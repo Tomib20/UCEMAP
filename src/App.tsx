@@ -3,7 +3,12 @@ import type { Carrera } from "@/types/carrera";
 import { Header } from "@/components/layout/Header";
 import { MapPage } from "@/pages/MapPage";
 import { useProgressStore } from "@/store/useProgressStore";
+import { useUserStore } from "@/store/useUserStore";
+import { initSyncWatcher } from "@/store/syncWatcher";
 import carrerasIndex from "../data/carreras/index.json";
+
+// Inicia el watcher de sincronizacion una sola vez (a nivel de modulo).
+initSyncWatcher();
 
 const carreraLoaders = import.meta.glob("../data/carreras/*.json") as Record<string, () => Promise<{ default: Carrera }>>;
 
@@ -20,7 +25,25 @@ async function loadCarrera(id: string): Promise<Carrera | null> {
 export default function App() {
   const carreraId = useProgressStore((s) => s.carreraId);
   const setCarreraStore = useProgressStore((s) => s.setCarrera);
+  const bootFromStorage = useUserStore((s) => s.bootFromStorage);
   const [carrera, setCarreraData] = useState<Carrera | null>(null);
+
+  // Auto-login si hay un usuario en localStorage (corre una sola vez al boot).
+  useEffect(() => {
+    bootFromStorage();
+  }, [bootFromStorage]);
+
+  // Aviso si el usuario intenta cerrar la pestania con cambios sin guardar.
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (useUserStore.getState().isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

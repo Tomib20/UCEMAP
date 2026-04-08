@@ -15,6 +15,7 @@ Mapa interactivo de correlatividades para carreras de la Universidad del CEMA, i
 - **Zustand** — estado global con persistencia en localStorage
 - **Tailwind CSS v4** — estilos utility-first via @tailwindcss/vite plugin
 - **Manrope** — tipografia (Google Fonts, cargada en index.html)
+- **Google Sheets + Google Forms** — backend serverless estilo FIUBA-Map (lectura via Sheets API con key restringida por dominio, escritura via POST `mode: "no-cors"` a Forms publicos)
 
 ## Arquitectura
 
@@ -22,9 +23,14 @@ Mapa interactivo de correlatividades para carreras de la Universidad del CEMA, i
 src/
   config/theme.ts        — colores (light/dark), branding, constantes de layout
   types/carrera.ts       — tipos: Materia, Carrera, MateriaStatus, MateriaGrupo
+  api/
+    sheetsConfig.ts      — IDs/URLs hardcodeados del spreadsheet, forms y API key
+    sheetsBackend.ts     — fetchUsuario (GET Sheets API), postUsuario/postRegistro (POST Forms)
   store/
     useProgressStore.ts  — aprobadas, cursando, notas por carrera (persiste en localStorage)
     useThemeStore.ts     — light/dark mode (persiste en localStorage)
+    useUserStore.ts      — usuario logueado, isDirty, login/logout/saveToCloud
+    syncWatcher.ts       — observa progressStore y marca dirty cuando hay cambios
   utils/
     layoutGraph.ts       — posiciona nodos en grilla por año (5 cols) + electivas
     materiaStatus.ts     — calcula status: aprobada > cursando > disponible > bloqueada
@@ -34,12 +40,12 @@ src/
       GraphView.tsx      — wrapper ReactFlow con highlight, drag vertical, fitView
       MateriaNode.tsx    — nodo custom (memo), lee status del store
       Legend.tsx          — leyenda de colores flotante
-    layout/Header.tsx    — header con branding + toggle dark mode
+    layout/Header.tsx    — header con branding, login UI, boton Guardar, toggle dark mode
     ui/
       MateriaDetail.tsx  — sidebar derecha con detalle, botones cursando/aprobada, notas
       ProgressBar.tsx    — isla flotante inferior con barra unificada + promedio
   pages/MapPage.tsx      — composicion: GraphView + ProgressBar + MateriaDetail
-  App.tsx                — carga JSON de carrera, renderiza Header + MapPage
+  App.tsx                — carga JSON de carrera, auto-login, beforeunload warning
 data/
   carreras/
     index.json                     — indice de carreras disponibles
@@ -65,6 +71,23 @@ docs/planes-de-estudio/            — PDFs oficiales de planes de UCEMA
 - **Dark mode**: colores duplicados en theme.ts (light/dark), componentes leen `useThemeStore` y aplican inline styles
 - **No hover highlight**: el highlight solo se activa al hacer click (seleccion), no al pasar el mouse
 - **Flechas directas**: al seleccionar una materia solo se iluminan las correlativas inmediatas (no toda la cadena recursiva)
+
+## Sistema de cuentas y sync (cloud)
+
+Inspirado en FIUBA-Map. Backend serverless: Google Sheets como "DB" + Google Forms como write API.
+
+- **No hay password**: solo usuario UCEMA tipo `tbruner27`. Cualquiera que conozca el usuario puede leer/sobreescribir su data. Es por diseño (igual que FIUBA-Map con el padron).
+- **Spreadsheet con 2 sheets**:
+  - `usuarios`: `timestamp | usuario | carrera_actual` — registra qué carrera tenia seleccionada cada usuario
+  - `registros`: `timestamp | usuario | carrera | mapa` — el `mapa` es JSON stringificado con `{aprobadas, cursando, notas}`
+- **Forms appendea, nunca actualiza**: cada save crea una fila nueva. `fetchUsuario` toma la última fila por `(usuario, carrera)` iterando de arriba abajo y sobreescribiendo la entrada en un Map.
+- **Save manual con boton "Guardar"**: cualquier cambio en aprobadas/cursando/notas estando logueado marca `isDirty: true`. El boton del header se pone verde. Click → `saveToCloud()` → reset dirty. NO hay debounce ni auto-sync (el usuario lo pidió explícito).
+- **Login = solo lectura**: `login()` SIEMPRE reemplaza el local con lo que esté en la nube (incluso si está vacío). Nunca pushea local. El campo `isKnown` de `fetchUsuario` distingue usuarios brand-new (que reciben un `postUsuario` para registrarlos en `usuarios`) de los que ya existen.
+- **Logout = limpiar local + warning si dirty**: NO flushea automáticamente. Si `isDirty === true`, muestra `window.confirm("¿Salir igual?")` antes de limpiar. Esto fuerza al usuario a guardar explícitamente o aceptar la pérdida.
+- **`pushAllCarrerasToCloud` postea estado vacío**: importante para que "desmarcar todo y guardar" se persista en la nube. Postea cualquier carrera con key en local, sin filtrar por contenido.
+- **`beforeunload` warning**: en `App.tsx`, si `isDirty === true`, el browser muestra el dialog nativo de "abandonar sitio".
+- **Auto-cambio de carrera**: cambiar carrera sí postea automáticamente a `usuarios` (sin debounce, sin marcar dirty), porque eso es preferencia de UI, no data del usuario. Lo maneja el `syncWatcher`.
+- **API key restringida por dominio**: la key vive hardcodeada en `sheetsConfig.ts` pero está restringida en Google Cloud Console por HTTP referrer (localhost + dominio de prod). Por eso es seguro committearla.
 
 ## Validaciones de negocio
 

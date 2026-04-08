@@ -499,7 +499,7 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
     selectedRef.current = null;
     selectMateria(null);
     doClear();
-    setTooltip(null);
+    setHoverInfo(null);
   }, [selectMateria, doClear]);
 
   const surface = SURFACE[mode];
@@ -526,7 +526,11 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
         defaultEdgeOptions={{ type: "default" }}
       >
         <Background color={surface.dots} gap={20} />
-        <Controls position="top-right" showInteractive={false} />
+        <Controls
+          position="top-right"
+          showInteractive={false}
+          onFitView={() => doFitView(300)}
+        />
         <MiniMap
           position="bottom-right"
           nodeColor={(node) => {
