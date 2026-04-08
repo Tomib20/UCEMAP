@@ -126,3 +126,4 @@ export function selectCursandoArray(s: ProgressState): number[] {
 export function selectNotasRecord(s: ProgressState): Record<string, Nota> {
   return s.notas[s.carreraId] ?? EMPTY_NOTAS;
 }
+

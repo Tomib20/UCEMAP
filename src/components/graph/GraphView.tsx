@@ -23,6 +23,7 @@ import { useProgressStore, selectAprobadasArray, selectCursandoArray } from "@/s
 import { useThemeStore } from "@/store/useThemeStore";
 import { MateriaNode } from "./MateriaNode";
 import { Legend } from "./Legend";
+import { ContextMenu, type ContextMenuState } from "./ContextMenu";
 
 /* ── Decorative node types ── */
 
@@ -30,15 +31,30 @@ function SpacerNode() {
   return null;
 }
 
-function YearLabelNode({ data }: { data: { label: string } }) {
+function YearLabelNode({ data }: { data: { label: string; total?: number; aprobadas?: number; cursando?: number } }) {
   const mode = useThemeStore((s) => s.mode);
   const surface = SURFACE[mode];
+  const total = data.total ?? 0;
+  const done = data.aprobadas ?? 0;
+  const curs = data.cursando ?? 0;
   return (
     <div
-      className="text-center font-bold text-sm pointer-events-none"
-      style={{ color: surface.textSecondary, width: NODE_WIDTH }}
+      className="text-center pointer-events-none"
+      style={{ width: NODE_WIDTH }}
     >
-      {data.label}
+      <div className="font-bold text-sm" style={{ color: surface.textSecondary }}>
+        {data.label}
+      </div>
+      {total > 0 && (
+        <div className="text-[10px] mt-0.5" style={{ color: surface.textSecondary }}>
+          <span style={{ color: done === total ? "#16a34a" : done > 0 ? "#3b82f6" : surface.textSecondary }}>
+            {done}/{total}
+          </span>
+          {curs > 0 && (
+            <span style={{ color: "#ca8a04" }}> + {curs}c</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -140,22 +156,15 @@ function applyChainHighlight(
   return { nodes: updatedNodes, edges: updatedEdges };
 }
 
-/* ── Tooltip component ── */
+/* ── Hover info (fixed bottom-right) ── */
 
-interface TooltipState {
-  materia: Materia;
-  x: number;
-  y: number;
-}
-
-function MateriaTooltip({ tooltip, carrera }: { tooltip: TooltipState; carrera: Carrera }) {
+function MateriaHoverInfo({ materia, carrera, top, left }: { materia: Materia; carrera: Carrera; top: number; left: number }) {
   const mode = useThemeStore((s) => s.mode);
   const surface = SURFACE[mode];
   const aprobadasArr = useProgressStore(selectAprobadasArray);
   const cursandoArr = useProgressStore(selectCursandoArray);
   const aprobadas = useMemo(() => new Set(aprobadasArr), [aprobadasArr]);
   const cursando = useMemo(() => new Set(cursandoArr), [cursandoArr]);
-  const { materia, x, y } = tooltip;
 
   const status = getMateriaStatus(materia, aprobadas, cursando);
   const statusLabel: Record<string, string> = {
@@ -171,21 +180,24 @@ function MateriaTooltip({ tooltip, carrera }: { tooltip: TooltipState; carrera: 
     bloqueada: mode === "dark" ? "#94a3b8" : "#64748b",
   };
 
+  const correlativas = materia.correlativas
+    .map((nro) => carrera.materias.find((m) => m.nro === nro))
+    .filter(Boolean) as Materia[];
+
   const missingCorrelativas = status === "bloqueada"
-    ? materia.correlativas
-        .filter((nro) => !aprobadas.has(nro))
-        .map((nro) => carrera.materias.find((m) => m.nro === nro)?.nombre)
-        .filter(Boolean)
+    ? correlativas.filter((m) => !aprobadas.has(m.nro))
     : [];
 
   return (
     <div
-      className="fixed z-50 pointer-events-none rounded-lg shadow-lg px-3 py-2 max-w-[240px]"
+      className="fixed z-50 pointer-events-none rounded-lg shadow-lg px-3 py-2.5 backdrop-blur-sm"
       style={{
-        left: x + 16,
-        top: y - 10,
-        backgroundColor: mode === "dark" ? "#1e293b" : "#ffffff",
+        top,
+        left,
+        backgroundColor: mode === "dark" ? "rgba(30,41,59,0.95)" : "rgba(255,255,255,0.97)",
         border: `1px solid ${surface.panelBorder}`,
+        minWidth: 180,
+        maxWidth: 260,
       }}
     >
       <div className="font-semibold text-xs mb-1" style={{ color: surface.textPrimary }}>
@@ -200,12 +212,24 @@ function MateriaTooltip({ tooltip, carrera }: { tooltip: TooltipState; carrera: 
           {statusLabel[status]}
         </span>
         <span style={{ color: surface.textSecondary }}>
-          &middot; {materia.creditos} cr&eacute;d.
+          &middot; {materia.anio}&deg; A&ntilde;o C{materia.cuatrimestre} &middot; {materia.creditos} cr&eacute;d.
         </span>
       </div>
-      {missingCorrelativas.length > 0 && (
+      {correlativas.length > 0 && (
         <div className="text-[10px] mt-1" style={{ color: surface.textSecondary }}>
-          Faltan: {missingCorrelativas.join(", ")}
+          Correlativas: {correlativas.map((m) => (
+            <span key={m.nro}>
+              <span style={{ color: aprobadas.has(m.nro) ? "#16a34a" : surface.textSecondary }}>
+                {m.nombre}
+              </span>
+              {m !== correlativas[correlativas.length - 1] && ", "}
+            </span>
+          ))}
+        </div>
+      )}
+      {missingCorrelativas.length > 0 && (
+        <div className="text-[10px] mt-0.5" style={{ color: "#ca8a04" }}>
+          Faltan: {missingCorrelativas.map((m) => m.nombre).join(", ")}
         </div>
       )}
     </div>
@@ -222,6 +246,8 @@ interface FlowInnerProps {
 function FlowInner({ carrera, showElectivas }: FlowInnerProps) {
   const selectMateria = useProgressStore((s) => s.selectMateria);
   const fullChain = useProgressStore((s) => s.fullChain);
+  const aprobadasArr = useProgressStore(selectAprobadasArray);
+  const cursandoArr = useProgressStore(selectCursandoArray);
   const mode = useThemeStore((s) => s.mode);
   const selectedRef = useRef<number | null>(null);
   const fullChainRef = useRef(fullChain);
@@ -230,7 +256,24 @@ function FlowInner({ carrera, showElectivas }: FlowInnerProps) {
   const { fitView, setViewport, getViewport } = useReactFlow();
   const TARGET_ZOOM = 0.8;
   const savedViewport = useRef<{ x: number; y: number; zoom: number } | null>(null);
-  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const [hoverInfo, setHoverInfo] = useState<{ materia: Materia; top: number; left: number } | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+
+  // Compute year stats
+  const yearStats = useMemo(() => {
+    const aprobadas = new Set(aprobadasArr);
+    const cursando = new Set(cursandoArr);
+    const stats = new Map<number, { total: number; aprobadas: number; cursando: number }>();
+    for (const m of carrera.materias) {
+      if (m.grupo !== "obligatoria") continue;
+      if (!stats.has(m.anio)) stats.set(m.anio, { total: 0, aprobadas: 0, cursando: 0 });
+      const s = stats.get(m.anio)!;
+      s.total++;
+      if (aprobadas.has(m.nro)) s.aprobadas++;
+      else if (cursando.has(m.nro)) s.cursando++;
+    }
+    return stats;
+  }, [carrera.materias, aprobadasArr, cursandoArr]);
 
   const doFitView = useCallback((duration = 0) => {
     if (savedViewport.current) {
@@ -285,6 +328,19 @@ function FlowInner({ carrera, showElectivas }: FlowInnerProps) {
     }
   }, [showElectivas, mode, initialNodes, initialEdges, setNodes, setEdges, doFitView]);
 
+  // Update year label nodes with stats
+  useEffect(() => {
+    setNodes((cur) =>
+      cur.map((n) => {
+        if (!n.id.startsWith("__year-")) return n;
+        const anio = Number(n.id.replace("__year-", ""));
+        const stats = yearStats.get(anio);
+        if (!stats) return n;
+        return { ...n, data: { ...n.data, total: stats.total, aprobadas: stats.aprobadas, cursando: stats.cursando } };
+      })
+    );
+  }, [yearStats, setNodes]);
+
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
       const locked = changes.map((change) => {
@@ -332,7 +388,7 @@ function FlowInner({ carrera, showElectivas }: FlowInnerProps) {
     (_event, node) => {
       if (node.id.startsWith("__")) return;
       const nro = Number(node.id);
-      setTooltip(null);
+      setHoverInfo(null);
       if (selectedRef.current === nro) {
         selectedRef.current = null;
         selectMateria(null);
@@ -357,19 +413,48 @@ function FlowInner({ carrera, showElectivas }: FlowInnerProps) {
     [setNodes]
   );
 
+  const onNodeContextMenu: NodeMouseHandler = useCallback(
+    (event, node) => {
+      event.preventDefault();
+      if (node.id.startsWith("__")) return;
+      const materia = (node.data as unknown as { materia: Materia }).materia;
+      if (!materia) return;
+      setContextMenu({ materia, x: (event as unknown as MouseEvent).clientX, y: (event as unknown as MouseEvent).clientY });
+    },
+    []
+  );
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (contextMenu) { setContextMenu(null); return; }
+        if (selectedRef.current !== null) {
+          selectedRef.current = null;
+          selectMateria(null);
+          doClear();
+        }
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [contextMenu, selectMateria, doClear]);
+
   const onNodeMouseEnter: NodeMouseHandler = useCallback(
     (event, node) => {
       if (node.id.startsWith("__")) return;
-      if (selectedRef.current !== null) return;
       const materia = (node.data as unknown as { materia: Materia }).materia;
       if (!materia) return;
-      setTooltip({ materia, x: (event as MouseEvent).clientX, y: (event as MouseEvent).clientY });
+      const target = (event.target as HTMLElement).closest(".react-flow__node") as HTMLElement | null;
+      if (!target) return;
+      const rect = target.getBoundingClientRect();
+      setHoverInfo({ materia, top: rect.top, left: rect.right + 8 });
     },
     []
   );
 
   const onNodeMouseLeave: NodeMouseHandler = useCallback(() => {
-    setTooltip(null);
+    setHoverInfo(null);
   }, []);
 
   const onInit = useCallback(() => {
@@ -395,6 +480,7 @@ function FlowInner({ carrera, showElectivas }: FlowInnerProps) {
         nodeTypes={nodeTypes}
         onNodeClick={onNodeClick}
         onNodeDoubleClick={onNodeDoubleClick}
+        onNodeContextMenu={onNodeContextMenu}
         onNodeMouseEnter={onNodeMouseEnter}
         onNodeMouseLeave={onNodeMouseLeave}
         onPaneClick={onPaneClick}
@@ -422,7 +508,8 @@ function FlowInner({ carrera, showElectivas }: FlowInnerProps) {
           style={mode === "dark" ? { backgroundColor: "#1e293b" } : undefined}
         />
       </ReactFlow>
-      {tooltip && <MateriaTooltip tooltip={tooltip} carrera={carrera} />}
+      {hoverInfo && <MateriaHoverInfo materia={hoverInfo.materia} carrera={carrera} top={hoverInfo.top} left={hoverInfo.left} />}
+      {contextMenu && <ContextMenu menu={contextMenu} onClose={() => setContextMenu(null)} />}
     </>
   );
 }
