@@ -22,6 +22,8 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
   const toggleCursando = useProgressStore((s) => s.toggleCursando);
   const setNota = useProgressStore((s) => s.setNota);
   const selectMateria = useProgressStore((s) => s.selectMateria);
+  const fullChain = useProgressStore((s) => s.fullChain);
+  const toggleFullChain = useProgressStore((s) => s.toggleFullChain);
   const mode = useThemeStore((s) => s.mode);
 
   if (selectedNro === null) return null;
@@ -162,6 +164,26 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
             </p>
           )}
         </div>
+
+        {/* Full chain toggle */}
+        <button
+          onClick={toggleFullChain}
+          className="w-full py-2 px-3 rounded-lg text-xs font-semibold transition-colors border flex items-center gap-2 mb-4"
+          style={{
+            backgroundColor: fullChain
+              ? mode === "dark" ? "rgba(14,165,233,0.15)" : "rgba(14,165,233,0.1)"
+              : mode === "dark" ? "#1e293b" : "#f8fafc",
+            borderColor: fullChain
+              ? "#0ea5e9"
+              : mode === "dark" ? "#334155" : "#e2e8f0",
+            color: fullChain
+              ? "#0ea5e9"
+              : surface.textSecondary,
+          }}
+        >
+          <span style={{ fontSize: 14 }}>{fullChain ? "\u25C9" : "\u25CB"}</span>
+          {fullChain ? "Cadena completa activada" : "Ver cadena completa"}
+        </button>
 
         {/* Nota selector */}
         {status === "aprobada" && (

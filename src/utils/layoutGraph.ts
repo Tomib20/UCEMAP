@@ -7,10 +7,11 @@ export interface MateriaNodeData {
   [key: string]: unknown;
 }
 
-const COL_WIDTH = 250;
-const ROW_HEIGHT = 92;
-const CUATRI_GAP = 36;
+export const COL_WIDTH = 250;
+export const ROW_HEIGHT = 92;
+export const CUATRI_GAP = 36;
 const TOP_OFFSET = 0;
+const LABEL_HEIGHT = 36;
 
 /**
  * Layout: 5 columns (one per year), up to 8 rows each (4 C1 + gap + 4 C2).
@@ -43,6 +44,17 @@ export function buildGraphLayout(
     const colIndex = anio - 1;
     const x = colIndex * COL_WIDTH + 40;
 
+    // Year label node
+    nodes.push({
+      id: `__year-${anio}`,
+      type: "yearLabel",
+      position: { x, y: -LABEL_HEIGHT - 10 },
+      data: { label: `${anio}\u00B0 A\u00F1o` },
+      selectable: false,
+      draggable: false,
+      focusable: false,
+    });
+
     for (let i = 0; i < c1.length; i++) {
       nodes.push({
         id: String(c1[i].nro),
@@ -51,6 +63,20 @@ export function buildGraphLayout(
         data: { materia: c1[i] } as MateriaNodeData,
         width: NODE_WIDTH,
         height: NODE_HEIGHT,
+      });
+    }
+
+    // Cuatrimestre separator node
+    if (c1.length > 0 && c2.length > 0) {
+      const sepY = c1.length * ROW_HEIGHT + TOP_OFFSET + (CUATRI_GAP - 2) / 2;
+      nodes.push({
+        id: `__sep-${anio}`,
+        type: "cuatriSeparator",
+        position: { x: x - 10, y: sepY },
+        data: {},
+        selectable: false,
+        draggable: false,
+        focusable: false,
       });
     }
 

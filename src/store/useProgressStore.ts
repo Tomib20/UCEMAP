@@ -10,6 +10,7 @@ interface ProgressState {
   cursando: Record<string, number[]>;
   notas: Record<string, Record<string, Nota>>;
   selectedMateria: number | null;
+  fullChain: boolean;
 
   toggleAprobada: (nro: number) => void;
   toggleCursando: (nro: number) => void;
@@ -17,6 +18,7 @@ interface ProgressState {
   removeNota: (nro: number) => void;
   selectMateria: (nro: number | null) => void;
   setCarrera: (id: string) => void;
+  toggleFullChain: () => void;
 }
 
 const EMPTY_ARRAY: number[] = [];
@@ -30,6 +32,7 @@ export const useProgressStore = create<ProgressState>()(
       cursando: {},
       notas: {},
       selectedMateria: null,
+      fullChain: false,
 
       toggleAprobada: (nro: number) =>
         set((state) => {
@@ -98,6 +101,7 @@ export const useProgressStore = create<ProgressState>()(
 
       selectMateria: (nro) => set({ selectedMateria: nro }),
       setCarrera: (id) => set({ carreraId: id, selectedMateria: null }),
+      toggleFullChain: () => set((s) => ({ fullChain: !s.fullChain })),
     }),
     {
       name: "ucema-map-progress",
