@@ -54,13 +54,21 @@ export function ProgressBar({ carrera }: ProgressBarProps) {
   const topicos = carrera.materias.filter((m) => m.grupo === "topico");
   const tesis = carrera.materias.filter((m) => m.grupo === "tesis");
   const requisitos = carrera.materias.filter((m) => m.grupo === "requisito");
+  const talleres = carrera.materias.filter((m) => m.grupo === "taller");
 
   const sections: Section[] = [
     { label: "Obligatorias", done: obligatorias.filter((m) => aprobadas.has(m.nro)).length, total: obligatorias.length, color: "#3b82f6" },
     { label: "Electivas", done: topicos.filter((m) => aprobadas.has(m.nro)).length, total: carrera.topicos_requeridos, color: "#d97706" },
-    { label: "Proyecto Final", done: tesis.filter((m) => aprobadas.has(m.nro)).length, total: tesis.length, color: "#7c3aed" },
-    { label: "Ingles", done: requisitos.filter((m) => aprobadas.has(m.nro)).length, total: requisitos.length, color: "#94a3b8" },
   ];
+  if (talleres.length > 0) {
+    sections.push({ label: "Talleres", done: talleres.filter((m) => aprobadas.has(m.nro)).length, total: carrera.talleres_requeridos ?? talleres.length, color: "#db2777" });
+  }
+  if (tesis.length > 0) {
+    sections.push({ label: "Proyecto Final", done: tesis.filter((m) => aprobadas.has(m.nro)).length, total: tesis.length, color: "#7c3aed" });
+  }
+  if (requisitos.length > 0) {
+    sections.push({ label: "Requisitos", done: requisitos.filter((m) => aprobadas.has(m.nro)).length, total: requisitos.length, color: "#94a3b8" });
+  }
 
   const widths = computeWidths(sections);
   const grandTotal = sections.reduce((s, sec) => s + sec.total, 0);

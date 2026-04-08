@@ -1,0 +1,1176 @@
+{
+  "id": "abogacia",
+  "nombre": "Abogacia",
+  "programa": "ABOG N",
+  "plan": "2026/00",
+  "resolucion": "52/18",
+  "titulo": "Abogado",
+  "anios": 4,
+  "materias": [
+    {
+      "nro": 4293,
+      "nombre": "Instituciones del Derecho Civil",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10762,
+      "nombre": "Pensamiento Científico",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4292,
+      "nombre": "Teoría General de los Derechos Humanos, Derechos y Garantías Constituc",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4291,
+      "nombre": "Teoría del Estado, Teoría General y Filosofía del Derecho",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4297,
+      "nombre": "Análisis Económico y Financiero del Derecho",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4295,
+      "nombre": "Derecho Comercial",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4296,
+      "nombre": "Derecho Penal - Parte General y Procesal Penal",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4294,
+      "nombre": "Teoría General de las Obligaciones Civiles y Comerciales",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4298,
+      "nombre": "Contratos Civiles y Comerciales - Parte General",
+      "anio": 2,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4294
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 80,
+      "nombre": "Derecho Constitucional",
+      "anio": 2,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4291
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4299,
+      "nombre": "Derecho de Daños, Responsabilidad Civil y Defensa del Consumidor",
+      "anio": 2,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4294
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1814,
+      "nombre": "Principios de Microeconomía",
+      "anio": 2,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4306,
+      "nombre": "Derecho Administrativo",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4292,
+        80,
+        4294
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4301,
+      "nombre": "Derecho Penal - Parte Especial",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4296
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4302,
+      "nombre": "Derechos Reales",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4294
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4300,
+      "nombre": "Sociedades Civiles y Comerciales",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4295
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4305,
+      "nombre": "Derecho Internacional Público",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4292,
+        80,
+        4298
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4235,
+      "nombre": "Derecho del Trabajo, Política Laboral y Seguridad Social",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4298,
+        80
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10763,
+      "nombre": "Finanzas Públicas y Derecho Tributario",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4296
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4308,
+      "nombre": "Derecho Financiero - Bancos y Mercado de Capitales",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4300
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4303,
+      "nombre": "Derecho Procesal Civil y Comercial",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4294
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4307,
+      "nombre": "Derecho de Familia",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4302,
+        4298
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4311,
+      "nombre": "Contratos Civiles y Comerciales - Parte Especial",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4298
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4309,
+      "nombre": "Derecho de los Negocios Internacionales",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4305,
+        4300
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4310,
+      "nombre": "Fundamentos de las Finanzas de Empresa",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1814
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 853,
+      "nombre": "Concursos y Quiebras",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4235,
+        4300
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4313,
+      "nombre": "Derecho de Sucesiones",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4298,
+        4302
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4312,
+      "nombre": "Derecho de la Integración y Comunitario",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4305
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10764,
+      "nombre": "Práctica Profesional Supervisada",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15253,
+      "nombre": "AI & Automation for Business - GS",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6513,
+      "nombre": "Análisis Matemático",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15190,
+      "nombre": "Economía del Comportamiento, Juicio y Riesgo Empresario",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15247,
+      "nombre": "Filosofía de la Comunicación",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15248,
+      "nombre": "Global Business Strategy - GS",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15252,
+      "nombre": "Global Political Economy: Institutions, Power and Development - GS",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15251,
+      "nombre": "International Project Lab - GS",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 5431,
+      "nombre": "Introducción al Pensamiento Computacional",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15249,
+      "nombre": "Neuroscience and Leadership - GS",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15189,
+      "nombre": "Política Global Aplicada: Introducción Práctica a la ONU y Negociación",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15250,
+      "nombre": "Strategic Management & Innovation - GS",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15058,
+      "nombre": "Construcción y Gestión de la Estrategia con el Balanced Scorecard",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15060,
+      "nombre": "Gestión de la Calidad",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15059,
+      "nombre": "Innovación, Contexto y Negocios",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14709,
+      "nombre": "Medio Ambiente y Recursos Naturales",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6471,
+      "nombre": "Optimización Dinámica",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 559,
+      "nombre": "Política Económica Argentina",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14708,
+      "nombre": "Tópicos Avanzados de IA",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6739,
+      "nombre": "Analítica Digital",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 840,
+      "nombre": "Análisis de Estados Contables",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 7507,
+      "nombre": "Big Data",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10264,
+      "nombre": "Blockchain & Crypto",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 3811,
+      "nombre": "Comportamiento del Consumidor",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1272,
+      "nombre": "Derecho Empresarial",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 7215,
+      "nombre": "Desarrollo y Gestión de Producto",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14046,
+      "nombre": "Desinformación y Política en el Contexto Global",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10179,
+      "nombre": "Econometría Avanzada",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4,
+      "nombre": "Elementos de Administración",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 12,
+      "nombre": "Elementos de Ciencia Política",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 5,
+      "nombre": "Elementos de Contabilidad",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 5991,
+      "nombre": "Entrepreneurship",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 13321,
+      "nombre": "Feminismo: Mujeres que Rompieron el Techo de Cristal",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14181,
+      "nombre": "Filosofía y Cine",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1011,
+      "nombre": "Fundamentos de Informática",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14182,
+      "nombre": "Guerras Civiles y Violencia Política en Argentina e Hispanoamérica",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 11278,
+      "nombre": "Herramientas Prácticas para Emprendimientos y Activos Personales",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6515,
+      "nombre": "Historia",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 9818,
+      "nombre": "Historia Internacional",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 83,
+      "nombre": "Historia Política Argentina",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 3151,
+      "nombre": "Historia del Pensamiento Económico y Social",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 76,
+      "nombre": "Historia del Pensamiento Político",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 9817,
+      "nombre": "Historia del Pensamiento Político II",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 11276,
+      "nombre": "Ideas, Poder y Contexto",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1025,
+      "nombre": "Inteligencia Artificial",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 951,
+      "nombre": "Introducción a las Relaciones Internacionales",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6736,
+      "nombre": "Introducción a los Negocios Digitales",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 12678,
+      "nombre": "Leadership in the 21st Century: Democracy, Populism and Assertive Styl",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 12568,
+      "nombre": "Neuroliderazgo: Neurociencias Cognitivas Aplicadas a la Organización",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1110,
+      "nombre": "Organización y Derecho Internacional",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 13322,
+      "nombre": "Political Economy of Development",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10306,
+      "nombre": "Politics & Business",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1044,
+      "nombre": "Política Exterior Argentina",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10718,
+      "nombre": "Psicología de la Autorrealización",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 85,
+      "nombre": "Relaciones Internacionales",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 71,
+      "nombre": "Sociología",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14045,
+      "nombre": "Tópicos de Microeconomía Aplicada",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 12718,
+      "nombre": "Women and Politics: A Global Perspective",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 850,
+      "nombre": "Actuación Profesional",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 8472,
+      "nombre": "Análisis de Decisiones Judiciales",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10559,
+      "nombre": "Desigualdades Sociales y Exclusiones Contemporáneas",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 9589,
+      "nombre": "Diversidad, Género y Derecho",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 11900,
+      "nombre": "Fintech",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10630,
+      "nombre": "Herramientas Prácticas para Emprendimientos y Activos Financieros",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 13426,
+      "nombre": "Herramientas para el uso de SAP",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14744,
+      "nombre": "Introducción a los Intelligence Studies: Una Perspectiva desde la Teor",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10732,
+      "nombre": "Proceso Constitucional Comparado Judiciales",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10610,
+      "nombre": "Project Management",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1671,
+      "nombre": "Relaciones Económicas Internacionales",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 11880,
+      "nombre": "The Politics of Immigration and Citizenship",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4231,
+      "nombre": "Psicología General",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 33,
+      "nombre": "Empresa y Negocios Internacionales",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 8896,
+      "nombre": "Filosofía",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 852,
+      "nombre": "Fusiones y Adquisiciones",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 13455,
+      "nombre": "Gestión de Esports y Modelos de Negocio",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 9590,
+      "nombre": "Compliance",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 8652,
+      "nombre": "Economía Política Constitucional",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 11960,
+      "nombre": "Financiamiento Sustentable en el Mercado de Capitales",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 11418,
+      "nombre": "Gobierno Societario, Integridad y Ética",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 8650,
+      "nombre": "Introducción a la Práctica Profesional: Escritos Judiciales y Presenta",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 13361,
+      "nombre": "Introducción a los Riesgos Legales y su Gestión",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 8317,
+      "nombre": "Prevención de Lavado de Activos",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 8907,
+      "nombre": "Seminario Derecho del Consumidor: Acciones y Práctica",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4339,
+      "nombre": "Taller Common Law Institutions",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4335,
+      "nombre": "Taller Common Wealth - Análisis de Fallos en Inglés",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4340,
+      "nombre": "Taller Contract Drafting - Redacción y Análisis de Cláusulas Contractu",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4334,
+      "nombre": "Taller Instituciones del Derecho Romano",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4331,
+      "nombre": "Taller de Argumentación Jurídica",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4333,
+      "nombre": "Taller de Derecho Comparado",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4337,
+      "nombre": "Taller de Exposición y Oratoria de Casos - Role Playing",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4332,
+      "nombre": "Taller de Lengua Jurídica",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4338,
+      "nombre": "Taller de Monografías y Tesinas",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4336,
+      "nombre": "Taller de Ratios Financieros",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 8651,
+      "nombre": "Tópicos de Práctica Profesional para Abogados de Empresa",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 8316,
+      "nombre": "Ética Profesional I",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 8315,
+      "nombre": "Ética Profesional II",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    }
+  ],
+  "topicos_requeridos": 4,
+  "talleres_requeridos": 3
+}

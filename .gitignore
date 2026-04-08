@@ -5,3 +5,13 @@ dist/
 .DS_Store
 Thumbs.db
 *.log
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Python cache (for the PDF parser scripts)
+__pycache__/
+*.pyc
+
+# Generated TXT extracts from PDFs
+docs/planes-de-estudio/txt/

@@ -1,0 +1,1178 @@
+{
+  "id": "ingenieria-informatica-old",
+  "nombre": "Ingenieria en Informatica (Plan viejo)",
+  "programa": "ININF",
+  "plan": "2026/00",
+  "resolucion": "20/11",
+  "titulo": "",
+  "anios": 5,
+  "materias": [
+    {
+      "nro": 1811,
+      "nombre": "Análisis Matemático I",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1011,
+      "nombre": "Fundamentos de Informática",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 3,
+      "nombre": "Lógica y Metodología de las Ciencias",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1012,
+      "nombre": "Matemática Discreta",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4,
+      "nombre": "Elementos de Administración",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1013,
+      "nombre": "Física I",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1811
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1014,
+      "nombre": "Programación I",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1011
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1812,
+      "nombre": "Álgebra I",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 11,
+      "nombre": "Estadística I",
+      "anio": 2,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1811
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1016,
+      "nombre": "Física II",
+      "anio": 2,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1013
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1017,
+      "nombre": "Programación II",
+      "anio": 2,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1014
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2655,
+      "nombre": "Química",
+      "anio": 2,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1015,
+      "nombre": "Algoritmos y Estructura de Datos",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1012,
+        1014
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1813,
+      "nombre": "Análisis Matemático II",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1812,
+        1811
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15,
+      "nombre": "Estadística II",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        11
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1018,
+      "nombre": "Técnicas Digitales",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1012,
+        1812
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1816,
+      "nombre": "Análisis Matemático III",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1813
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1021,
+      "nombre": "Arquitectura de Computadoras",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1016,
+        1017,
+        1018
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1020,
+      "nombre": "Lenguajes Formales y Teoría de la Computación",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1014
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1022,
+      "nombre": "Programación III",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1017,
+        1015
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1024,
+      "nombre": "Análisis Numérico",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1816
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2651,
+      "nombre": "Redes I",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1018,
+        1816,
+        1017
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1023,
+      "nombre": "Sistemas Operativos",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1020,
+        1021
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 26,
+      "nombre": "Teoría de las Organizaciones",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        4
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2652,
+      "nombre": "Base de Datos I",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1017,
+        1015
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2671,
+      "nombre": "Economía",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1813
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2653,
+      "nombre": "Redes II",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        2651
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 31,
+      "nombre": "Sistemas de Información",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        11
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2654,
+      "nombre": "Base de Datos II",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        2652
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1025,
+      "nombre": "Inteligencia Artificial",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1022
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1027,
+      "nombre": "Metodologías de Diseño de Sistemas",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1022
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1188,
+      "nombre": "Seguridad Informática",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        2653,
+        1023
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1030,
+      "nombre": "Ingeniería de Software",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        2654,
+        1027
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1031,
+      "nombre": "Simulación de Sistemas",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1024,
+        15
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 23,
+      "nombre": "Teoría de las Decisiones",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1813,
+        15
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 32,
+      "nombre": "Administración de Recursos Humanos",
+      "anio": 5,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        23
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2871,
+      "nombre": "Gestión Ambiental",
+      "anio": 5,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        2655
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1032,
+      "nombre": "Ingeniería Legal",
+      "anio": 5,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [
+        1027
+      ],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2672,
+      "nombre": "Práctica Profesional Supervisada",
+      "anio": 5,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15190,
+      "nombre": "Economía del Comportamiento, Juicio y Riesgo Empresario",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 11900,
+      "nombre": "Fintech",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15189,
+      "nombre": "Política Global Aplicada: Introducción Práctica a la ONU y Negociación",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14708,
+      "nombre": "Tópicos Avanzados de IA",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 13455,
+      "nombre": "Gestión de Esports y Modelos de Negocio",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14744,
+      "nombre": "Introducción a los Intelligence Studies: Una Perspectiva desde la Teor",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14709,
+      "nombre": "Medio Ambiente y Recursos Naturales",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6471,
+      "nombre": "Optimización Dinámica",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10732,
+      "nombre": "Proceso Constitucional Comparado Judiciales",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 3071,
+      "nombre": "Base de Datos Avanzada",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10264,
+      "nombre": "Blockchain & Crypto",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 3811,
+      "nombre": "Comportamiento del Consumidor",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1716,
+      "nombre": "Comunicaciones Integradas de Marketing",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1235,
+      "nombre": "Costos",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 25,
+      "nombre": "Cálculo Financiero",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10713,
+      "nombre": "Debate Oral",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1273,
+      "nombre": "Derecho y Política Laboral",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 9656,
+      "nombre": "Desarrollo Full Stack con Python",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14046,
+      "nombre": "Desinformación y Política en el Contexto Global",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2352,
+      "nombre": "Dinámica de Sistemas",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 11294,
+      "nombre": "Diseño Digital",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 36,
+      "nombre": "Econometría",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 40,
+      "nombre": "Economía Internacional II",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 12,
+      "nombre": "Elementos de Ciencia Política",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1271,
+      "nombre": "Estados Contables",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14181,
+      "nombre": "Filosofía y Cine",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6743,
+      "nombre": "Gestión de Operaciones",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 30,
+      "nombre": "Gestión de Operaciones y Producción",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 729,
+      "nombre": "Historia II",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1156,
+      "nombre": "Instituciones del Derecho Privado",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6736,
+      "nombre": "Introducción a los Negocios Digitales",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 5431,
+      "nombre": "Introducción al Pensamiento Computacional",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 3791,
+      "nombre": "Investigación de Mercado",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 8136,
+      "nombre": "Laboratorio de Programación Python",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6740,
+      "nombre": "Marketing Digital",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1715,
+      "nombre": "Marketing Directo e Interactivo",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 29,
+      "nombre": "Marketing",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1718,
+      "nombre": "Marketing de Servicios",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 13,
+      "nombre": "Microeconomía I",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 5411,
+      "nombre": "Negocios, Tecnología y Proyectos",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 12568,
+      "nombre": "Neuroliderazgo: Neurociencias Cognitivas Aplicadas a la Organización",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1233,
+      "nombre": "Opinión Pública y Comunicación Política",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1110,
+      "nombre": "Organización y Derecho Internacional",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10762,
+      "nombre": "Pensamiento Científico",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 559,
+      "nombre": "Política Económica Argentina",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1044,
+      "nombre": "Política Exterior Argentina",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1717,
+      "nombre": "Política de Precios",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1814,
+      "nombre": "Principios de Microeconomía",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1251,
+      "nombre": "Procesos Administrativos y Control Interno",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1651,
+      "nombre": "Proyectos de Software",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 7176,
+      "nombre": "Taller de Comunicación Escrita",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14045,
+      "nombre": "Tópicos de Microeconomía Aplicada",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4651,
+      "nombre": "Administración de Proyectos II: Gestión Eficiente de Proyectos y Servi",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 842,
+      "nombre": "Contabilidad de Costos",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 5991,
+      "nombre": "Entrepreneurship",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10952,
+      "nombre": "Habilidades Profesionales I",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1631,
+      "nombre": "Literatura Latinoamericana",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10610,
+      "nombre": "Project Management",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1097,
+      "nombre": "Tópicos Política Mundial",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 840,
+      "nombre": "Análisis de Estados Contables",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 847,
+      "nombre": "Impuestos I",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 845,
+      "nombre": "Legislación del Trabajo y de la Seguridad Social",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 42,
+      "nombre": "Organización Industrial",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 24,
+      "nombre": "Sistemas de Contabilidad Gerencial",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 849,
+      "nombre": "Auditoría",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6738,
+      "nombre": "Comercio Electrónico",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 853,
+      "nombre": "Concursos y Quiebras",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 33,
+      "nombre": "Empresa y Negocios Internacionales",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 13321,
+      "nombre": "Feminismo: Mujeres que Rompieron el Techo de Cristal",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 13426,
+      "nombre": "Herramientas para el uso de SAP",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 848,
+      "nombre": "Impuestos II",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 27,
+      "nombre": "Instituciones del Derecho",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 11275,
+      "nombre": "Machine Learning y Data Análisis",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 3131,
+      "nombre": "Administración de Proyectos",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1431,
+      "nombre": "Diseño Orientado a Objetos",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 5,
+      "nombre": "Elementos de Contabilidad",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1109,
+      "nombre": "Emprendimientos",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 728,
+      "nombre": "Historia I",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 10159,
+      "nombre": "Implementando Machine Learning",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1411,
+      "nombre": "Redes IP",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1815,
+      "nombre": "Principios de Macroeconomía",
+      "anio": 5,
+      "cuatrimestre": 2,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 7298,
+      "nombre": "Trabajo Final de Grado",
+      "anio": 5,
+      "cuatrimestre": 2,
+      "grupo": "tesis",
+      "correlativas": [],
+      "creditos": 1.0
+    }
+  ],
+  "topicos_requeridos": 2,
+  "talleres_requeridos": 0
+}

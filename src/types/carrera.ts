@@ -1,4 +1,4 @@
-export type MateriaGrupo = "obligatoria" | "topico" | "tesis" | "requisito";
+export type MateriaGrupo = "obligatoria" | "topico" | "tesis" | "requisito" | "taller";
 
 export type MateriaStatus = "aprobada" | "cursando" | "disponible" | "bloqueada";
 
@@ -22,4 +22,5 @@ export interface Carrera {
   anios: number;
   materias: Materia[];
   topicos_requeridos: number;
+  talleres_requeridos?: number;
 }

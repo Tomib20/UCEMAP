@@ -5,7 +5,73 @@
       "id": "ingenieria-informatica",
       "nombre": "Ingenieria en Informatica",
       "archivo": "ingenieria-informatica.json",
-      "planEstudio": "plan-ingenieria-informatica.pdf"
+      "planEstudio": "Plan de Estudios - ININFn.pdf"
+    },
+    {
+      "id": "abogacia",
+      "nombre": "Abogacia",
+      "archivo": "abogacia.json",
+      "planEstudio": "Plan de Estudios - ABOGn.pdf"
+    },
+    {
+      "id": "actuario",
+      "nombre": "Actuario",
+      "archivo": "actuario.json",
+      "planEstudio": "Plan de Estudios - ACTU.pdf"
+    },
+    {
+      "id": "business-administration",
+      "nombre": "Business Administration",
+      "archivo": "business-administration.json",
+      "planEstudio": "Plan de Estudios - BA.pdf"
+    },
+    {
+      "id": "contador-publico",
+      "nombre": "Contador Publico",
+      "archivo": "contador-publico.json",
+      "planEstudio": "Plan de Estudios - CCPn.pdf"
+    },
+    {
+      "id": "licenciatura-ciencias-politicas",
+      "nombre": "Licenciatura en Ciencias Politicas",
+      "archivo": "licenciatura-ciencias-politicas.json",
+      "planEstudio": "Plan de Estudios - LICPn.pdf"
+    },
+    {
+      "id": "licenciatura-administracion",
+      "nombre": "Licenciatura en Direccion de Empresas",
+      "archivo": "licenciatura-administracion.json",
+      "planEstudio": "Plan de Estudios - LIAN.pdf"
+    },
+    {
+      "id": "licenciatura-economia",
+      "nombre": "Licenciatura en Economia",
+      "archivo": "licenciatura-economia.json",
+      "planEstudio": "Plan de Estudios - LIEn.pdf"
+    },
+    {
+      "id": "licenciatura-finanzas",
+      "nombre": "Licenciatura en Finanzas",
+      "archivo": "licenciatura-finanzas.json",
+      "planEstudio": "Plan de Estudios - LIFI.pdf"
+    },
+    {
+      "id": "licenciatura-marketing",
+      "nombre": "Licenciatura en Marketing",
+      "archivo": "licenciatura-marketing.json",
+      "planEstudio": "Plan de Estudios - LIMAn.pdf"
+    },
+    {
+      "id": "licenciatura-negocios-digitales",
+      "nombre": "Licenciatura en Negocios Digitales",
+      "archivo": "licenciatura-negocios-digitales.json",
+      "planEstudio": "Plan de Estudios - LIND.pdf"
+    },
+    {
+      "id": "licenciatura-relaciones-internacionales",
+      "nombre": "Licenciatura en Relaciones Internacionales",
+      "archivo": "licenciatura-relaciones-internacionales.json",
+      "planEstudio": "Plan de Estudios - LIRIn.pdf"
     }
   ]
 }

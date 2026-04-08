@@ -4,12 +4,12 @@
   "programa": "ININF N",
   "plan": "2026/00",
   "resolucion": "66/22",
-  "titulo": "Ingeniero",
+  "titulo": "",
   "anios": 5,
   "materias": [
     {
       "nro": 1811,
-      "nombre": "Analisis Matematico I",
+      "nombre": "Análisis Matemático I",
       "anio": 1,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
@@ -18,7 +18,7 @@
     },
     {
       "nro": 1011,
-      "nombre": "Fundamentos de Informatica",
+      "nombre": "Fundamentos de Informática",
       "anio": 1,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
@@ -27,7 +27,7 @@
     },
     {
       "nro": 1012,
-      "nombre": "Matematica Discreta",
+      "nombre": "Matemática Discreta",
       "anio": 1,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
@@ -36,7 +36,7 @@
     },
     {
       "nro": 14722,
-      "nombre": "Teoria de la Informacion",
+      "nombre": "Teoría de la Información",
       "anio": 1,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
@@ -45,7 +45,7 @@
     },
     {
       "nro": 4,
-      "nombre": "Elementos de Administracion",
+      "nombre": "Elementos de Administración",
       "anio": 1,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
@@ -54,7 +54,7 @@
     },
     {
       "nro": 1013,
-      "nombre": "Fisica I",
+      "nombre": "Física I",
       "anio": 1,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
@@ -63,7 +63,7 @@
     },
     {
       "nro": 1014,
-      "nombre": "Programacion I",
+      "nombre": "Programación I",
       "anio": 1,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
@@ -72,7 +72,7 @@
     },
     {
       "nro": 14727,
-      "nombre": "Algebra",
+      "nombre": "Álgebra",
       "anio": 1,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
@@ -90,29 +90,35 @@
     },
     {
       "nro": 1016,
-      "nombre": "Fisica II",
+      "nombre": "Física II",
       "anio": 2,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [1013],
+      "correlativas": [
+        1013
+      ],
       "creditos": 1.0
     },
     {
       "nro": 14723,
-      "nombre": "Probabilidad y Estadistica",
+      "nombre": "Probabilidad y Estadística",
       "anio": 2,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [1811],
+      "correlativas": [
+        1811
+      ],
       "creditos": 1.0
     },
     {
       "nro": 1017,
-      "nombre": "Programacion II",
+      "nombre": "Programación II",
       "anio": 2,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [1014],
+      "correlativas": [
+        1014
+      ],
       "creditos": 1.0
     },
     {
@@ -121,43 +127,55 @@
       "anio": 2,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [1011, 1014],
+      "correlativas": [
+        1011,
+        1014
+      ],
       "creditos": 1.0
     },
     {
       "nro": 1813,
-      "nombre": "Analisis Matematico II",
+      "nombre": "Análisis Matemático II",
       "anio": 2,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [1811],
+      "correlativas": [
+        1811
+      ],
       "creditos": 1.0
     },
     {
       "nro": 6519,
-      "nombre": "Estadistica para la Toma de Decisiones",
+      "nombre": "Estadística para la Toma de Decisiones",
       "anio": 2,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [14723],
+      "correlativas": [
+        14723
+      ],
       "creditos": 1.0
     },
     {
       "nro": 1018,
-      "nombre": "Tecnicas Digitales",
+      "nombre": "Técnicas Digitales",
       "anio": 2,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [1012, 14727],
+      "correlativas": [
+        1012,
+        14727
+      ],
       "creditos": 1.0
     },
     {
       "nro": 1816,
-      "nombre": "Analisis Matematico III",
+      "nombre": "Análisis Matemático III",
       "anio": 3,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [1813],
+      "correlativas": [
+        1813
+      ],
       "creditos": 1.0
     },
     {
@@ -166,34 +184,43 @@
       "anio": 3,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [1018],
+      "correlativas": [
+        1018
+      ],
       "creditos": 1.0
     },
     {
       "nro": 1020,
-      "nombre": "Lenguajes Formales y Teoria de la Computacion",
+      "nombre": "Lenguajes Formales y Teoría de la Computación",
       "anio": 3,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [1014],
+      "correlativas": [
+        1014
+      ],
       "creditos": 1.0
     },
     {
       "nro": 1022,
-      "nombre": "Programacion III",
+      "nombre": "Programación III",
       "anio": 3,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [1015, 1017],
+      "correlativas": [
+        1015,
+        1017
+      ],
       "creditos": 1.0
     },
     {
       "nro": 1024,
-      "nombre": "Analisis Numerico",
+      "nombre": "Análisis Numérico",
       "anio": 3,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [1816],
+      "correlativas": [
+        1816
+      ],
       "creditos": 1.0
     },
     {
@@ -202,7 +229,9 @@
       "anio": 3,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [2652],
+      "correlativas": [
+        2652
+      ],
       "creditos": 1.0
     },
     {
@@ -211,7 +240,10 @@
       "anio": 3,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [1018, 1017],
+      "correlativas": [
+        1018,
+        1017
+      ],
       "creditos": 1.0
     },
     {
@@ -220,16 +252,20 @@
       "anio": 3,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [1021],
+      "correlativas": [
+        1021
+      ],
       "creditos": 1.0
     },
     {
       "nro": 14724,
-      "nombre": "Laboratorio de Informatica",
+      "nombre": "Laboratorio de Informática",
       "anio": 4,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [1026],
+      "correlativas": [
+        1026
+      ],
       "creditos": 1.0
     },
     {
@@ -238,25 +274,33 @@
       "anio": 4,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [1022],
+      "correlativas": [
+        1022
+      ],
       "creditos": 1.0
     },
     {
       "nro": 1031,
-      "nombre": "Simulacion de Sistemas",
+      "nombre": "Simulación de Sistemas",
       "anio": 4,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [6519, 1017],
+      "correlativas": [
+        6519,
+        1017
+      ],
       "creditos": 1.0
     },
     {
       "nro": 31,
-      "nombre": "Sistemas de Informacion",
+      "nombre": "Sistemas de Información",
       "anio": 4,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [14723, 1022],
+      "correlativas": [
+        14723,
+        1022
+      ],
       "creditos": 1.0
     },
     {
@@ -265,7 +309,9 @@
       "anio": 4,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [1022],
+      "correlativas": [
+        1022
+      ],
       "creditos": 1.0
     },
     {
@@ -274,25 +320,33 @@
       "anio": 4,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [6519, 1017],
+      "correlativas": [
+        6519,
+        1017
+      ],
       "creditos": 1.0
     },
     {
       "nro": 1027,
-      "nombre": "Metodologias de Diseno de Sistemas",
+      "nombre": "Metodologías de Diseño de Sistemas",
       "anio": 4,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [1022],
+      "correlativas": [
+        1022
+      ],
       "creditos": 1.0
     },
     {
       "nro": 1188,
-      "nombre": "Seguridad Informatica",
+      "nombre": "Seguridad Informática",
       "anio": 4,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [1026, 1023],
+      "correlativas": [
+        1026,
+        1023
+      ],
       "creditos": 1.0
     },
     {
@@ -301,48 +355,60 @@
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [1025],
+      "correlativas": [
+        1025
+      ],
       "creditos": 1.0
     },
     {
       "nro": 1030,
-      "nombre": "Ingenieria de Software",
+      "nombre": "Ingeniería de Software",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [14725],
+      "correlativas": [
+        14725
+      ],
       "creditos": 1.0
     },
     {
       "nro": 2672,
-      "nombre": "Practica Profesional Supervisada",
+      "nombre": "Práctica Profesional Supervisada",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [1027],
+      "correlativas": [
+        1027
+      ],
       "creditos": 1.0
     },
     {
       "nro": 14708,
-      "nombre": "Topicos Avanzados de IA",
+      "nombre": "Tópicos Avanzados de IA",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "obligatoria",
-      "correlativas": [1031, 1025],
+      "correlativas": [
+        1031,
+        1025
+      ],
       "creditos": 1.0
     },
     {
       "nro": 14726,
-      "nombre": "Entrepreneurship Tecnologico",
+      "nombre": "Entrepreneurship Tecnológico",
       "anio": 5,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [10610, 4],
+      "correlativas": [
+        10610,
+        4
+      ],
       "creditos": 1.0
     },
     {
       "nro": 2871,
-      "nombre": "Gestion Ambiental",
+      "nombre": "Gestión Ambiental",
       "anio": 5,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
@@ -351,16 +417,18 @@
     },
     {
       "nro": 1032,
-      "nombre": "Ingenieria Legal",
+      "nombre": "Ingeniería Legal",
       "anio": 5,
       "cuatrimestre": 2,
       "grupo": "obligatoria",
-      "correlativas": [1027],
+      "correlativas": [
+        1027
+      ],
       "creditos": 1.0
     },
     {
       "nro": 32,
-      "nombre": "Administracion de Recursos Humanos",
+      "nombre": "Administración de Recursos Humanos",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "topico",
@@ -378,7 +446,7 @@
     },
     {
       "nro": 2671,
-      "nombre": "Economia",
+      "nombre": "Economía",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "topico",
@@ -405,7 +473,7 @@
     },
     {
       "nro": 15060,
-      "nombre": "Gestion de la Calidad",
+      "nombre": "Gestión de la Calidad",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "topico",
@@ -414,7 +482,7 @@
     },
     {
       "nro": 8136,
-      "nombre": "Laboratorio de Programacion Python",
+      "nombre": "Laboratorio de Programación Python",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "topico",
@@ -423,7 +491,7 @@
     },
     {
       "nro": 10629,
-      "nombre": "Metodos Cuantitativos para Ciencia de Datos",
+      "nombre": "Métodos Cuantitativos para Ciencia de Datos",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "topico",
@@ -432,7 +500,7 @@
     },
     {
       "nro": 42,
-      "nombre": "Organizacion Industrial",
+      "nombre": "Organización Industrial",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "topico",
@@ -441,7 +509,7 @@
     },
     {
       "nro": 1815,
-      "nombre": "Principios de Macroeconomia",
+      "nombre": "Principios de Macroeconomía",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "topico",
@@ -450,7 +518,7 @@
     },
     {
       "nro": 2655,
-      "nombre": "Quimica",
+      "nombre": "Química",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "topico",
@@ -459,7 +527,7 @@
     },
     {
       "nro": 23,
-      "nombre": "Teoria de las Decisiones",
+      "nombre": "Teoría de las Decisiones",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "topico",
@@ -468,7 +536,7 @@
     },
     {
       "nro": 26,
-      "nombre": "Teoria de las Organizaciones",
+      "nombre": "Teoría de las Organizaciones",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "topico",
@@ -486,7 +554,7 @@
     },
     {
       "nro": 14109,
-      "nombre": "Nivel de Ingles",
+      "nombre": "Nivel de Inglés",
       "anio": 5,
       "cuatrimestre": 1,
       "grupo": "requisito",
@@ -494,5 +562,6 @@
       "creditos": 1.0
     }
   ],
-  "topicos_requeridos": 2
+  "topicos_requeridos": 2,
+  "talleres_requeridos": 0
 }

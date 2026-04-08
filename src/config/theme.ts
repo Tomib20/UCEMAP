@@ -19,12 +19,14 @@ export const GRUPO_COLORS: Record<"light" | "dark", Record<MateriaGrupo, GrupoCo
     topico: { bg: "#fde68a", border: "#b45309", text: "#78350f", label: "Topico (Electiva)" },
     tesis: { bg: "#ddd6fe", border: "#6d28d9", text: "#4c1d95", label: "Tesis / Proyecto Final" },
     requisito: { bg: "#e2e8f0", border: "#64748b", text: "#334155", label: "Requisito" },
+    taller: { bg: "#fce7f3", border: "#db2777", text: "#831843", label: "Taller" },
   },
   dark: {
     obligatoria: { bg: "#2d4a7a", border: "#60a5fa", text: "#dbeafe", label: "Obligatoria" },
     topico: { bg: "#451a03", border: "#fbbf24", text: "#fef9c3", label: "Topico (Electiva)" },
     tesis: { bg: "#2e1065", border: "#a78bfa", text: "#ede9fe", label: "Tesis / Proyecto Final" },
     requisito: { bg: "#1e293b", border: "#94a3b8", text: "#e2e8f0", label: "Requisito" },
+    taller: { bg: "#4a1942", border: "#f472b6", text: "#fce7f3", label: "Taller" },
   },
 };
 

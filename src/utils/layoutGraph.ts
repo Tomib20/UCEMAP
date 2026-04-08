@@ -13,21 +13,40 @@ export const CUATRI_GAP = 36;
 const TOP_OFFSET = 0;
 const LABEL_HEIGHT = 36;
 
+export type ElectivasMode = "hidden" | "active" | "all";
+
 /**
  * Layout: 5 columns (one per year), up to 8 rows each (4 C1 + gap + 4 C2).
  * Extra column: tesis + requisito at top, then electivas below.
+ *
+ * `electivasMode` controls visibility of topicos/talleres:
+ *   - "hidden": no topicos/talleres shown
+ *   - "active": only those in aprobadas or cursando
+ *   - "all": every topico/taller from the plan
  */
 export function buildGraphLayout(
   materias: Materia[],
-  showElectivas: boolean
+  electivasMode: ElectivasMode = "hidden",
+  aprobadas: Set<number> = new Set(),
+  cursando: Set<number> = new Set()
 ): {
   nodes: Node[];
   edges: Edge[];
 } {
   const obligatorias = materias.filter((m) => m.grupo === "obligatoria");
-  const topicos = materias.filter((m) => m.grupo === "topico");
+  const allTopicos = materias.filter((m) => m.grupo === "topico");
   const tesis = materias.filter((m) => m.grupo === "tesis");
   const requisitos = materias.filter((m) => m.grupo === "requisito");
+  const allTalleres = materias.filter((m) => m.grupo === "taller");
+
+  // Filter topicos/talleres based on mode
+  const topicos = electivasMode === "active"
+    ? allTopicos.filter((m) => aprobadas.has(m.nro) || cursando.has(m.nro))
+    : allTopicos;
+  const talleres = electivasMode === "active"
+    ? allTalleres.filter((m) => aprobadas.has(m.nro) || cursando.has(m.nro))
+    : allTalleres;
+  const showElectivas = electivasMode !== "hidden";
 
   const nodes: Node[] = [];
 
@@ -93,9 +112,21 @@ export function buildGraphLayout(
     }
   }
 
-  // Extra column: tesis + requisito at top, electivas below
-  const extraX = 5 * COL_WIDTH + 80;
-  const EXTRA_COL2_X = extraX + 230;
+  // Calculate max year column height in "rows" (c1 rows + cuatri gap + c2 rows).
+  // This is used as the wrap height for electivas/talleres so they form a block
+  // similar in height to the obligatorias columns.
+  let maxYearRows = 0;
+  for (const { c1, c2 } of byYear.values()) {
+    // Treat the cuatri gap as 1 extra row equivalent
+    const rows = c1.length + (c1.length > 0 && c2.length > 0 ? 1 : 0) + c2.length;
+    if (rows > maxYearRows) maxYearRows = rows;
+  }
+  if (maxYearRows < 6) maxYearRows = 6; // sensible minimum
+
+  // Extra column: tesis + requisito at top, electivas/talleres below
+  const maxAnio = Math.max(...[...byYear.keys()], 1);
+  const extraX = maxAnio * COL_WIDTH + 80;
+  const EXTRA_COL2_X = extraX + COL_WIDTH;
   let extraY = TOP_OFFSET;
 
   // Tesis & requisitos side by side at top
@@ -120,24 +151,41 @@ export function buildGraphLayout(
     });
   }
 
-  // Electivas below tesis/requisito
+  // Electivas + talleres below tesis/requisito.
+  // Wrap into multiple columns: each column is at most maxYearRows tall, but
+  // when items don't fill that height, distribute them evenly across columns.
   if (showElectivas) {
-    const electivasStartY = extraY + Math.max(tesis.length, requisitos.length) * ROW_HEIGHT + CUATRI_GAP;
-    for (let i = 0; i < topicos.length; i++) {
-      const col = i % 2;
-      const row = Math.floor(i / 2);
-      nodes.push({
-        id: String(topicos[i].nro),
-        type: "materia",
-        position: {
-          x: extraX + col * 230,
-          y: electivasStartY + row * ROW_HEIGHT,
-        },
-        data: { materia: topicos[i] } as MateriaNodeData,
-        width: NODE_WIDTH,
-        height: NODE_HEIGHT,
-      });
-    }
+    const tesisHeight = Math.max(tesis.length, requisitos.length);
+    const electivasStartY = extraY + tesisHeight * ROW_HEIGHT + (tesisHeight > 0 ? CUATRI_GAP : 0);
+
+    const layoutBlock = (
+      items: Materia[],
+      startX: number,
+    ): { cols: number } => {
+      if (items.length === 0) return { cols: 0 };
+      const cols = Math.max(1, Math.ceil(items.length / maxYearRows));
+      const rowsPerCol = Math.ceil(items.length / cols); // balanced
+      for (let i = 0; i < items.length; i++) {
+        const col = Math.floor(i / rowsPerCol);
+        const row = i % rowsPerCol;
+        nodes.push({
+          id: String(items[i].nro),
+          type: "materia",
+          position: {
+            x: startX + col * COL_WIDTH,
+            y: electivasStartY + row * ROW_HEIGHT,
+          },
+          data: { materia: items[i] } as MateriaNodeData,
+          width: NODE_WIDTH,
+          height: NODE_HEIGHT,
+        });
+      }
+      return { cols };
+    };
+
+    const { cols: topicCols } = layoutBlock(topicos, extraX);
+    const tallerStartX = extraX + topicCols * COL_WIDTH + (topicCols > 0 ? 30 : 0);
+    layoutBlock(talleres, tallerStartX);
   }
 
   // Invisible spacer at the bottom to shift fitView center upward
