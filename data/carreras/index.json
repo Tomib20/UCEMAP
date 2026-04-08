@@ -1,0 +1,11 @@
+{
+  "universidad": "UCEMA",
+  "carreras": [
+    {
+      "id": "ingenieria-informatica",
+      "nombre": "Ingenieria en Informatica",
+      "archivo": "ingenieria-informatica.json",
+      "planEstudio": "plan-ingenieria-informatica.pdf"
+    }
+  ]
+}

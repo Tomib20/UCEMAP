@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Carrera UCEMA",
+  "description": "Schema para los archivos JSON de carreras",
+  "type": "object",
+  "required": ["id", "nombre", "materias"],
+  "properties": {
+    "id": { "type": "string" },
+    "nombre": { "type": "string" },
+    "planEstudio": { "type": "string" },
+    "anios": { "type": "integer" },
+    "materias": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "nombre", "anio", "cuatrimestre", "correlativas"],
+        "properties": {
+          "id": { "type": "string", "description": "Identificador unico de la materia" },
+          "codigo": { "type": "string", "description": "Codigo oficial de la materia" },
+          "nombre": { "type": "string" },
+          "anio": { "type": "integer", "minimum": 1 },
+          "cuatrimestre": { "type": "integer", "enum": [1, 2, 0], "description": "0 = anual" },
+          "correlativas": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "IDs de materias que son correlativas (prerequisitos)"
+          },
+          "creditos": { "type": ["integer", "null"] },
+          "optativa": { "type": "boolean", "default": false },
+          "categoria": { "type": "string", "description": "Ej: basica, troncal, electiva" }
+        }
+      }
+    }
+  }
+}

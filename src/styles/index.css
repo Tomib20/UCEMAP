@@ -1,0 +1,25 @@
+@import "tailwindcss";
+@import "@xyflow/react/dist/style.css";
+
+@theme {
+  --font-sans: "Manrope", sans-serif;
+  --color-navy: #1a2744;
+  --color-navy-light: #2a3f66;
+  --color-navy-lighter: #3d5a8a;
+  --color-teal: #0d9488;
+  --color-teal-light: #14b8a6;
+  --color-teal-lighter: #ccfbf1;
+  --color-accent: #6d28d9;
+  --color-accent-light: #ede9fe;
+}
+
+body {
+  margin: 0;
+  font-family: "Manrope", sans-serif;
+  background: #f8fafc;
+  color: var(--color-navy);
+}
+
+.react-flow__attribution {
+  display: none;
+}
