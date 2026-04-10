@@ -148,7 +148,7 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
                     ? "bg-slate-800 text-slate-500 border-slate-600 cursor-not-allowed"
                     : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
           }`}
-          disabled={hasAprobadaDependent || (!canAprobar && status !== "aprobada")}
+          disabled={hasAprobadaDependent || !canAprobar}
         >
           {status === "aprobada" && hasAprobadaDependent
             ? "\u2713 Aprobada \u2014 no se puede desmarcar"

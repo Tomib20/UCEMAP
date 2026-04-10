@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -425,8 +425,8 @@ function FlowInner({ carrera, electivasMode, isMobile }: FlowInnerProps) {
       const dependents = full
         ? getDescendants(nro, adjacency)
         : adjacency.dependentsOf.get(nro) ?? new Set();
-      setNodes((cur) => applyChainHighlight(cur, [], nro, prereqs, dependents, mode).nodes);
-      setEdges((cur) => applyChainHighlight([], cur, nro, prereqs, dependents, mode).edges);
+      setNodes((cur) => applyChainHighlight(cur, [], nro, prereqs, dependents, mode).nodes as typeof cur);
+      setEdges((cur) => applyChainHighlight([], cur, nro, prereqs, dependents, mode).edges as typeof cur);
     },
     [adjacency, setNodes, setEdges, mode]
   );
@@ -440,7 +440,7 @@ function FlowInner({ carrera, electivasMode, isMobile }: FlowInnerProps) {
 
   const doClear = useCallback(() => {
     setNodes((cur) => clearNodeFlags(cur));
-    setEdges((cur) => clearEdgeStyles(cur, mode));
+    setEdges((cur) => clearEdgeStyles(cur, mode) as typeof cur);
   }, [setNodes, setEdges, mode]);
 
   const onNodeClick: NodeMouseHandler = useCallback(
@@ -611,7 +611,7 @@ export function GraphView({ carrera }: GraphViewProps) {
   const isMobile = useIsMobile();
   const aprobadasArr = useProgressStore(selectAprobadasArray);
   const cursandoArr = useProgressStore(selectCursandoArray);
-  const usuario = useUserStore((s) => s.usuario);
+
   const [electivasMode, setElectivasMode] = useState<ElectivasMode>("hidden");
   const surface = SURFACE[mode];
 
