@@ -4,6 +4,7 @@ import { GRUPO_COLORS, SURFACE } from "@/config/theme";
 import { getMateriaStatus } from "@/utils/materiaStatus";
 import { useProgressStore, selectAprobadasArray, selectCursandoArray, selectNotasRecord, type Nota } from "@/store/useProgressStore";
 import { useThemeStore } from "@/store/useThemeStore";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 const NOTA_OPTIONS: Nota[] = ["AP", 4, 5, 6, 7, 8, 9, 10];
 
@@ -25,11 +26,19 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
   const fullChain = useProgressStore((s) => s.fullChain);
   const toggleFullChain = useProgressStore((s) => s.toggleFullChain);
   const mode = useThemeStore((s) => s.mode);
+  const isMobile = useIsMobile();
 
-  if (selectedNro === null) return null;
+  const isOpen = selectedNro !== null;
 
-  const materia = carrera.materias.find((m) => m.nro === selectedNro);
-  if (!materia) return null;
+  const materia = isOpen
+    ? carrera.materias.find((m) => m.nro === selectedNro) ?? null
+    : null;
+
+  if (!materia) {
+    // On mobile: render nothing if closed. On desktop: render nothing either.
+    if (!isOpen) return null;
+    return null;
+  }
 
   const status = getMateriaStatus(materia, aprobadas, cursando);
   const grupo = GRUPO_COLORS[mode][materia.grupo];
@@ -47,7 +56,6 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
   const canCursar = status === "disponible" || status === "cursando";
   const canAprobar = status === "disponible" || status === "cursando" || status === "aprobada";
 
-  // Can't remove aprobada if a dependent materia is also aprobada or cursando
   const hasAprobadaDependent = status === "aprobada" && desbloquea.some(
     (m) => aprobadas.has(m.nro) || cursando.has(m.nro)
   );
@@ -68,6 +76,248 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
     }
   };
 
+  /* ── Shared content ── */
+  const content = (
+    <div className="p-4">
+      <div className="flex items-start justify-between mb-3">
+        <div
+          className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded"
+          style={{ backgroundColor: grupo.bg, color: grupo.text }}
+        >
+          {grupo.label}
+        </div>
+        <button
+          onClick={() => selectMateria(null)}
+          className="text-lg leading-none hover:opacity-70"
+          style={{ color: surface.textSecondary }}
+        >
+          &times;
+        </button>
+      </div>
+
+      <h3 className="text-base font-bold leading-tight mb-1" style={{ color: surface.textPrimary }}>
+        {materia.nombre}
+      </h3>
+      <p className="text-xs mb-4" style={{ color: surface.textSecondary }}>
+        #{materia.nro} &middot; {materia.anio}&deg; Ano C{materia.cuatrimestre}{" "}
+        &middot; {materia.creditos} credito(s)
+      </p>
+
+      {/* Action buttons */}
+      <div className="flex flex-col gap-2 mb-4">
+        <button
+          onClick={handleCursando}
+          className={`w-full py-2 px-3 rounded-lg text-sm font-semibold transition-colors border ${
+            status === "cursando"
+              ? mode === "dark"
+                ? "bg-yellow-900/40 text-yellow-400 border-yellow-700 hover:bg-yellow-900/60"
+                : "bg-yellow-100 text-yellow-700 border-yellow-400 hover:bg-yellow-200"
+              : canCursar
+                ? mode === "dark"
+                  ? "bg-yellow-900/20 text-yellow-500 border-yellow-800 hover:bg-yellow-900/40"
+                  : "bg-yellow-50 text-yellow-600 border-yellow-300 hover:bg-yellow-100"
+                : mode === "dark"
+                  ? "bg-slate-800 text-slate-500 border-slate-600 cursor-not-allowed"
+                  : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
+          }`}
+          disabled={!canCursar}
+        >
+          {status === "cursando"
+            ? "\u25CF Cursando \u2014 click para desmarcar"
+            : canCursar
+              ? "Marcar como cursando"
+              : "No disponible"}
+        </button>
+
+        <button
+          onClick={handleAprobada}
+          className={`w-full py-2 px-3 rounded-lg text-sm font-semibold transition-colors border ${
+            status === "aprobada" && !hasAprobadaDependent
+              ? mode === "dark"
+                ? "bg-green-900/40 text-green-400 border-green-700 hover:bg-green-900/60"
+                : "bg-green-100 text-green-700 border-green-300 hover:bg-green-200"
+              : status === "aprobada" && hasAprobadaDependent
+                ? mode === "dark"
+                  ? "bg-green-900/40 text-green-400 border-green-700 opacity-60 cursor-not-allowed"
+                  : "bg-green-100 text-green-700 border-green-300 opacity-60 cursor-not-allowed"
+                : canAprobar
+                  ? mode === "dark"
+                    ? "bg-green-900/20 text-green-500 border-green-800 hover:bg-green-900/40"
+                    : "bg-green-50 text-green-600 border-green-300 hover:bg-green-100"
+                  : mode === "dark"
+                    ? "bg-slate-800 text-slate-500 border-slate-600 cursor-not-allowed"
+                    : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
+          }`}
+          disabled={hasAprobadaDependent || (!canAprobar && status !== "aprobada")}
+        >
+          {status === "aprobada" && hasAprobadaDependent
+            ? "\u2713 Aprobada \u2014 no se puede desmarcar"
+            : status === "aprobada"
+              ? "\u2713 Aprobada \u2014 click para desmarcar"
+              : canAprobar
+                ? "Marcar como aprobada"
+                : "Bloqueada \u2014 faltan correlativas"}
+        </button>
+        {hasAprobadaDependent && (
+          <p className="text-[10px] mt-1" style={{ color: mode === "dark" ? "#f87171" : "#dc2626" }}>
+            No se puede desmarcar porque {dependentesAprobadas.join(", ")} depende de esta materia.
+          </p>
+        )}
+      </div>
+
+      {/* Full chain toggle */}
+      <button
+        onClick={toggleFullChain}
+        className="w-full py-2 px-3 rounded-lg text-xs font-semibold transition-colors border flex items-center gap-2 mb-4"
+        style={{
+          backgroundColor: fullChain
+            ? mode === "dark" ? "rgba(14,165,233,0.15)" : "rgba(14,165,233,0.1)"
+            : mode === "dark" ? "#1e293b" : "#f8fafc",
+          borderColor: fullChain
+            ? "#0ea5e9"
+            : mode === "dark" ? "#334155" : "#e2e8f0",
+          color: fullChain
+            ? "#0ea5e9"
+            : surface.textSecondary,
+        }}
+      >
+        <span style={{ fontSize: 14 }}>{fullChain ? "\u25C9" : "\u25CB"}</span>
+        {fullChain ? "Cadena completa activada" : "Ver cadena completa"}
+      </button>
+
+      {/* Nota selector */}
+      {status === "aprobada" && (
+        <div className="mb-4">
+          <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: surface.textSecondary }}>
+            Nota
+          </h4>
+          <div className="flex flex-wrap gap-1.5">
+            {NOTA_OPTIONS.map((n) => {
+              const isActive = currentNota === n;
+              return (
+                <button
+                  key={String(n)}
+                  onClick={() => setNota(materia.nro, n)}
+                  className="px-2.5 py-1 rounded text-xs font-semibold border transition-colors"
+                  style={{
+                    backgroundColor: isActive
+                      ? mode === "dark" ? "#0ea5e9" : "#0284c7"
+                      : mode === "dark" ? "#1e293b" : "#f1f5f9",
+                    color: isActive
+                      ? "#fff"
+                      : mode === "dark" ? "#94a3b8" : "#64748b",
+                    borderColor: isActive
+                      ? "transparent"
+                      : mode === "dark" ? "#334155" : "#e2e8f0",
+                  }}
+                >
+                  {n === "AP" ? "AP" : n}
+                </button>
+              );
+            })}
+          </div>
+          <p className="text-[10px] mt-1.5" style={{ color: surface.textSecondary }}>
+            AP = aprobada sin nota (no afecta promedio)
+          </p>
+        </div>
+      )}
+
+      {correlativasNombres.length > 0 && (
+        <div className="mb-4">
+          <h4 className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: surface.textSecondary }}>
+            Correlativas (prerequisitos)
+          </h4>
+          <ul className="space-y-1">
+            {correlativasNombres.map((m) => (
+              <li
+                key={m.nro}
+                className="text-xs flex items-center gap-1.5 cursor-pointer hover:opacity-70"
+                style={{ color: surface.textPrimary }}
+                onClick={() => selectMateria(m.nro)}
+              >
+                {aprobadas.has(m.nro) ? (
+                  <span className="text-green-500">&#10003;</span>
+                ) : cursando.has(m.nro) ? (
+                  <span className="text-yellow-500">&#9679;</span>
+                ) : (
+                  <span style={{ color: surface.textSecondary }}>&#9675;</span>
+                )}
+                {m.nombre}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {desbloquea.length > 0 && (
+        <div>
+          <h4 className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: surface.textSecondary }}>
+            Desbloquea
+          </h4>
+          <ul className="space-y-1">
+            {desbloquea.map((m) => (
+              <li
+                key={m.nro}
+                className="text-xs flex items-center gap-1.5 cursor-pointer hover:opacity-70"
+                style={{ color: surface.textPrimary }}
+                onClick={() => selectMateria(m.nro)}
+              >
+                {aprobadas.has(m.nro) ? (
+                  <span className="text-green-500">&#10003;</span>
+                ) : cursando.has(m.nro) ? (
+                  <span className="text-yellow-500">&#9679;</span>
+                ) : (
+                  <span style={{ color: surface.textSecondary }}>&#9654;</span>
+                )}
+                {m.nombre}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+
+  /* ── Mobile: bottom sheet ── */
+  if (isMobile) {
+    return (
+      <>
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 z-20"
+          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
+          onClick={() => selectMateria(null)}
+        />
+        {/* Sheet */}
+        <div
+          className="fixed bottom-0 left-0 right-0 z-30 rounded-t-2xl shadow-2xl overflow-y-auto"
+          style={{
+            maxHeight: "70vh",
+            backgroundColor: surface.panel,
+            borderTop: `1px solid ${surface.panelBorder}`,
+            animation: "slideUp 0.2s ease-out",
+          }}
+        >
+          {/* Drag handle */}
+          <div className="flex justify-center pt-2 pb-1">
+            <div
+              className="w-10 h-1 rounded-full"
+              style={{ backgroundColor: surface.textSecondary, opacity: 0.4 }}
+            />
+          </div>
+          {content}
+        </div>
+        <style>{`
+          @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+          }
+        `}</style>
+      </>
+    );
+  }
+
+  /* ── Desktop: right sidebar ── */
   return (
     <div
       className="absolute top-0 right-0 w-80 h-full shadow-lg z-20 overflow-y-auto"
@@ -76,206 +326,7 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
         borderLeft: `1px solid ${surface.panelBorder}`,
       }}
     >
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-3">
-          <div
-            className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded"
-            style={{ backgroundColor: grupo.bg, color: grupo.text }}
-          >
-            {grupo.label}
-          </div>
-          <button
-            onClick={() => selectMateria(null)}
-            className="text-lg leading-none hover:opacity-70"
-            style={{ color: surface.textSecondary }}
-          >
-            &times;
-          </button>
-        </div>
-
-        <h3 className="text-base font-bold leading-tight mb-1" style={{ color: surface.textPrimary }}>
-          {materia.nombre}
-        </h3>
-        <p className="text-xs mb-4" style={{ color: surface.textSecondary }}>
-          #{materia.nro} &middot; {materia.anio}&deg; Ano C{materia.cuatrimestre}{" "}
-          &middot; {materia.creditos} credito(s)
-        </p>
-
-        {/* Action buttons */}
-        <div className="flex flex-col gap-2 mb-4">
-          {/* Cursando */}
-          <button
-            onClick={handleCursando}
-            className={`w-full py-2 px-3 rounded-lg text-sm font-semibold transition-colors border ${
-              status === "cursando"
-                ? mode === "dark"
-                  ? "bg-yellow-900/40 text-yellow-400 border-yellow-700 hover:bg-yellow-900/60"
-                  : "bg-yellow-100 text-yellow-700 border-yellow-400 hover:bg-yellow-200"
-                : canCursar
-                  ? mode === "dark"
-                    ? "bg-yellow-900/20 text-yellow-500 border-yellow-800 hover:bg-yellow-900/40"
-                    : "bg-yellow-50 text-yellow-600 border-yellow-300 hover:bg-yellow-100"
-                  : mode === "dark"
-                    ? "bg-slate-800 text-slate-500 border-slate-600 cursor-not-allowed"
-                    : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
-            }`}
-            disabled={!canCursar}
-          >
-            {status === "cursando"
-              ? "\u25CF Cursando \u2014 click para desmarcar"
-              : canCursar
-                ? "Marcar como cursando"
-                : "No disponible"}
-          </button>
-
-          {/* Aprobada */}
-          <button
-            onClick={handleAprobada}
-            className={`w-full py-2 px-3 rounded-lg text-sm font-semibold transition-colors border ${
-              status === "aprobada" && !hasAprobadaDependent
-                ? mode === "dark"
-                  ? "bg-green-900/40 text-green-400 border-green-700 hover:bg-green-900/60"
-                  : "bg-green-100 text-green-700 border-green-300 hover:bg-green-200"
-                : status === "aprobada" && hasAprobadaDependent
-                  ? mode === "dark"
-                    ? "bg-green-900/40 text-green-400 border-green-700 opacity-60 cursor-not-allowed"
-                    : "bg-green-100 text-green-700 border-green-300 opacity-60 cursor-not-allowed"
-                  : canAprobar
-                    ? mode === "dark"
-                      ? "bg-green-900/20 text-green-500 border-green-800 hover:bg-green-900/40"
-                      : "bg-green-50 text-green-600 border-green-300 hover:bg-green-100"
-                    : mode === "dark"
-                      ? "bg-slate-800 text-slate-500 border-slate-600 cursor-not-allowed"
-                      : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
-            }`}
-            disabled={hasAprobadaDependent || (!canAprobar && status !== "aprobada")}
-          >
-            {status === "aprobada" && hasAprobadaDependent
-              ? "\u2713 Aprobada \u2014 no se puede desmarcar"
-              : status === "aprobada"
-                ? "\u2713 Aprobada \u2014 click para desmarcar"
-                : canAprobar
-                  ? "Marcar como aprobada"
-                  : "Bloqueada \u2014 faltan correlativas"}
-          </button>
-          {hasAprobadaDependent && (
-            <p className="text-[10px] mt-1" style={{ color: mode === "dark" ? "#f87171" : "#dc2626" }}>
-              No se puede desmarcar porque {dependentesAprobadas.join(", ")} depende de esta materia.
-            </p>
-          )}
-        </div>
-
-        {/* Full chain toggle */}
-        <button
-          onClick={toggleFullChain}
-          className="w-full py-2 px-3 rounded-lg text-xs font-semibold transition-colors border flex items-center gap-2 mb-4"
-          style={{
-            backgroundColor: fullChain
-              ? mode === "dark" ? "rgba(14,165,233,0.15)" : "rgba(14,165,233,0.1)"
-              : mode === "dark" ? "#1e293b" : "#f8fafc",
-            borderColor: fullChain
-              ? "#0ea5e9"
-              : mode === "dark" ? "#334155" : "#e2e8f0",
-            color: fullChain
-              ? "#0ea5e9"
-              : surface.textSecondary,
-          }}
-        >
-          <span style={{ fontSize: 14 }}>{fullChain ? "\u25C9" : "\u25CB"}</span>
-          {fullChain ? "Cadena completa activada" : "Ver cadena completa"}
-        </button>
-
-        {/* Nota selector */}
-        {status === "aprobada" && (
-          <div className="mb-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: surface.textSecondary }}>
-              Nota
-            </h4>
-            <div className="flex flex-wrap gap-1.5">
-              {NOTA_OPTIONS.map((n) => {
-                const isActive = currentNota === n;
-                return (
-                  <button
-                    key={String(n)}
-                    onClick={() => setNota(materia.nro, n)}
-                    className="px-2.5 py-1 rounded text-xs font-semibold border transition-colors"
-                    style={{
-                      backgroundColor: isActive
-                        ? mode === "dark" ? "#0ea5e9" : "#0284c7"
-                        : mode === "dark" ? "#1e293b" : "#f1f5f9",
-                      color: isActive
-                        ? "#fff"
-                        : mode === "dark" ? "#94a3b8" : "#64748b",
-                      borderColor: isActive
-                        ? "transparent"
-                        : mode === "dark" ? "#334155" : "#e2e8f0",
-                    }}
-                  >
-                    {n === "AP" ? "AP" : n}
-                  </button>
-                );
-              })}
-            </div>
-            <p className="text-[10px] mt-1.5" style={{ color: surface.textSecondary }}>
-              AP = aprobada sin nota (no afecta promedio)
-            </p>
-          </div>
-        )}
-
-        {correlativasNombres.length > 0 && (
-          <div className="mb-4">
-            <h4 className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: surface.textSecondary }}>
-              Correlativas (prerequisitos)
-            </h4>
-            <ul className="space-y-1">
-              {correlativasNombres.map((m) => (
-                <li
-                  key={m.nro}
-                  className="text-xs flex items-center gap-1.5 cursor-pointer hover:opacity-70"
-                  style={{ color: surface.textPrimary }}
-                  onClick={() => selectMateria(m.nro)}
-                >
-                  {aprobadas.has(m.nro) ? (
-                    <span className="text-green-500">&#10003;</span>
-                  ) : cursando.has(m.nro) ? (
-                    <span className="text-yellow-500">&#9679;</span>
-                  ) : (
-                    <span style={{ color: surface.textSecondary }}>&#9675;</span>
-                  )}
-                  {m.nombre}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {desbloquea.length > 0 && (
-          <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: surface.textSecondary }}>
-              Desbloquea
-            </h4>
-            <ul className="space-y-1">
-              {desbloquea.map((m) => (
-                <li
-                  key={m.nro}
-                  className="text-xs flex items-center gap-1.5 cursor-pointer hover:opacity-70"
-                  style={{ color: surface.textPrimary }}
-                  onClick={() => selectMateria(m.nro)}
-                >
-                  {aprobadas.has(m.nro) ? (
-                    <span className="text-green-500">&#10003;</span>
-                  ) : cursando.has(m.nro) ? (
-                    <span className="text-yellow-500">&#9679;</span>
-                  ) : (
-                    <span style={{ color: surface.textSecondary }}>&#9654;</span>
-                  )}
-                  {m.nombre}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
+      {content}
     </div>
   );
 }

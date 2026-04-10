@@ -16,7 +16,7 @@ import {
 } from "@xyflow/react";
 import type { Materia, Carrera } from "@/types/carrera";
 import { buildGraphLayout, type ElectivasMode } from "@/utils/layoutGraph";
-import { CHAIN_COLORS, EDGE_COLORS, SURFACE, NODE_WIDTH } from "@/config/theme";
+import { CHAIN_COLORS, EDGE_COLORS, SURFACE, NODE_WIDTH, NODE_HEIGHT } from "@/config/theme";
 import { buildAdjacencyMaps, getAncestors, getDescendants } from "@/utils/prerequisiteChain";
 import { getMateriaStatus } from "@/utils/materiaStatus";
 import { useProgressStore, selectAprobadasArray, selectCursandoArray } from "@/store/useProgressStore";
@@ -24,6 +24,7 @@ import { useThemeStore } from "@/store/useThemeStore";
 import { MateriaNode } from "./MateriaNode";
 import { Legend } from "./Legend";
 import { ContextMenu, type ContextMenuState } from "./ContextMenu";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 /* ── Decorative node types ── */
 
@@ -241,9 +242,10 @@ function MateriaHoverInfo({ materia, carrera, top, left }: { materia: Materia; c
 interface FlowInnerProps {
   carrera: Carrera;
   electivasMode: ElectivasMode;
+  isMobile: boolean;
 }
 
-function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
+function FlowInner({ carrera, electivasMode, isMobile }: FlowInnerProps) {
   const selectMateria = useProgressStore((s) => s.selectMateria);
   const fullChain = useProgressStore((s) => s.fullChain);
   const aprobadasArr = useProgressStore(selectAprobadasArray);
@@ -253,7 +255,7 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
   const fullChainRef = useRef(fullChain);
   fullChainRef.current = fullChain;
   const originalPositions = useRef<Map<string, { x: number; y: number }>>(new Map());
-  const { setViewport } = useReactFlow();
+  const { setViewport, setCenter } = useReactFlow();
   const [hoverInfo, setHoverInfo] = useState<{ materia: Materia; top: number; left: number } | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
 
@@ -292,20 +294,20 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
     const contentH = maxY - minY;
 
     // Available viewport area (accounting for fixed UI overlays)
-    const SIDEBAR = 0; // sidebar only opens on selection, not by default
-    const HEADER = 60;
-    const BOTTOM_BAR = 100;
-    const PADDING = 60;
+    const SIDEBAR = 0;
+    const HEADER = isMobile ? 44 : 60;
+    const BOTTOM_BAR = isMobile ? 50 : 100;
+    const PADDING = isMobile ? 20 : 60;
     const availW = window.innerWidth - SIDEBAR - PADDING * 2;
     const availH = window.innerHeight - HEADER - BOTTOM_BAR - PADDING * 2;
 
     const zoomX = availW / contentW;
     const zoomY = availH / contentH;
-    let zoom = Math.min(zoomX, zoomY) * 0.85; // pull back a notch for breathing room
+    const breathingRoom = isMobile ? 0.75 : 0.85;
+    let zoom = Math.min(zoomX, zoomY) * breathingRoom;
     zoom = Math.max(0.2, Math.min(1.2, zoom));
 
-    // Center the content (shift slightly up so it doesn't sit on top of the bottom bar)
-    const VERTICAL_NUDGE = 60;
+    const VERTICAL_NUDGE = isMobile ? 30 : 60;
     const centerX = (minX + maxX) / 2;
     const centerY = (minY + maxY) / 2;
     const screenCenterX = (window.innerWidth - SIDEBAR) / 2;
@@ -315,7 +317,7 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
       y: screenCenterY - centerY * zoom,
       zoom,
     };
-  }, []);
+  }, [isMobile]);
 
   const adjacency = useMemo(
     () => buildAdjacencyMaps(carrera.materias),
@@ -474,6 +476,24 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
     return () => window.removeEventListener("keydown", handler);
   }, [contextMenu, selectMateria, doClear]);
 
+  // Center on materia when requested from SearchPalette
+  const centerOnMateria = useProgressStore((s) => s.centerOnMateria);
+  const clearCenterOn = useProgressStore((s) => s.clearCenterOn);
+  useEffect(() => {
+    if (centerOnMateria === null) return;
+    const node = nodes.find((n) => n.id === String(centerOnMateria));
+    if (node) {
+      setCenter(
+        node.position.x + NODE_WIDTH / 2,
+        node.position.y + NODE_HEIGHT / 2,
+        { zoom: 1, duration: 500 }
+      );
+      selectedRef.current = centerOnMateria;
+      doHighlight(centerOnMateria);
+    }
+    clearCenterOn();
+  }, [centerOnMateria, clearCenterOn, nodes, setCenter, doHighlight]);
+
   const onNodeMouseEnter: NodeMouseHandler = useCallback(
     (event, node) => {
       if (node.id.startsWith("__")) return;
@@ -526,30 +546,34 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
         defaultEdgeOptions={{ type: "default" }}
       >
         <Background color={surface.dots} gap={20} />
-        <Controls
-          position="top-right"
-          showInteractive={false}
-          onFitView={() => doFitView(300)}
-        />
-        <MiniMap
-          position="bottom-right"
-          nodeColor={(node) => {
-            if (node.id.startsWith("__")) return "transparent";
-            const materia = (node.data as unknown as { materia: Materia }).materia;
-            if (!materia) return "transparent";
-            if (aprobadasArr.includes(materia.nro)) return mode === "dark" ? "#4ade80" : "#16a34a";
-            if (cursandoArr.includes(materia.nro)) return mode === "dark" ? "#facc15" : "#eab308";
-            if (materia.grupo === "obligatoria") return "#3b82f6";
-            if (materia.grupo === "topico") return "#d97706";
-            if (materia.grupo === "tesis") return "#7c3aed";
-            if (materia.grupo === "taller") return "#db2777";
-            return "#94a3b8";
-          }}
-          maskColor={mode === "dark" ? "rgba(15,23,42,0.7)" : "rgba(255,255,255,0.7)"}
-          style={mode === "dark" ? { backgroundColor: "#1e293b" } : undefined}
-        />
+        {!isMobile && (
+          <Controls
+            position="top-right"
+            showInteractive={false}
+            onFitView={() => doFitView(300)}
+          />
+        )}
+        {!isMobile && (
+          <MiniMap
+            position="bottom-right"
+            nodeColor={(node) => {
+              if (node.id.startsWith("__")) return "transparent";
+              const materia = (node.data as unknown as { materia: Materia }).materia;
+              if (!materia) return "transparent";
+              if (aprobadasArr.includes(materia.nro)) return mode === "dark" ? "#4ade80" : "#16a34a";
+              if (cursandoArr.includes(materia.nro)) return mode === "dark" ? "#facc15" : "#eab308";
+              if (materia.grupo === "obligatoria") return "#3b82f6";
+              if (materia.grupo === "topico") return "#d97706";
+              if (materia.grupo === "tesis") return "#7c3aed";
+              if (materia.grupo === "taller") return "#db2777";
+              return "#94a3b8";
+            }}
+            maskColor={mode === "dark" ? "rgba(15,23,42,0.7)" : "rgba(255,255,255,0.7)"}
+            style={mode === "dark" ? { backgroundColor: "#1e293b" } : undefined}
+          />
+        )}
       </ReactFlow>
-      {hoverInfo && <MateriaHoverInfo materia={hoverInfo.materia} carrera={carrera} top={hoverInfo.top} left={hoverInfo.left} />}
+      {hoverInfo && !isMobile && <MateriaHoverInfo materia={hoverInfo.materia} carrera={carrera} top={hoverInfo.top} left={hoverInfo.left} />}
       {contextMenu && <ContextMenu menu={contextMenu} onClose={() => setContextMenu(null)} />}
     </>
   );
@@ -561,6 +585,7 @@ interface GraphViewProps {
 
 export function GraphView({ carrera }: GraphViewProps) {
   const mode = useThemeStore((s) => s.mode);
+  const isMobile = useIsMobile();
   const aprobadasArr = useProgressStore(selectAprobadasArray);
   const cursandoArr = useProgressStore(selectCursandoArray);
   const [electivasMode, setElectivasMode] = useState<ElectivasMode>("hidden");
@@ -603,7 +628,7 @@ export function GraphView({ carrera }: GraphViewProps) {
   return (
     <div className="w-full h-full relative" style={{ backgroundColor: surface.bg }}>
       <ReactFlowProvider key={carrera.id}>
-        <FlowInner carrera={carrera} electivasMode={electivasMode} />
+        <FlowInner carrera={carrera} electivasMode={electivasMode} isMobile={isMobile} />
       </ReactFlowProvider>
       <Legend />
 
