@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { fetchUsuario, postRegistro, postUsuario } from "@/api/sheetsBackend";
 import type { CarreraMapa } from "@/api/sheetsBackend";
 import { useProgressStore } from "./useProgressStore";
+import { setLastPostedCarrera } from "./syncWatcher";
 
 const STORAGE_KEY = "ucema-map-usuario";
 
@@ -102,6 +103,9 @@ export const useUserStore = create<UserState>((set, get) => ({
         await postUsuario(usuario, carreraId);
       }
 
+      // Sincronizar el cache del syncWatcher para no repostear la misma carrera
+      setLastPostedCarrera(carreraId);
+
       writeStored(usuario);
       set({
         usuario,
@@ -129,8 +133,9 @@ export const useUserStore = create<UserState>((set, get) => ({
       if (!ok) return;
     }
 
-    // 1. Limpiar usuario primero para que el syncWatcher no marque dirty al
-    // limpiar el progress.
+    // 1. Limpiar usuario y cache del syncWatcher primero para que no marque
+    // dirty al limpiar el progress.
+    setLastPostedCarrera(null);
     writeStored(null);
     set({
       usuario: null,

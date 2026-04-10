@@ -69,6 +69,29 @@ export const SURFACE = {
   dark: { bg: "#0f172a", panel: "#1e293b", panelBorder: "#334155", textPrimary: "#e2e8f0", textSecondary: "#94a3b8", dots: "#334155" },
 };
 
+/**
+ * CSS variable references for use in inline styles.
+ * These read from :root / :root[data-theme="dark"] defined in index.css.
+ * Use these instead of `mode === "dark" ? X : Y` for surface colors.
+ */
+export const cssVar = {
+  bg: "var(--surface-bg)",
+  panel: "var(--surface-panel)",
+  panelBorder: "var(--surface-panel-border)",
+  textPrimary: "var(--surface-text-primary)",
+  textSecondary: "var(--surface-text-secondary)",
+  dots: "var(--surface-dots)",
+  panelBlur: "var(--surface-panel-blur)",
+  separator: "var(--surface-separator)",
+  edgeDefault: "var(--edge-default)",
+  edgeDimmed: "var(--edge-dimmed)",
+};
+
+/** Apply data-theme attribute to document root. Call when theme changes. */
+export function applyThemeToDOM(mode: "light" | "dark") {
+  document.documentElement.setAttribute("data-theme", mode);
+}
+
 export const COLUMN_WIDTH = 220;
 export const ROW_HEIGHT = 90;
 export const NODE_WIDTH = 190;

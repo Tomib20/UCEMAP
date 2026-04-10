@@ -13,11 +13,37 @@
   --color-accent-light: #ede9fe;
 }
 
+:root {
+  --surface-bg: #f8fafc;
+  --surface-panel: #ffffff;
+  --surface-panel-border: #e2e8f0;
+  --surface-text-primary: #1a2744;
+  --surface-text-secondary: #64748b;
+  --surface-dots: #e2e8f0;
+  --surface-panel-blur: rgba(255, 255, 255, 0.95);
+  --surface-separator: rgba(0, 0, 0, 0.1);
+  --edge-default: #cbd5e1;
+  --edge-dimmed: #f1f5f9;
+}
+
+:root[data-theme="dark"] {
+  --surface-bg: #0f172a;
+  --surface-panel: #1e293b;
+  --surface-panel-border: #334155;
+  --surface-text-primary: #e2e8f0;
+  --surface-text-secondary: #94a3b8;
+  --surface-dots: #334155;
+  --surface-panel-blur: rgba(30, 41, 59, 0.92);
+  --surface-separator: rgba(255, 255, 255, 0.15);
+  --edge-default: #475569;
+  --edge-dimmed: #1e293b;
+}
+
 body {
   margin: 0;
   font-family: "Manrope", sans-serif;
-  background: #f8fafc;
-  color: var(--color-navy);
+  background: var(--surface-bg);
+  color: var(--surface-text-primary);
 }
 
 .react-flow__attribution {

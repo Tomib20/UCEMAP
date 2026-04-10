@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -15,15 +15,17 @@ import {
   MarkerType,
 } from "@xyflow/react";
 import type { Materia, Carrera } from "@/types/carrera";
-import { buildGraphLayout, type ElectivasMode } from "@/utils/layoutGraph";
+import { buildGraphLayout, type ElectivasMode, type MateriaNodeData } from "@/utils/layoutGraph";
 import { CHAIN_COLORS, EDGE_COLORS, SURFACE, NODE_WIDTH } from "@/config/theme";
 import { buildAdjacencyMaps, getAncestors, getDescendants } from "@/utils/prerequisiteChain";
 import { getMateriaStatus } from "@/utils/materiaStatus";
 import { useProgressStore, selectAprobadasArray, selectCursandoArray } from "@/store/useProgressStore";
+import { useUserStore } from "@/store/useUserStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { MateriaNode } from "./MateriaNode";
 import { Legend } from "./Legend";
 import { ContextMenu, type ContextMenuState } from "./ContextMenu";
+import { toPng } from "html-to-image";
 
 /* ── Decorative node types ── */
 
@@ -40,19 +42,24 @@ function YearLabelNode({ data }: { data: { label: string; total?: number; aproba
   return (
     <div
       className="text-center pointer-events-none"
-      style={{ width: NODE_WIDTH }}
+      style={{ width: NODE_WIDTH + 20 }}
     >
-      <div className="font-bold text-sm" style={{ color: surface.textSecondary }}>
+      <div className="font-bold" style={{ color: surface.textPrimary, fontSize: 15 }}>
         {data.label}
       </div>
       {total > 0 && (
-        <div className="text-[10px] mt-0.5" style={{ color: surface.textSecondary }}>
-          <span style={{ color: done === total ? "#16a34a" : done > 0 ? "#3b82f6" : surface.textSecondary }}>
-            {done}/{total}
+        <div className="flex items-center justify-center gap-2 mt-1" style={{ fontSize: 12 }}>
+          <span className="font-semibold" style={{ color: done === total ? "#16a34a" : done > 0 ? "#3b82f6" : surface.textSecondary }}>
+            {done} aprobada{done !== 1 ? "s" : ""}
           </span>
           {curs > 0 && (
-            <span style={{ color: "#ca8a04" }}> + {curs}c</span>
+            <span className="font-semibold" style={{ color: "#ca8a04" }}>
+              {curs} cursando
+            </span>
           )}
+          <span style={{ color: surface.textSecondary }}>
+            / {total}
+          </span>
         </div>
       )}
     </div>
@@ -326,17 +333,27 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
     const aprobadas = new Set(aprobadasArr);
     const cursando = new Set(cursandoArr);
     const { nodes, edges } = buildGraphLayout(carrera.materias, electivasMode, aprobadas, cursando);
+
+    // Inject year stats directly into year label nodes
+    const nodesWithStats = nodes.map((n) => {
+      if (!n.id.startsWith("__year-")) return n;
+      const anio = Number(n.id.replace("__year-", ""));
+      const stats = yearStats.get(anio);
+      if (!stats) return n;
+      return { ...n, data: { ...n.data, total: stats.total, aprobadas: stats.aprobadas, cursando: stats.cursando } };
+    });
+
     const edgesStyled = edges.map((e) => ({
       ...e,
       style: defaultEdgeStyle(mode),
       markerEnd: defaultMarker(mode),
     }));
     originalPositions.current.clear();
-    for (const n of nodes) {
+    for (const n of nodesWithStats) {
       originalPositions.current.set(n.id, { ...n.position });
     }
-    return { initialNodes: nodes, initialEdges: edgesStyled };
-  }, [carrera.materias, mode, electivasMode, aprobadasArr, cursandoArr]);
+    return { initialNodes: nodesWithStats, initialEdges: edgesStyled };
+  }, [carrera.materias, mode, electivasMode, aprobadasArr, cursandoArr, yearStats]);
 
   const doFitView = useCallback((duration = 0, nodesToFit?: Node[]) => {
     const target = computeViewport(nodesToFit ?? initialNodes);
@@ -348,21 +365,7 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
   const [nodes, setNodes, onNodesChangeBase] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-  const prevKeyRef = useRef(`${electivasMode}-${mode}`);
-  useEffect(() => {
-    const key = `${electivasMode}-${mode}`;
-    if (key !== prevKeyRef.current) {
-      prevKeyRef.current = key;
-      setNodes(initialNodes);
-      setEdges(initialEdges);
-      selectedRef.current = null;
-      setTimeout(() => {
-        doFitView(300, initialNodes);
-      }, 50);
-    }
-  }, [electivasMode, mode, initialNodes, initialEdges, setNodes, setEdges, doFitView]);
-
-  // Update year label nodes with stats
+  // Sync year label stats when aprobadas/cursando change
   useEffect(() => {
     setNodes((cur) =>
       cur.map((n) => {
@@ -374,6 +377,26 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
       })
     );
   }, [yearStats, setNodes]);
+
+  // Re-sync all nodes/edges when layout changes (electivas mode, theme, or login/logout)
+  const prevNodesRef = useRef(initialNodes);
+  const prevEdgesRef = useRef(initialEdges);
+  useEffect(() => {
+    if (prevNodesRef.current === initialNodes && prevEdgesRef.current === initialEdges) return;
+    const layoutChanged =
+      prevNodesRef.current.length !== initialNodes.length ||
+      prevNodesRef.current.some((n, i) => n.id !== initialNodes[i]?.id);
+    prevNodesRef.current = initialNodes;
+    prevEdgesRef.current = initialEdges;
+    setNodes(initialNodes);
+    setEdges(initialEdges);
+    selectedRef.current = null;
+    if (layoutChanged) {
+      setTimeout(() => {
+        doFitView(300, initialNodes);
+      }, 50);
+    }
+  }, [initialNodes, initialEdges, setNodes, setEdges, doFitView]);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -451,7 +474,7 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
     (event, node) => {
       event.preventDefault();
       if (node.id.startsWith("__")) return;
-      const materia = (node.data as unknown as { materia: Materia }).materia;
+      const materia = (node.data as MateriaNodeData).materia;
       if (!materia) return;
       setContextMenu({ materia, x: (event as unknown as MouseEvent).clientX, y: (event as unknown as MouseEvent).clientY });
     },
@@ -477,7 +500,7 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
   const onNodeMouseEnter: NodeMouseHandler = useCallback(
     (event, node) => {
       if (node.id.startsWith("__")) return;
-      const materia = (node.data as unknown as { materia: Materia }).materia;
+      const materia = (node.data as MateriaNodeData).materia;
       if (!materia) return;
       const target = (event.target as HTMLElement).closest(".react-flow__node") as HTMLElement | null;
       if (!target) return;
@@ -535,7 +558,7 @@ function FlowInner({ carrera, electivasMode }: FlowInnerProps) {
           position="bottom-right"
           nodeColor={(node) => {
             if (node.id.startsWith("__")) return "transparent";
-            const materia = (node.data as unknown as { materia: Materia }).materia;
+            const materia = (node.data as MateriaNodeData).materia;
             if (!materia) return "transparent";
             if (aprobadasArr.includes(materia.nro)) return mode === "dark" ? "#4ade80" : "#16a34a";
             if (cursandoArr.includes(materia.nro)) return mode === "dark" ? "#facc15" : "#eab308";
@@ -563,6 +586,7 @@ export function GraphView({ carrera }: GraphViewProps) {
   const mode = useThemeStore((s) => s.mode);
   const aprobadasArr = useProgressStore(selectAprobadasArray);
   const cursandoArr = useProgressStore(selectCursandoArray);
+  const usuario = useUserStore((s) => s.usuario);
   const [electivasMode, setElectivasMode] = useState<ElectivasMode>("hidden");
   const surface = SURFACE[mode];
 
@@ -599,6 +623,35 @@ export function GraphView({ carrera }: GraphViewProps) {
     : "Ocultar electivas";
 
   const isHighlighted = electivasMode !== "hidden";
+  const [exporting, setExporting] = useState(false);
+
+  const handleExportPng = useCallback(async () => {
+    const viewport = document.querySelector(".react-flow__viewport") as HTMLElement | null;
+    if (!viewport) return;
+    setExporting(true);
+    try {
+      const dataUrl = await toPng(viewport, {
+        backgroundColor: surface.bg,
+        pixelRatio: 2,
+        filter: (node) => {
+          // Exclude controls, minimap, attribution
+          if (node.classList?.contains("react-flow__controls")) return false;
+          if (node.classList?.contains("react-flow__minimap")) return false;
+          if (node.classList?.contains("react-flow__attribution")) return false;
+          return true;
+        },
+      });
+      const link = document.createElement("a");
+      const user = useUserStore.getState().usuario ?? "anonimo";
+      link.download = `${carrera.nombre} - ${user}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("Export failed:", err);
+    } finally {
+      setExporting(false);
+    }
+  }, [carrera.id, surface.bg]);
 
   return (
     <div className="w-full h-full relative" style={{ backgroundColor: surface.bg }}>
@@ -607,19 +660,34 @@ export function GraphView({ carrera }: GraphViewProps) {
       </ReactFlowProvider>
       <Legend />
 
-      <button
-        onClick={cycleElectivas}
-        className="absolute top-3 left-3 z-10 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border backdrop-blur-sm"
-        style={{
-          backgroundColor: isHighlighted
-            ? mode === "dark" ? "rgba(217,119,6,0.25)" : "rgba(217,119,6,0.15)"
-            : mode === "dark" ? "rgba(30,41,59,0.9)" : "rgba(255,255,255,0.9)",
-          borderColor: isHighlighted ? "#d97706" : surface.panelBorder,
-          color: isHighlighted ? "#d97706" : surface.textSecondary,
-        }}
-      >
-        {buttonLabel}
-      </button>
+      <div className="absolute top-3 left-3 z-10 flex gap-2">
+        <button
+          onClick={cycleElectivas}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border backdrop-blur-sm"
+          style={{
+            backgroundColor: isHighlighted
+              ? mode === "dark" ? "rgba(217,119,6,0.25)" : "rgba(217,119,6,0.15)"
+              : mode === "dark" ? "rgba(30,41,59,0.9)" : "rgba(255,255,255,0.9)",
+            borderColor: isHighlighted ? "#d97706" : surface.panelBorder,
+            color: isHighlighted ? "#d97706" : surface.textSecondary,
+          }}
+        >
+          {buttonLabel}
+        </button>
+        <button
+          onClick={handleExportPng}
+          disabled={exporting}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border backdrop-blur-sm"
+          style={{
+            backgroundColor: mode === "dark" ? "rgba(30,41,59,0.9)" : "rgba(255,255,255,0.9)",
+            borderColor: surface.panelBorder,
+            color: surface.textSecondary,
+          }}
+          title="Descargar mapa como imagen PNG"
+        >
+          {exporting ? "Exportando..." : "Exportar PNG"}
+        </button>
+      </div>
     </div>
   );
 }

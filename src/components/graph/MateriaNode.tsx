@@ -1,22 +1,17 @@
 import { memo, useMemo } from "react";
-import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
 import type { MateriaNodeData } from "@/utils/layoutGraph";
-import type { Materia } from "@/types/carrera";
 import { GRUPO_COLORS, STATUS_STYLES, CHAIN_COLORS } from "@/config/theme";
 import { getMateriaStatus } from "@/utils/materiaStatus";
 import { useProgressStore, selectAprobadasArray, selectCursandoArray, selectNotasRecord } from "@/store/useProgressStore";
 import { useThemeStore } from "@/store/useThemeStore";
 
-type ChainRole = "selected" | "ancestor" | "descendant" | "none";
+export type MateriaNode = Node<MateriaNodeData, "materia">;
 
-function MateriaNodeComponent({ data }: NodeProps) {
-  const nodeData = data as unknown as MateriaNodeData & {
-    dimmed?: boolean;
-    role?: ChainRole;
-  };
-  const materia: Materia = nodeData.materia;
-  const dimmed = nodeData.dimmed ?? false;
-  const role: ChainRole = nodeData.role ?? "none";
+function MateriaNodeComponent({ data }: NodeProps<MateriaNode>) {
+  const materia = data.materia;
+  const dimmed = data.dimmed ?? false;
+  const role = data.role ?? "none";
 
   const mode = useThemeStore((s) => s.mode);
   const aprobadasArr = useProgressStore(selectAprobadasArray);

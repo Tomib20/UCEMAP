@@ -2,9 +2,10 @@ import type { Node, Edge } from "@xyflow/react";
 import type { Materia } from "@/types/carrera";
 import { NODE_WIDTH, NODE_HEIGHT } from "@/config/theme";
 
-export interface MateriaNodeData {
+export interface MateriaNodeData extends Record<string, unknown> {
   materia: Materia;
-  [key: string]: unknown;
+  dimmed?: boolean;
+  role?: "selected" | "ancestor" | "descendant" | "none";
 }
 
 export const COL_WIDTH = 250;

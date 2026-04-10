@@ -46,12 +46,23 @@ src/
       ProgressBar.tsx    — isla flotante inferior con barra unificada + promedio
   pages/MapPage.tsx      — composicion: GraphView + ProgressBar + MateriaDetail
   App.tsx                — carga JSON de carrera, auto-login, beforeunload warning
+  hooks/
+    useIsMobile.ts       — hook de matchMedia para breakpoint mobile (768px)
+  pages/MapPage.tsx      — composicion: GraphView + ProgressBar + MateriaDetail + SearchPalette
+  App.tsx                — BrowserRouter con rutas /carrera/:carreraId
 data/
   carreras/
-    index.json                     — indice de carreras disponibles
-    ingenieria-informatica.json    — 54 materias con nro, correlativas, grupo
+    index.json                     — indice de 12 carreras activas
+    ingenieria-informatica.json    — 54 materias (plan 2026)
+    abogacia.json, actuario.json, business-administration.json,
+    contador-publico.json, licenciatura-*.json  — 11 carreras mas
+    *-old.json, *-m.json, *-2025.json           — planes legacy (no en index)
   schema.json                      — schema JSON (desactualizado, usar types/carrera.ts)
 docs/planes-de-estudio/            — PDFs oficiales de planes de UCEMA
+scripts/
+  generate_carreras.py             — genera todos los JSONs desde PDFs
+  parse_plan.py                    — parser de tabla PDF con PyMUPDF
+  parse_pdf.py                     — parser alternativo (referencia)
 ```
 
 ## Datos de carreras
@@ -59,8 +70,33 @@ docs/planes-de-estudio/            — PDFs oficiales de planes de UCEMA
 - Cada carrera es un JSON en `data/carreras/` con la estructura definida en `types/carrera.ts`
 - El campo `nro` (number) es el ID unico de cada materia, viene del plan de estudios oficial
 - `correlativas` es un array de `nro` de las materias que hay que tener aprobadas
-- `grupo`: "obligatoria" | "topico" | "tesis" | "requisito"
+- `grupo`: "obligatoria" | "topico" | "taller" | "tesis" | "requisito"
 - Las electivas (topico) se ocultan por defecto, se muestran con el toggle
+- 12 carreras activas en index.json, mas planes legacy/alternativos como referencia
+- Los JSONs se generan con `scripts/generate_carreras.py` a partir de los PDFs en `docs/planes-de-estudio/`
+
+## Routing
+
+- React Router v7 con rutas: `/` redirect, `/carrera/:carreraId`, `*` fallback
+- `AppLayout.tsx` maneja la carga dinamica de carrera y sync bidireccional URL ↔ Zustand store
+- Cambiar carrera en el Header dropdown navega a la nueva URL y recarga el JSON
+- Loop prevention: checks explicitos antes de setState
+
+## Search Palette
+
+- Ctrl+K / Cmd+K abre un command palette para buscar materias
+- Busqueda fuzzy con normalizacion de diacriticos
+- Muestra status (Aprobada/Cursando/Disponible/Bloqueada) con color
+- Enter selecciona y centra el grafo en la materia (via `requestCenterOn`)
+- Navegacion con flechas + Escape para cerrar
+
+## Mobile responsive
+
+- Breakpoint 768px via `useIsMobile()` hook con matchMedia
+- Header: hamburger menu, elementos condensados
+- MateriaDetail: bottom sheet en vez de sidebar derecha, swipe-to-close
+- ProgressBar: layout compacto horizontal
+- Legend: colapsable con toggle
 
 ## Patrones importantes
 

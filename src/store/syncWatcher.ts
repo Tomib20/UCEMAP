@@ -41,15 +41,28 @@ function notasEqual(a: Record<string, Nota>, b: Record<string, Nota>): boolean {
 
 let initialized = false;
 
+/**
+ * Ultima carrera posteada al sheet "usuarios" para este usuario.
+ * Evita postear filas duplicadas si la carrera no cambio realmente.
+ */
+let lastPostedCarrera: string | null = null;
+
+/** Llamar despues de login/logout para sincronizar el cache. */
+export function setLastPostedCarrera(carreraId: string | null) {
+  lastPostedCarrera = carreraId;
+}
+
 export function initSyncWatcher() {
   if (initialized) return;
   initialized = true;
 
   useProgressStore.subscribe((state, prev) => {
-    // 1. Cambio de carrera seleccionada → postear a USER_FORM (sin debounce).
+    // 1. Cambio de carrera seleccionada → postear a USER_FORM solo si es diferente
+    //    a lo que ya esta en la nube (evita filas duplicadas).
     if (state.carreraId !== prev.carreraId) {
       const usuario = useUserStore.getState().usuario;
-      if (usuario) {
+      if (usuario && state.carreraId !== lastPostedCarrera) {
+        lastPostedCarrera = state.carreraId;
         postUsuario(usuario, state.carreraId).catch(() => undefined);
       }
     }
