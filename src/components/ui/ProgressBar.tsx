@@ -3,6 +3,7 @@ import type { Carrera } from "@/types/carrera";
 import { useProgressStore, selectAprobadasArray, selectNotasRecord, type Nota } from "@/store/useProgressStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { SURFACE } from "@/config/theme";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface ProgressBarProps {
   carrera: Carrera;
@@ -27,10 +28,6 @@ interface Section {
   color: string;
 }
 
-/**
- * Computes display widths so small sections get a minimum visible size.
- * Assigns a minimum of 8% to each section, then distributes the rest proportionally.
- */
 function computeWidths(sections: Section[]): number[] {
   const MIN_PCT = 12;
   const reserved = sections.length * MIN_PCT;
@@ -47,6 +44,7 @@ export function ProgressBar({ carrera }: ProgressBarProps) {
   const aprobadasArr = useProgressStore(selectAprobadasArray);
   const notasRecord = useProgressStore(selectNotasRecord);
   const mode = useThemeStore((s) => s.mode);
+  const isMobile = useIsMobile();
   const aprobadas = useMemo(() => new Set(aprobadasArr), [aprobadasArr]);
   const surface = SURFACE[mode];
 
@@ -77,9 +75,76 @@ export function ProgressBar({ carrera }: ProgressBarProps) {
   const promedio = computePromedio(notasRecord, aprobadasArr);
 
   const trackBg = mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
-  const separatorColor = mode === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)";
   const barSep = mode === "dark" ? "#0f172a" : "#fff";
+  const separatorColor = mode === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)";
 
+  /* ── Mobile: compact progress bar ── */
+  if (isMobile) {
+    return (
+      <div
+        className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 backdrop-blur-sm rounded-xl shadow-lg px-3 py-2 flex items-center gap-3"
+        style={{
+          backgroundColor: mode === "dark" ? "rgba(30,41,59,0.92)" : "rgba(255,255,255,0.95)",
+          border: `1px solid ${surface.panelBorder}`,
+          width: "min(95%, 900px)",
+        }}
+      >
+        {/* Bar only (no labels) */}
+        <div className="flex-1 min-w-0">
+          <div className="flex h-3.5 rounded-full overflow-hidden" style={{ backgroundColor: trackBg }}>
+            {sections.map((sec, i) => {
+              const fillPct = sec.total > 0 ? (sec.done / sec.total) * 100 : 0;
+              return (
+                <div
+                  key={sec.label}
+                  className="relative h-full"
+                  style={{
+                    width: `${widths[i]}%`,
+                    borderRight: i < sections.length - 1 ? `2px solid ${barSep}` : undefined,
+                  }}
+                >
+                  <div
+                    className="h-full transition-all duration-300"
+                    style={{ width: `${fillPct}%`, backgroundColor: sec.color }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Compact stats */}
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="text-center">
+            <div className="text-base font-bold leading-tight" style={{ color: surface.textPrimary }}>
+              {grandPct}%
+            </div>
+            <div className="text-[9px]" style={{ color: surface.textSecondary }}>
+              {grandDone}/{grandTotal}
+            </div>
+          </div>
+          {promedio !== null && (
+            <>
+              <div className="h-6 w-px" style={{ backgroundColor: separatorColor }} />
+              <div className="text-center">
+                <div
+                  className="text-base font-bold leading-tight"
+                  style={{ color: "#4ade80" }}
+                >
+                  {promedio.toFixed(1)}
+                </div>
+                <div className="text-[9px]" style={{ color: surface.textSecondary }}>
+                  Prom.
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Desktop: full progress bar ── */
   return (
     <div
       className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 backdrop-blur-sm rounded-2xl shadow-lg px-6 py-4 flex items-center gap-6"

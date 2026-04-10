@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { BRANDING } from "@/config/theme";
 import type { Carrera } from "@/types/carrera";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useUserStore } from "@/store/useUserStore";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface CarreraEntry {
   id: string;
@@ -12,10 +14,12 @@ interface CarreraEntry {
 interface HeaderProps {
   carrera: Carrera;
   carreras: CarreraEntry[];
-  onCarreraChange: (id: string) => void;
+  onSearchOpen?: () => void;
 }
 
-export function Header({ carrera, carreras, onCarreraChange }: HeaderProps) {
+export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const mode = useThemeStore((s) => s.mode);
   const toggle = useThemeStore((s) => s.toggle);
 
@@ -28,16 +32,197 @@ export function Header({ carrera, carreras, onCarreraChange }: HeaderProps) {
   const saveToCloud = useUserStore((s) => s.saveToCloud);
 
   const [input, setInput] = useState("");
-  const [open, setOpen] = useState(false);
+  const [loginOpen, setLoginOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogin = async () => {
     const ok = await login(input);
     if (ok) {
       setInput("");
-      setOpen(false);
+      setLoginOpen(false);
     }
   };
 
+  /* ── Shared UI pieces ── */
+
+  const searchButton = onSearchOpen && (
+    <button
+      onClick={onSearchOpen}
+      className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-xs text-slate-300"
+      title="Buscar materia"
+    >
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      {!isMobile && (
+        <span className="opacity-70 text-[10px]">
+          {typeof navigator !== "undefined" && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent) ? "⌘K" : "Ctrl+K"}
+        </span>
+      )}
+    </button>
+  );
+
+  const themeButton = (
+    <button
+      onClick={toggle}
+      className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm"
+      title={mode === "light" ? "Cambiar a modo oscuro" : "Cambiar a modo claro"}
+    >
+      {mode === "light" ? "\u263E" : "\u2600"}
+    </button>
+  );
+
+  const userControls = (
+    <>
+      {usuario ? (
+        <div className={`flex ${isMobile ? "flex-col" : "flex-row"} items-${isMobile ? "stretch" : "center"} gap-2`}>
+          <span className="text-sm font-semibold">{usuario}</span>
+          <button
+            onClick={saveToCloud}
+            disabled={!isDirty || status === "syncing"}
+            className={`text-xs px-2 py-1 rounded-lg transition-colors ${
+              isDirty
+                ? "bg-emerald-500/80 hover:bg-emerald-500 text-white"
+                : "bg-white/10 text-slate-400"
+            } disabled:cursor-default`}
+            title={
+              status === "syncing"
+                ? "Guardando..."
+                : isDirty
+                  ? "Guardar cambios en la nube"
+                  : "Sin cambios pendientes"
+            }
+          >
+            {status === "syncing"
+              ? "Guardando..."
+              : isDirty
+                ? "Guardar"
+                : "Guardado"}
+          </button>
+          <button
+            onClick={() => { logout(); setMenuOpen(false); }}
+            className="text-xs px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+            title="Cerrar sesion"
+          >
+            Salir
+          </button>
+        </div>
+      ) : loginOpen ? (
+        <div className={`flex ${isMobile ? "flex-col" : "flex-row"} items-${isMobile ? "stretch" : "center"} gap-1`}>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleLogin();
+              if (e.key === "Escape") {
+                setLoginOpen(false);
+                setInput("");
+              }
+            }}
+            placeholder="usuario UCEMA"
+            autoFocus
+            className="bg-white/10 text-white placeholder-slate-400 text-sm rounded-lg px-2 py-1 border border-white/20 outline-none focus:bg-white/20 w-full"
+          />
+          <div className="flex gap-1">
+            <button
+              onClick={handleLogin}
+              disabled={status === "loading" || !input.trim()}
+              className="text-xs px-2 py-1 rounded-lg bg-white/20 hover:bg-white/30 transition-colors disabled:opacity-50 flex-1"
+            >
+              {status === "loading" ? "..." : "Entrar"}
+            </button>
+            <button
+              onClick={() => { setLoginOpen(false); setInput(""); }}
+              className="text-xs px-2 py-1 rounded-lg hover:bg-white/10 transition-colors"
+              title="Cancelar"
+            >
+              {"\u00D7"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          onClick={() => setLoginOpen(true)}
+          className="text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+          title="Iniciar sesion para sincronizar entre dispositivos"
+        >
+          Iniciar sesion
+        </button>
+      )}
+      {errorMsg && status === "error" && (
+        <span className="text-xs text-red-300" title={errorMsg}>
+          Error
+        </span>
+      )}
+    </>
+  );
+
+  /* ── Mobile header ── */
+  if (isMobile) {
+    return (
+      <>
+        <header className="bg-navy text-white px-3 py-2 flex items-center justify-between shadow-md relative z-30">
+          {/* Left: compact branding + carrera */}
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <h1 className="text-sm font-bold tracking-tight shrink-0">
+              {BRANDING.name}
+            </h1>
+            <div className="h-5 w-px bg-white/20 shrink-0" />
+            {carreras.length > 1 ? (
+              <select
+                value={carrera.id}
+                onChange={(e) => navigate(`/carrera/${e.target.value}`)}
+                className="bg-white/10 text-white text-xs font-semibold rounded-lg px-1.5 py-1 border border-white/20 cursor-pointer outline-none min-w-0 truncate"
+              >
+                {carreras.map((c) => (
+                  <option key={c.id} value={c.id} className="bg-navy text-white">
+                    {c.nombre}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="text-xs font-semibold truncate">{carrera.nombre}</span>
+            )}
+          </div>
+
+          {/* Right: search + hamburger */}
+          <div className="flex items-center gap-1 shrink-0">
+            {searchButton}
+            <button
+              onClick={() => setMenuOpen((p) => !p)}
+              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm"
+              title="Menu"
+            >
+              {menuOpen ? "\u2715" : "\u2630"}
+            </button>
+          </div>
+        </header>
+
+        {/* Mobile dropdown menu */}
+        {menuOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-20"
+              onClick={() => setMenuOpen(false)}
+            />
+            <div className="absolute top-[44px] left-0 right-0 z-30 bg-navy border-t border-white/10 px-4 py-3 shadow-lg flex flex-col gap-3">
+              {userControls}
+              <div className="flex items-center gap-2 pt-1 border-t border-white/10">
+                {themeButton}
+                <span className="text-xs text-slate-400">
+                  {mode === "light" ? "Modo oscuro" : "Modo claro"}
+                </span>
+              </div>
+            </div>
+          </>
+        )}
+      </>
+    );
+  }
+
+  /* ── Desktop header ── */
   return (
     <header className="bg-navy text-white px-6 py-2.5 flex items-center justify-between shadow-md">
       <div className="flex items-center gap-4">
@@ -52,7 +237,7 @@ export function Header({ carrera, carreras, onCarreraChange }: HeaderProps) {
           {carreras.length > 1 ? (
             <select
               value={carrera.id}
-              onChange={(e) => onCarreraChange(e.target.value)}
+              onChange={(e) => navigate(`/carrera/${e.target.value}`)}
               className="bg-white/10 text-white text-sm font-semibold rounded-lg px-2 py-1 border border-white/20 cursor-pointer hover:bg-white/20 transition-colors outline-none"
             >
               {carreras.map((c) => (
@@ -71,97 +256,9 @@ export function Header({ carrera, carreras, onCarreraChange }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        {usuario ? (
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold">{usuario}</span>
-            <button
-              onClick={saveToCloud}
-              disabled={!isDirty || status === "syncing"}
-              className={`text-xs px-2 py-1 rounded-lg transition-colors ${
-                isDirty
-                  ? "bg-emerald-500/80 hover:bg-emerald-500 text-white"
-                  : "bg-white/10 text-slate-400"
-              } disabled:cursor-default`}
-              title={
-                status === "syncing"
-                  ? "Guardando..."
-                  : isDirty
-                    ? "Guardar cambios en la nube"
-                    : "Sin cambios pendientes"
-              }
-            >
-              {status === "syncing"
-                ? "Guardando..."
-                : isDirty
-                  ? "Guardar"
-                  : "Guardado"}
-            </button>
-            <button
-              onClick={logout}
-              className="text-xs px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-              title="Cerrar sesion"
-            >
-              Salir
-            </button>
-          </div>
-        ) : open ? (
-          <div className="flex items-center gap-1">
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleLogin();
-                if (e.key === "Escape") {
-                  setOpen(false);
-                  setInput("");
-                }
-              }}
-              placeholder="usuario UCEMA"
-              autoFocus
-              className="bg-white/10 text-white placeholder-slate-400 text-sm rounded-lg px-2 py-1 border border-white/20 outline-none focus:bg-white/20 w-36"
-            />
-            <button
-              onClick={handleLogin}
-              disabled={status === "loading" || !input.trim()}
-              className="text-xs px-2 py-1 rounded-lg bg-white/20 hover:bg-white/30 transition-colors disabled:opacity-50"
-            >
-              {status === "loading" ? "..." : "Entrar"}
-            </button>
-            <button
-              onClick={() => {
-                setOpen(false);
-                setInput("");
-              }}
-              className="text-xs px-2 py-1 rounded-lg hover:bg-white/10 transition-colors"
-              title="Cancelar"
-            >
-              {"\u00D7"}
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setOpen(true)}
-            className="text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-            title="Iniciar sesion para sincronizar entre dispositivos"
-          >
-            Iniciar sesion
-          </button>
-        )}
-
-        {errorMsg && status === "error" && (
-          <span className="text-xs text-red-300" title={errorMsg}>
-            Error
-          </span>
-        )}
-
-        <button
-          onClick={toggle}
-          className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-sm"
-          title={mode === "light" ? "Cambiar a modo oscuro" : "Cambiar a modo claro"}
-        >
-          {mode === "light" ? "\u263E" : "\u2600"}
-        </button>
+        {userControls}
+        {searchButton}
+        {themeButton}
       </div>
     </header>
   );
