@@ -16,7 +16,7 @@ import {
 } from "@xyflow/react";
 import type { Materia, Carrera } from "@/types/carrera";
 import { buildGraphLayout, type ElectivasMode, type MateriaNodeData } from "@/utils/layoutGraph";
-import { CHAIN_COLORS, EDGE_COLORS, SURFACE, NODE_WIDTH, NODE_HEIGHT } from "@/config/theme";
+import { CHAIN_COLORS, EDGE_COLORS, SURFACE, NODE_WIDTH, NODE_HEIGHT, NODE_WIDTH_MOBILE } from "@/config/theme";
 import { buildAdjacencyMaps, getAncestors, getDescendants } from "@/utils/prerequisiteChain";
 import { getMateriaStatus } from "@/utils/materiaStatus";
 import { useProgressStore, selectAprobadasArray, selectCursandoArray } from "@/store/useProgressStore";
@@ -36,19 +36,21 @@ function SpacerNode() {
 
 function YearLabelNode({ data }: { data: { label: string; total?: number; aprobadas?: number; cursando?: number } }) {
   const mode = useThemeStore((s) => s.mode);
+  const isMobile = useIsMobile();
   const surface = SURFACE[mode];
   const total = data.total ?? 0;
   const done = data.aprobadas ?? 0;
   const curs = data.cursando ?? 0;
+  const w = isMobile ? NODE_WIDTH_MOBILE + 10 : NODE_WIDTH + 20;
   return (
     <div
       className="text-center pointer-events-none"
-      style={{ width: NODE_WIDTH + 20 }}
+      style={{ width: w }}
     >
-      <div className="font-bold" style={{ color: surface.textPrimary, fontSize: 15 }}>
+      <div className="font-bold" style={{ color: surface.textPrimary, fontSize: isMobile ? 10 : 15 }}>
         {data.label}
       </div>
-      {total > 0 && (
+      {!isMobile && total > 0 && (
         <div className="flex items-center justify-center gap-2 mt-1" style={{ fontSize: 12 }}>
           <span className="font-semibold" style={{ color: done === total ? "#16a34a" : done > 0 ? "#3b82f6" : surface.textSecondary }}>
             {done} aprobada{done !== 1 ? "s" : ""}
@@ -69,6 +71,8 @@ function YearLabelNode({ data }: { data: { label: string; total?: number; aproba
 
 function CuatriSeparatorNode() {
   const mode = useThemeStore((s) => s.mode);
+  const isMobile = useIsMobile();
+  if (isMobile) return null;
   return (
     <div
       className="pointer-events-none flex items-center gap-2"
@@ -303,14 +307,14 @@ function FlowInner({ carrera, electivasMode, isMobile }: FlowInnerProps) {
     // Available viewport area (accounting for fixed UI overlays)
     const SIDEBAR = 0;
     const HEADER = isMobile ? 44 : 60;
-    const BOTTOM_BAR = isMobile ? 50 : 100;
-    const PADDING = isMobile ? 20 : 60;
+    const BOTTOM_BAR = isMobile ? 44 : 100;
+    const PADDING = isMobile ? 8 : 60;
     const availW = window.innerWidth - SIDEBAR - PADDING * 2;
     const availH = window.innerHeight - HEADER - BOTTOM_BAR - PADDING * 2;
 
     const zoomX = availW / contentW;
     const zoomY = availH / contentH;
-    const breathingRoom = isMobile ? 0.75 : 0.85;
+    const breathingRoom = isMobile ? 0.92 : 0.85;
     let zoom = Math.min(zoomX, zoomY) * breathingRoom;
     zoom = Math.max(0.2, Math.min(1.2, zoom));
 
@@ -334,7 +338,7 @@ function FlowInner({ carrera, electivasMode, isMobile }: FlowInnerProps) {
   const { initialNodes, initialEdges } = useMemo(() => {
     const aprobadas = new Set(aprobadasArr);
     const cursando = new Set(cursandoArr);
-    const { nodes, edges } = buildGraphLayout(carrera.materias, electivasMode, aprobadas, cursando);
+    const { nodes, edges } = buildGraphLayout(carrera.materias, electivasMode, aprobadas, cursando, isMobile);
 
     // Inject year stats directly into year label nodes
     const nodesWithStats = nodes.map((n) => {
@@ -355,7 +359,7 @@ function FlowInner({ carrera, electivasMode, isMobile }: FlowInnerProps) {
       originalPositions.current.set(n.id, { ...n.position });
     }
     return { initialNodes: nodesWithStats, initialEdges: edgesStyled };
-  }, [carrera.materias, mode, electivasMode, aprobadasArr, cursandoArr, yearStats]);
+  }, [carrera.materias, mode, electivasMode, aprobadasArr, cursandoArr, yearStats, isMobile]);
 
   const doFitView = useCallback((duration = 0, nodesToFit?: Node[]) => {
     const target = computeViewport(nodesToFit ?? initialNodes);
@@ -642,10 +646,9 @@ export function GraphView({ carrera }: GraphViewProps) {
     });
   };
 
-  const buttonLabel =
-    electivasMode === "hidden" ? "Mostrar electivas"
-    : electivasMode === "active" ? "Ver todas las electivas"
-    : "Ocultar electivas";
+  const buttonLabel = isMobile
+    ? (electivasMode === "hidden" ? "Electivas" : electivasMode === "active" ? "Todas" : "Ocultar")
+    : (electivasMode === "hidden" ? "Mostrar electivas" : electivasMode === "active" ? "Ver todas las electivas" : "Ocultar electivas");
 
   const isHighlighted = electivasMode !== "hidden";
   const [exporting, setExporting] = useState(false);
@@ -685,7 +688,7 @@ export function GraphView({ carrera }: GraphViewProps) {
       </ReactFlowProvider>
       <Legend />
 
-      <div className="absolute top-3 left-3 z-10 flex gap-2">
+      <div className={`absolute z-10 flex gap-2 ${isMobile ? "bottom-14 right-2" : "top-3 left-3"}`}>
         <button
           onClick={cycleElectivas}
           className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border backdrop-blur-sm"
@@ -699,19 +702,21 @@ export function GraphView({ carrera }: GraphViewProps) {
         >
           {buttonLabel}
         </button>
-        <button
-          onClick={handleExportPng}
-          disabled={exporting}
-          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border backdrop-blur-sm"
-          style={{
-            backgroundColor: mode === "dark" ? "rgba(30,41,59,0.9)" : "rgba(255,255,255,0.9)",
-            borderColor: surface.panelBorder,
-            color: surface.textSecondary,
-          }}
-          title="Descargar mapa como imagen PNG"
-        >
-          {exporting ? "Exportando..." : "Exportar PNG"}
-        </button>
+        {!isMobile && (
+          <button
+            onClick={handleExportPng}
+            disabled={exporting}
+            className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border backdrop-blur-sm"
+            style={{
+              backgroundColor: mode === "dark" ? "rgba(30,41,59,0.9)" : "rgba(255,255,255,0.9)",
+              borderColor: surface.panelBorder,
+              color: surface.textSecondary,
+            }}
+            title="Descargar mapa como imagen PNG"
+          >
+            {exporting ? "Exportando..." : "Exportar PNG"}
+          </button>
+        )}
       </div>
     </div>
   );

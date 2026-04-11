@@ -1,6 +1,6 @@
 import type { Node, Edge } from "@xyflow/react";
 import type { Materia } from "@/types/carrera";
-import { NODE_WIDTH, NODE_HEIGHT } from "@/config/theme";
+import { NODE_WIDTH, NODE_HEIGHT, NODE_WIDTH_MOBILE, NODE_HEIGHT_MOBILE } from "@/config/theme";
 
 export interface MateriaNodeData extends Record<string, unknown> {
   materia: Materia;
@@ -13,6 +13,11 @@ export const ROW_HEIGHT = 92;
 export const CUATRI_GAP = 36;
 const TOP_OFFSET = 0;
 const LABEL_HEIGHT = 36;
+
+const COL_WIDTH_M = 165;
+const ROW_HEIGHT_M = 62;
+const CUATRI_GAP_M = 18;
+const LABEL_HEIGHT_M = 24;
 
 export type ElectivasMode = "hidden" | "active" | "all";
 
@@ -29,11 +34,19 @@ export function buildGraphLayout(
   materias: Materia[],
   electivasMode: ElectivasMode = "hidden",
   aprobadas: Set<number> = new Set(),
-  cursando: Set<number> = new Set()
+  cursando: Set<number> = new Set(),
+  isMobile = false
 ): {
   nodes: Node[];
   edges: Edge[];
 } {
+  const colW = isMobile ? COL_WIDTH_M : COL_WIDTH;
+  const rowH = isMobile ? ROW_HEIGHT_M : ROW_HEIGHT;
+  const gap = isMobile ? CUATRI_GAP_M : CUATRI_GAP;
+  const labelH = isMobile ? LABEL_HEIGHT_M : LABEL_HEIGHT;
+  const nodeW = isMobile ? NODE_WIDTH_MOBILE : NODE_WIDTH;
+  const nodeH = isMobile ? NODE_HEIGHT_MOBILE : NODE_HEIGHT;
+
   const obligatorias = materias.filter((m) => m.grupo === "obligatoria");
   const allTopicos = materias.filter((m) => m.grupo === "topico");
   const tesis = materias.filter((m) => m.grupo === "tesis");
@@ -62,13 +75,13 @@ export function buildGraphLayout(
 
   for (const [anio, { c1, c2 }] of byYear) {
     const colIndex = anio - 1;
-    const x = colIndex * COL_WIDTH + 40;
+    const x = colIndex * colW + 40;
 
     // Year label node
     nodes.push({
       id: `__year-${anio}`,
       type: "yearLabel",
-      position: { x, y: -LABEL_HEIGHT - 10 },
+      position: { x, y: -labelH - 10 },
       data: { label: `${anio}\u00B0 A\u00F1o` },
       selectable: false,
       draggable: false,
@@ -79,16 +92,16 @@ export function buildGraphLayout(
       nodes.push({
         id: String(c1[i].nro),
         type: "materia",
-        position: { x, y: i * ROW_HEIGHT + TOP_OFFSET },
+        position: { x, y: i * rowH + TOP_OFFSET },
         data: { materia: c1[i] } as MateriaNodeData,
-        width: NODE_WIDTH,
-        height: NODE_HEIGHT,
+        width: nodeW,
+        height: nodeH,
       });
     }
 
     // Cuatrimestre separator node
     if (c1.length > 0 && c2.length > 0) {
-      const sepY = c1.length * ROW_HEIGHT + TOP_OFFSET + (CUATRI_GAP - 2) / 2;
+      const sepY = c1.length * rowH + TOP_OFFSET + (gap - 2) / 2;
       nodes.push({
         id: `__sep-${anio}`,
         type: "cuatriSeparator",
@@ -100,15 +113,15 @@ export function buildGraphLayout(
       });
     }
 
-    const c2StartY = c1.length * ROW_HEIGHT + CUATRI_GAP + TOP_OFFSET;
+    const c2StartY = c1.length * rowH + gap + TOP_OFFSET;
     for (let i = 0; i < c2.length; i++) {
       nodes.push({
         id: String(c2[i].nro),
         type: "materia",
-        position: { x, y: c2StartY + i * ROW_HEIGHT },
+        position: { x, y: c2StartY + i * rowH },
         data: { materia: c2[i] } as MateriaNodeData,
-        width: NODE_WIDTH,
-        height: NODE_HEIGHT,
+        width: nodeW,
+        height: nodeH,
       });
     }
   }
@@ -126,8 +139,8 @@ export function buildGraphLayout(
 
   // Extra column: tesis + requisito at top, electivas/talleres below
   const maxAnio = Math.max(...[...byYear.keys()], 1);
-  const extraX = maxAnio * COL_WIDTH + 80;
-  const EXTRA_COL2_X = extraX + COL_WIDTH;
+  const extraX = maxAnio * colW + (isMobile ? 40 : 80);
+  const EXTRA_COL2_X = extraX + colW;
   let extraY = TOP_OFFSET;
 
   // Tesis & requisitos side by side at top
@@ -135,29 +148,26 @@ export function buildGraphLayout(
     nodes.push({
       id: String(tesis[i].nro),
       type: "materia",
-      position: { x: extraX, y: extraY + i * ROW_HEIGHT },
+      position: { x: extraX, y: extraY + i * rowH },
       data: { materia: tesis[i] } as MateriaNodeData,
-      width: NODE_WIDTH,
-      height: NODE_HEIGHT,
+      width: nodeW,
+      height: nodeH,
     });
   }
   for (let i = 0; i < requisitos.length; i++) {
     nodes.push({
       id: String(requisitos[i].nro),
       type: "materia",
-      position: { x: EXTRA_COL2_X, y: extraY + i * ROW_HEIGHT },
+      position: { x: EXTRA_COL2_X, y: extraY + i * rowH },
       data: { materia: requisitos[i] } as MateriaNodeData,
-      width: NODE_WIDTH,
-      height: NODE_HEIGHT,
+      width: nodeW,
+      height: nodeH,
     });
   }
 
-  // Electivas + talleres below tesis/requisito.
-  // Wrap into multiple columns: each column is at most maxYearRows tall, but
-  // when items don't fill that height, distribute them evenly across columns.
   if (showElectivas) {
     const tesisHeight = Math.max(tesis.length, requisitos.length);
-    const electivasStartY = extraY + tesisHeight * ROW_HEIGHT + (tesisHeight > 0 ? CUATRI_GAP : 0);
+    const electivasStartY = extraY + tesisHeight * rowH + (tesisHeight > 0 ? gap : 0);
 
     const layoutBlock = (
       items: Materia[],
@@ -165,7 +175,7 @@ export function buildGraphLayout(
     ): { cols: number } => {
       if (items.length === 0) return { cols: 0 };
       const cols = Math.max(1, Math.ceil(items.length / maxYearRows));
-      const rowsPerCol = Math.ceil(items.length / cols); // balanced
+      const rowsPerCol = Math.ceil(items.length / cols);
       for (let i = 0; i < items.length; i++) {
         const col = Math.floor(i / rowsPerCol);
         const row = i % rowsPerCol;
@@ -173,19 +183,19 @@ export function buildGraphLayout(
           id: String(items[i].nro),
           type: "materia",
           position: {
-            x: startX + col * COL_WIDTH,
-            y: electivasStartY + row * ROW_HEIGHT,
+            x: startX + col * colW,
+            y: electivasStartY + row * rowH,
           },
           data: { materia: items[i] } as MateriaNodeData,
-          width: NODE_WIDTH,
-          height: NODE_HEIGHT,
+          width: nodeW,
+          height: nodeH,
         });
       }
       return { cols };
     };
 
     const { cols: topicCols } = layoutBlock(topicos, extraX);
-    const tallerStartX = extraX + topicCols * COL_WIDTH + (topicCols > 0 ? 30 : 0);
+    const tallerStartX = extraX + topicCols * colW + (topicCols > 0 ? 30 : 0);
     layoutBlock(talleres, tallerStartX);
   }
 

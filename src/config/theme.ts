@@ -96,3 +96,6 @@ export const COLUMN_WIDTH = 220;
 export const ROW_HEIGHT = 90;
 export const NODE_WIDTH = 190;
 export const NODE_HEIGHT = 60;
+
+export const NODE_WIDTH_MOBILE = 140;
+export const NODE_HEIGHT_MOBILE = 44;

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useRef, useCallback } from "react";
 import type { Carrera, Materia } from "@/types/carrera";
 import { GRUPO_COLORS, SURFACE } from "@/config/theme";
 import { getMateriaStatus } from "@/utils/materiaStatus";
@@ -56,6 +56,15 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
   const canCursar = status === "disponible" || status === "cursando";
   const canAprobar = status === "disponible" || status === "cursando" || status === "aprobada";
 
+  // Check if blocked only because correlativas are cursando (not missing entirely)
+  const missingCorrelativas = materia.correlativas.filter((nro) => !aprobadas.has(nro));
+  const allMissingAreCursando = status === "bloqueada"
+    && missingCorrelativas.length > 0
+    && missingCorrelativas.every((nro) => cursando.has(nro));
+  const missingCursandoNames = allMissingAreCursando
+    ? missingCorrelativas.map((nro) => carrera.materias.find((m) => m.nro === nro)?.nombre).filter(Boolean) as string[]
+    : [];
+
   const hasAprobadaDependent = status === "aprobada" && desbloquea.some(
     (m) => aprobadas.has(m.nro) || cursando.has(m.nro)
   );
@@ -65,6 +74,16 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
 
   const handleCursando = () => {
     toggleCursando(materia.nro);
+  };
+
+  const handleCursandoConPermiso = () => {
+    const nombres = missingCursandoNames.join(", ");
+    const ok = window.confirm(
+      `${materia.nombre} depende de ${nombres} que todavia estas cursando.\n\n¿Tenes permiso de la universidad para cursarlas en simultaneo?`
+    );
+    if (ok) {
+      toggleCursando(materia.nro);
+    }
   };
 
   const handleAprobada = () => {
@@ -106,13 +125,13 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
       {/* Action buttons */}
       <div className="flex flex-col gap-2 mb-4">
         <button
-          onClick={handleCursando}
+          onClick={allMissingAreCursando ? handleCursandoConPermiso : handleCursando}
           className={`w-full py-2 px-3 rounded-lg text-sm font-semibold transition-colors border ${
             status === "cursando"
               ? mode === "dark"
                 ? "bg-yellow-900/40 text-yellow-400 border-yellow-700 hover:bg-yellow-900/60"
                 : "bg-yellow-100 text-yellow-700 border-yellow-400 hover:bg-yellow-200"
-              : canCursar
+              : canCursar || allMissingAreCursando
                 ? mode === "dark"
                   ? "bg-yellow-900/20 text-yellow-500 border-yellow-800 hover:bg-yellow-900/40"
                   : "bg-yellow-50 text-yellow-600 border-yellow-300 hover:bg-yellow-100"
@@ -120,13 +139,15 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
                   ? "bg-slate-800 text-slate-500 border-slate-600 cursor-not-allowed"
                   : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
           }`}
-          disabled={!canCursar}
+          disabled={!canCursar && !allMissingAreCursando}
         >
           {status === "cursando"
             ? "\u25CF Cursando \u2014 click para desmarcar"
-            : canCursar
-              ? "Marcar como cursando"
-              : "No disponible"}
+            : allMissingAreCursando
+              ? "Cursar en simultaneo (con permiso)"
+              : canCursar
+                ? "Marcar como cursando"
+                : "No disponible"}
         </button>
 
         <button
@@ -278,43 +299,9 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
     </div>
   );
 
-  /* ── Mobile: bottom sheet ── */
+  /* ── Mobile: bottom sheet with swipe-to-dismiss ── */
   if (isMobile) {
-    return (
-      <>
-        {/* Backdrop */}
-        <div
-          className="fixed inset-0 z-20"
-          style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
-          onClick={() => selectMateria(null)}
-        />
-        {/* Sheet */}
-        <div
-          className="fixed bottom-0 left-0 right-0 z-30 rounded-t-2xl shadow-2xl overflow-y-auto"
-          style={{
-            maxHeight: "70vh",
-            backgroundColor: surface.panel,
-            borderTop: `1px solid ${surface.panelBorder}`,
-            animation: "slideUp 0.2s ease-out",
-          }}
-        >
-          {/* Drag handle */}
-          <div className="flex justify-center pt-2 pb-1">
-            <div
-              className="w-10 h-1 rounded-full"
-              style={{ backgroundColor: surface.textSecondary, opacity: 0.4 }}
-            />
-          </div>
-          {content}
-        </div>
-        <style>{`
-          @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
-          }
-        `}</style>
-      </>
-    );
+    return <MobileSheet surface={surface} onClose={() => selectMateria(null)}>{content}</MobileSheet>;
   }
 
   /* ── Desktop: right sidebar ── */
@@ -328,5 +315,89 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
     >
       {content}
     </div>
+  );
+}
+
+/* ── Mobile bottom sheet with swipe-to-dismiss ── */
+
+interface MobileSheetProps {
+  surface: { panel: string; panelBorder: string; textSecondary: string };
+  onClose: () => void;
+  children: React.ReactNode;
+}
+
+function MobileSheet({ surface, onClose, children }: MobileSheetProps) {
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const touchStartY = useRef(0);
+  const [dragY, setDragY] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [entered, setEntered] = useState(false);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // Only allow swipe dismiss when scrolled to top
+    if (sheetRef.current && sheetRef.current.scrollTop > 0) return;
+    touchStartY.current = e.touches[0].clientY;
+    setIsDragging(true);
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDragging) return;
+    const delta = e.touches[0].clientY - touchStartY.current;
+    if (delta > 0) {
+      setDragY(delta);
+    }
+  }, [isDragging]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    if (dragY > 100) {
+      onClose();
+    } else {
+      setDragY(0);
+    }
+  }, [isDragging, dragY, onClose]);
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-20"
+        style={{
+          backgroundColor: `rgba(0,0,0,${Math.max(0.02, 0.15 - dragY / 600)})`,
+          backdropFilter: "blur(2px)",
+        }}
+        onClick={onClose}
+      />
+      <div
+        ref={sheetRef}
+        className="fixed bottom-0 left-0 right-0 z-30 rounded-t-2xl shadow-2xl overflow-y-auto"
+        style={{
+          maxHeight: "60vh",
+          backgroundColor: surface.panel,
+          borderTop: `1px solid ${surface.panelBorder}`,
+          transform: entered ? `translateY(${dragY}px)` : undefined,
+          transition: isDragging ? "none" : "transform 0.2s ease-out",
+          animation: entered ? undefined : "slideUp 0.2s ease-out",
+        }}
+        onAnimationEnd={() => setEntered(true)}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <div className="flex justify-center pt-2 pb-1 cursor-grab">
+          <div
+            className="w-10 h-1 rounded-full"
+            style={{ backgroundColor: surface.textSecondary, opacity: 0.4 }}
+          />
+        </div>
+        {children}
+      </div>
+      <style>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+      `}</style>
+    </>
   );
 }
