@@ -39,11 +39,19 @@
   --edge-dimmed: #1e293b;
 }
 
-body {
+html, body {
   margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
   font-family: "Manrope", sans-serif;
   background: var(--surface-bg);
   color: var(--surface-text-primary);
+}
+
+#root {
+  height: 100%;
+  overflow: hidden;
 }
 
 .react-flow__attribution {

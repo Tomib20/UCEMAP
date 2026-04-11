@@ -688,7 +688,7 @@ export function GraphView({ carrera }: GraphViewProps) {
       </ReactFlowProvider>
       <Legend />
 
-      <div className={`absolute z-10 flex gap-2 ${isMobile ? "bottom-14 right-2" : "top-3 left-3"}`}>
+      <div className={`absolute z-10 flex gap-2 ${isMobile ? "bottom-16 right-2" : "top-3 left-3"}`}>
         <button
           onClick={cycleElectivas}
           className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border backdrop-blur-sm"

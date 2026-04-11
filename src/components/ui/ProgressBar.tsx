@@ -82,7 +82,7 @@ export function ProgressBar({ carrera }: ProgressBarProps) {
   if (isMobile) {
     return (
       <div
-        className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 backdrop-blur-sm rounded-xl shadow-lg px-3 py-2 flex items-center gap-3"
+        className="fixed bottom-2 left-1/2 -translate-x-1/2 z-10 backdrop-blur-sm rounded-xl shadow-lg px-3 py-2 flex items-center gap-3"
         style={{
           backgroundColor: mode === "dark" ? "rgba(30,41,59,0.92)" : "rgba(255,255,255,0.95)",
           border: `1px solid ${surface.panelBorder}`,
@@ -147,7 +147,7 @@ export function ProgressBar({ carrera }: ProgressBarProps) {
   /* ── Desktop: full progress bar ── */
   return (
     <div
-      className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 backdrop-blur-sm rounded-2xl shadow-lg px-6 py-4 flex items-center gap-6"
+      className="fixed bottom-5 left-1/2 -translate-x-1/2 z-10 backdrop-blur-sm rounded-2xl shadow-lg px-6 py-4 flex items-center gap-6"
       style={{
         backgroundColor: mode === "dark" ? "rgba(30,41,59,0.92)" : "rgba(255,255,255,0.95)",
         border: `1px solid ${surface.panelBorder}`,

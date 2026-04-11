@@ -19,7 +19,7 @@ export function Legend() {
     return (
       <button
         onClick={() => setExpanded(true)}
-        className="absolute bottom-2 left-2 backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md z-10 text-[11px] font-semibold"
+        className={`fixed ${isMobile ? "top-14 right-2" : "bottom-2 left-2"} backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md z-10 text-[11px] font-semibold`}
         style={{
           backgroundColor: panelBg,
           border: `1px solid ${surface.panelBorder}`,
@@ -33,7 +33,7 @@ export function Legend() {
 
   return (
     <div
-      className={`absolute ${isMobile ? "bottom-2 left-2" : "bottom-4 left-4"} backdrop-blur-sm rounded-lg p-3 shadow-md z-10`}
+      className={`fixed ${isMobile ? "top-14 right-2" : "bottom-4 left-4"} backdrop-blur-sm rounded-lg p-3 shadow-md z-10`}
       style={{
         backgroundColor: panelBg,
         border: `1px solid ${surface.panelBorder}`,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, Navigate, useNavigate } from "react-router-dom";
 import type { Carrera } from "@/types/carrera";
 import { Header } from "@/components/layout/Header";
@@ -25,7 +25,6 @@ async function loadCarrera(id: string): Promise<Carrera | null> {
 export function AppLayout() {
   const { carreraId } = useParams<{ carreraId: string }>();
   const navigate = useNavigate();
-  const storeCarreraId = useProgressStore((s) => s.carreraId);
   const setCarreraStore = useProgressStore((s) => s.setCarrera);
   const bootFromStorage = useUserStore((s) => s.bootFromStorage);
   const [carrera, setCarreraData] = useState<Carrera | null>(null);
@@ -47,12 +46,23 @@ export function AppLayout() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // Auto-login si hay un usuario en localStorage (corre una sola vez al boot).
+  // Auto-login. If login changes the carrera in the store, redirect to it.
+  const bootedRef = useRef(false);
   useEffect(() => {
-    bootFromStorage();
-  }, [bootFromStorage]);
+    if (bootedRef.current) return;
+    bootedRef.current = true;
+    bootFromStorage().then(() => {
+      const storeId = useProgressStore.getState().carreraId;
+      if (storeId && storeId !== carreraId) {
+        const exists = carrerasIndex.carreras.some((c) => c.id === storeId);
+        if (exists) {
+          navigate(`/carrera/${storeId}`, { replace: true });
+        }
+      }
+    });
+  }, [bootFromStorage, carreraId, navigate]);
 
-  // Aviso si el usuario intenta cerrar la pestaña con cambios sin guardar.
+  // Beforeunload warning
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
       if (useUserStore.getState().isDirty) {
@@ -64,22 +74,11 @@ export function AppLayout() {
     return () => window.removeEventListener("beforeunload", handler);
   }, []);
 
-  // Si el store cambió de carrera (ej: login cargó otra carrera desde la nube),
-  // sincronizar el cambio a la URL.
-  useEffect(() => {
-    if (storeCarreraId && storeCarreraId !== carreraId) {
-      const exists = carrerasIndex.carreras.some((c) => c.id === storeCarreraId);
-      if (exists) {
-        navigate(`/carrera/${storeCarreraId}`, { replace: true });
-      }
-    }
-  }, [storeCarreraId, carreraId, navigate]);
-
-  // Sincronizar URL → store y cargar JSON de la carrera.
+  // Single source of truth: URL drives everything.
+  // When carreraId in URL changes, sync store and load JSON.
   useEffect(() => {
     if (!carreraId) return;
 
-    // Validar que la carrera existe en el index
     const exists = carrerasIndex.carreras.some((c) => c.id === carreraId);
     if (!exists) {
       setInvalidId(true);
@@ -87,10 +86,9 @@ export function AppLayout() {
     }
 
     setInvalidId(false);
-    // Solo actualizar store si realmente difiere (evita loop con store→URL sync)
-    if (useProgressStore.getState().carreraId !== carreraId) {
-      setCarreraStore(carreraId);
-    }
+    setCarreraData(null);
+    useProgressStore.getState().selectMateria(null);
+    setCarreraStore(carreraId);
 
     let cancelled = false;
     loadCarrera(carreraId).then((data) => {
@@ -102,13 +100,12 @@ export function AppLayout() {
     };
   }, [carreraId, setCarreraStore]);
 
-  // Redirigir si el carreraId de la URL no es válido
   if (invalidId) {
     const fallback = carrerasIndex.carreras[0]?.id ?? "ingenieria-informatica";
     return <Navigate to={`/carrera/${fallback}`} replace />;
   }
 
-  if (!carrera || carrera.id !== carreraId) {
+  if (!carrera) {
     return (
       <div className="h-screen flex items-center justify-center text-navy">
         Cargando...
@@ -117,9 +114,9 @@ export function AppLayout() {
   }
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-screen flex flex-col overflow-hidden">
       <Header carrera={carrera} carreras={carrerasIndex.carreras} onSearchOpen={openSearch} />
-      <MapPage carrera={carrera} searchOpen={searchOpen} onSearchClose={closeSearch} />
+      <MapPage key={carrera.id} carrera={carrera} searchOpen={searchOpen} onSearchClose={closeSearch} />
     </div>
   );
 }
