@@ -89,24 +89,27 @@ export function ProgressBar({ carrera }: ProgressBarProps) {
           width: "min(95%, 900px)",
         }}
       >
-        {/* Bar only (no labels) */}
+        {/* Bar with numbers inside */}
         <div className="flex-1 min-w-0">
-          <div className="flex h-3.5 rounded-full overflow-hidden" style={{ backgroundColor: trackBg }}>
+          <div className="flex h-6 rounded-full overflow-hidden" style={{ backgroundColor: trackBg }}>
             {sections.map((sec, i) => {
               const fillPct = sec.total > 0 ? (sec.done / sec.total) * 100 : 0;
               return (
                 <div
                   key={sec.label}
-                  className="relative h-full"
+                  className="relative h-full flex items-center justify-center"
                   style={{
                     width: `${widths[i]}%`,
                     borderRight: i < sections.length - 1 ? `2px solid ${barSep}` : undefined,
                   }}
                 >
                   <div
-                    className="h-full transition-all duration-300"
+                    className="absolute inset-0 transition-all duration-300"
                     style={{ width: `${fillPct}%`, backgroundColor: sec.color }}
                   />
+                  <span className="relative z-10 text-[9px] font-bold" style={{ color: "#fff", textShadow: "0 0 3px rgba(0,0,0,0.5)" }}>
+                    {sec.done}/{sec.total}
+                  </span>
                 </div>
               );
             })}
@@ -119,21 +122,18 @@ export function ProgressBar({ carrera }: ProgressBarProps) {
             <div className="text-base font-bold leading-tight" style={{ color: surface.textPrimary }}>
               {grandPct}%
             </div>
-            <div className="text-[9px]" style={{ color: surface.textSecondary }}>
-              {grandDone}/{grandTotal}
-            </div>
           </div>
           {promedio !== null && (
             <>
               <div className="h-6 w-px" style={{ backgroundColor: separatorColor }} />
               <div className="text-center">
                 <div
-                  className="text-base font-bold leading-tight"
+                  className="text-sm font-bold leading-tight"
                   style={{ color: "#4ade80" }}
                 >
-                  {promedio.toFixed(1)}
+                  {promedio.toFixed(2)}
                 </div>
-                <div className="text-[9px]" style={{ color: surface.textSecondary }}>
+                <div className="text-[8px]" style={{ color: surface.textSecondary }}>
                   Prom.
                 </div>
               </div>
