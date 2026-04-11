@@ -447,22 +447,47 @@ function FlowInner({ carrera, electivasMode, isMobile }: FlowInnerProps) {
     setEdges((cur) => clearEdgeStyles(cur, mode) as typeof cur);
   }, [setNodes, setEdges, mode]);
 
+  // On mobile: first tap = highlight only, second tap = open detail, third = deselect.
+  // On desktop: first click = highlight + open detail, second = deselect.
+  const highlightedRef = useRef<number | null>(null);
+
   const onNodeClick: NodeMouseHandler = useCallback(
     (_event, node) => {
       if (node.id.startsWith("__")) return;
       const nro = Number(node.id);
       setHoverInfo(null);
-      if (selectedRef.current === nro) {
-        selectedRef.current = null;
-        selectMateria(null);
-        doClear();
+
+      if (isMobile) {
+        if (selectedRef.current === nro) {
+          // Already showing detail → deselect
+          selectedRef.current = null;
+          highlightedRef.current = null;
+          selectMateria(null);
+          doClear();
+        } else if (highlightedRef.current === nro) {
+          // Already highlighted → open detail
+          selectedRef.current = nro;
+          selectMateria(nro);
+        } else {
+          // First tap → highlight only, no detail
+          highlightedRef.current = nro;
+          selectedRef.current = null;
+          selectMateria(null);
+          doHighlight(nro);
+        }
       } else {
-        selectedRef.current = nro;
-        selectMateria(nro);
-        doHighlight(nro);
+        if (selectedRef.current === nro) {
+          selectedRef.current = null;
+          selectMateria(null);
+          doClear();
+        } else {
+          selectedRef.current = nro;
+          selectMateria(nro);
+          doHighlight(nro);
+        }
       }
     },
-    [selectMateria, doHighlight, doClear]
+    [selectMateria, doHighlight, doClear, isMobile]
   );
 
   const onNodeDoubleClick: NodeMouseHandler = useCallback(
@@ -544,6 +569,7 @@ function FlowInner({ carrera, electivasMode, isMobile }: FlowInnerProps) {
 
   const onPaneClick = useCallback(() => {
     selectedRef.current = null;
+    highlightedRef.current = null;
     selectMateria(null);
     doClear();
     setHoverInfo(null);
