@@ -15,8 +15,8 @@ import {
   MarkerType,
 } from "@xyflow/react";
 import type { Materia, Carrera } from "@/types/carrera";
-import { buildGraphLayout, type ElectivasMode, type MateriaNodeData } from "@/utils/layoutGraph";
-import { CHAIN_COLORS, EDGE_COLORS, SURFACE, NODE_WIDTH, NODE_HEIGHT, NODE_WIDTH_MOBILE } from "@/config/theme";
+import { buildGraphLayout, type ElectivasMode, type MateriaNodeData, type MateriaRole } from "@/utils/layoutGraph";
+import { CHAIN_COLORS, AVAILABLE_GLOW, EDGE_COLORS, SURFACE, NODE_WIDTH, NODE_HEIGHT, NODE_WIDTH_MOBILE } from "@/config/theme";
 import { buildAdjacencyMaps, getAncestors, getDescendants } from "@/utils/prerequisiteChain";
 import { getMateriaStatus } from "@/utils/materiaStatus";
 import { useProgressStore, selectAprobadasArray, selectCursandoArray } from "@/store/useProgressStore";
@@ -27,6 +27,7 @@ import { Legend } from "./Legend";
 import { ContextMenu, type ContextMenuState } from "./ContextMenu";
 import { toPng } from "html-to-image";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { Tour } from "@/components/ui/Tour";
 
 /* ── Decorative node types ── */
 
@@ -116,9 +117,12 @@ function dimmedMarker(mode: "light" | "dark") {
   return { type: MarkerType.ArrowClosed as const, width: 10, height: 10, color: EDGE_COLORS[mode].dimmed };
 }
 
-function clearNodeFlags(nodes: Node[]): Node[] {
+function clearNodeFlags(nodes: Node[], isMobile: boolean): Node[] {
   return nodes.map((n) => ({
     ...n,
+    // Sin seleccion: en desktop las materias vuelven a ser arrastrables; en mobile
+    // NO, asi el gesto de pinch/zoom llega al lienzo y no lo captura una materia.
+    draggable: n.id.startsWith("__") ? n.draggable : !isMobile,
     data: { ...n.data, dimmed: false, role: "none" as const },
   }));
 }
@@ -141,12 +145,19 @@ function highlightNodes(
   const visible = new Set([...prereqs, ...dependents, selectedNro]);
 
   return nodes.map((n) => {
+    const isDecorative = n.id.startsWith("__");
     const nro = Number(n.id);
-    let role: "selected" | "ancestor" | "descendant" | "none" = "none";
+    let role: MateriaRole = "none";
     if (nro === selectedNro) role = "selected";
     else if (prereqs.has(nro)) role = "ancestor";
     else if (dependents.has(nro)) role = "descendant";
-    return { ...n, data: { ...n.data, dimmed: !visible.has(nro), role } };
+    return {
+      ...n,
+      // Solo la materia seleccionada se puede arrastrar: en mobile eso deja el
+      // resto del lienzo libre para el pinch/zoom.
+      draggable: isDecorative ? n.draggable : nro === selectedNro,
+      data: { ...n.data, dimmed: !visible.has(nro), role },
+    };
   });
 }
 
@@ -258,9 +269,13 @@ interface FlowInnerProps {
   carrera: Carrera;
   electivasMode: ElectivasMode;
   isMobile: boolean;
+  /** Modo "que puedo cursar": ilumina solo las materias disponibles. */
+  disponiblesMode: boolean;
+  /** Se llama al tocar una materia, para que el padre apague el modo disponibles. */
+  onExitDisponibles: () => void;
 }
 
-function FlowInner({ carrera, electivasMode, isMobile }: FlowInnerProps) {
+function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDisponibles }: FlowInnerProps) {
   const selectMateria = useProgressStore((s) => s.selectMateria);
   const fullChain = useProgressStore((s) => s.fullChain);
   const aprobadasArr = useProgressStore(selectAprobadasArray);
@@ -447,19 +462,91 @@ function FlowInner({ carrera, electivasMode, isMobile }: FlowInnerProps) {
   }, [fullChain, doHighlight]);
 
   const doClear = useCallback(() => {
-    setNodes((cur) => clearNodeFlags(cur));
+    setNodes((cur) => clearNodeFlags(cur, isMobile));
     setEdges((cur) => clearEdgeStyles(cur, mode) as typeof cur);
-  }, [setNodes, setEdges, mode]);
+  }, [setNodes, setEdges, mode, isMobile]);
+
+  /**
+   * Modo "que puedo cursar": atenua todo el mapa menos las materias que ya se
+   * pueden cursar (correlativas aprobadas), que quedan con halo celeste.
+   */
+  const doDisponibles = useCallback(() => {
+    const aprobadas = new Set(aprobadasArr);
+    const cursando = new Set(cursandoArr);
+    const disponibles = new Set<number>();
+    for (const m of carrera.materias) {
+      if (getMateriaStatus(m, aprobadas, cursando) === "disponible") disponibles.add(m.nro);
+    }
+    setNodes((cur) =>
+      cur.map((n) => {
+        if (n.id.startsWith("__")) return n;
+        const ok = disponibles.has(Number(n.id));
+        return {
+          ...n,
+          draggable: false,
+          data: { ...n.data, dimmed: !ok, role: ok ? ("available" as const) : ("none" as const) },
+        };
+      })
+    );
+    setEdges((cur) =>
+      cur.map((e) => ({
+        ...e,
+        animated: false,
+        style: dimmedEdgeStyle(mode),
+        markerEnd: dimmedMarker(mode),
+      })) as typeof cur
+    );
+  }, [carrera.materias, aprobadasArr, cursandoArr, setNodes, setEdges, mode]);
 
   // On mobile: first tap = highlight only, second tap = open detail, third = deselect.
   // On desktop: first click = highlight + open detail, second = deselect.
   const highlightedRef = useRef<number | null>(null);
 
+  // Pinch (2 dedos): mientras dura el gesto no se selecciona ninguna materia,
+  // aunque un dedo caiga encima. Solo zoom/pan.
+  const pinchRef = useRef(false);
+  useEffect(() => {
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length >= 2) pinchRef.current = true;
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      // El click sintetizado llega despues del touchend: mantener la supresion un instante.
+      if (e.touches.length === 0 && pinchRef.current) {
+        setTimeout(() => { pinchRef.current = false; }, 150);
+      }
+    };
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, []);
+
+  // Enciende / apaga el modo disponibles. Al apagarlo solo limpia si no quedo
+  // nada resaltado (en mobile el primer tap resalta sin abrir el detalle).
+  const disponiblesPrev = useRef(disponiblesMode);
+  useEffect(() => {
+    if (disponiblesMode) {
+      selectedRef.current = null;
+      highlightedRef.current = null;
+      selectMateria(null);
+      doDisponibles();
+    } else if (disponiblesPrev.current) {
+      if (selectedRef.current === null && highlightedRef.current === null) doClear();
+    }
+    disponiblesPrev.current = disponiblesMode;
+  }, [disponiblesMode, doDisponibles, doClear, selectMateria]);
+
   const onNodeClick: NodeMouseHandler = useCallback(
     (_event, node) => {
       if (node.id.startsWith("__")) return;
+      // Si hay (o hubo recien) pinch de 2 dedos, no seleccionar: es zoom/pan.
+      if (pinchRef.current) return;
       const nro = Number(node.id);
       setHoverInfo(null);
+      // Al tocar una materia salimos del modo disponibles para ver su cadena.
+      if (disponiblesMode) onExitDisponibles();
 
       if (isMobile) {
         if (selectedRef.current === nro) {
@@ -491,7 +578,7 @@ function FlowInner({ carrera, electivasMode, isMobile }: FlowInnerProps) {
         }
       }
     },
-    [selectMateria, doHighlight, doClear, isMobile]
+    [selectMateria, doHighlight, doClear, isMobile, disponiblesMode, onExitDisponibles]
   );
 
   const onNodeDoubleClick: NodeMouseHandler = useCallback(
@@ -647,14 +734,29 @@ export function GraphView({ carrera }: GraphViewProps) {
   const cursandoArr = useProgressStore(selectCursandoArray);
 
   const [electivasMode, setElectivasMode] = useState<ElectivasMode>("hidden");
+  const [disponiblesMode, setDisponiblesMode] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const surface = SURFACE[mode];
 
-  // Reset electivas mode when carrera changes
+  // Mini-tour: se abre solo la primera visita; despues, con el boton "?".
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem("ucema-map-tour-v1")) {
+        setTourOpen(true);
+        localStorage.setItem("ucema-map-tour-v1", "1");
+      }
+    } catch {
+      /* modo incognito sin storage: no pasa nada */
+    }
+  }, []);
+
+  // Reset electivas / disponibles mode when carrera changes
   const carreraIdRef = useRef(carrera.id);
   useEffect(() => {
     if (carreraIdRef.current !== carrera.id) {
       carreraIdRef.current = carrera.id;
       setElectivasMode("hidden");
+      setDisponiblesMode(false);
     }
   }, [carrera.id]);
 
@@ -676,9 +778,14 @@ export function GraphView({ carrera }: GraphViewProps) {
     });
   };
 
+  const electivasCount = useMemo(
+    () => carrera.materias.filter((m) => m.grupo === "topico" || m.grupo === "taller").length,
+    [carrera.materias]
+  );
+
   const buttonLabel = isMobile
-    ? (electivasMode === "hidden" ? "Electivas" : electivasMode === "active" ? "Todas" : "Ocultar")
-    : (electivasMode === "hidden" ? "Mostrar electivas" : electivasMode === "active" ? "Ver todas las electivas" : "Ocultar electivas");
+    ? (electivasMode === "hidden" ? `Electivas (${electivasCount})` : electivasMode === "active" ? "Todas" : "Ocultar")
+    : (electivasMode === "hidden" ? `Mostrar electivas (${electivasCount})` : electivasMode === "active" ? "Ver todas las electivas" : "Ocultar electivas");
 
   const isHighlighted = electivasMode !== "hidden";
   const [exporting, setExporting] = useState(false);
@@ -714,11 +821,33 @@ export function GraphView({ carrera }: GraphViewProps) {
   return (
     <div className="w-full h-full relative" style={{ backgroundColor: surface.bg }}>
       <ReactFlowProvider key={carrera.id}>
-        <FlowInner carrera={carrera} electivasMode={electivasMode} isMobile={isMobile} />
+        <FlowInner
+          carrera={carrera}
+          electivasMode={electivasMode}
+          isMobile={isMobile}
+          disponiblesMode={disponiblesMode}
+          onExitDisponibles={() => setDisponiblesMode(false)}
+        />
       </ReactFlowProvider>
       <Legend />
 
-      <div className={`absolute z-10 flex gap-2 ${isMobile ? "top-2 left-2" : "top-3 left-3"}`}>
+      <div className={`absolute z-10 flex gap-2 ${isMobile ? "top-2 left-2 right-2 overflow-x-auto" : "top-3 left-3"}`}>
+        <button
+          onClick={() => setDisponiblesMode((v) => !v)}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border backdrop-blur-sm shrink-0"
+          style={{
+            backgroundColor: disponiblesMode
+              ? mode === "dark" ? "rgba(8,145,178,0.25)" : "rgba(8,145,178,0.14)"
+              : mode === "dark" ? "rgba(30,41,59,0.9)" : "rgba(255,255,255,0.9)",
+            borderColor: disponiblesMode ? AVAILABLE_GLOW.border : surface.panelBorder,
+            color: disponiblesMode
+              ? mode === "dark" ? "#67e8f9" : "#0e7490"
+              : surface.textSecondary,
+          }}
+          title="Resaltar solo las materias que ya podes cursar"
+        >
+          {disponiblesMode ? "Disponibles ✓" : isMobile ? "¿Cursables?" : "¿Que puedo cursar?"}
+        </button>
         <button
           onClick={cycleElectivas}
           className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border backdrop-blur-sm"
@@ -747,7 +876,22 @@ export function GraphView({ carrera }: GraphViewProps) {
             {exporting ? "Exportando..." : "Exportar PNG"}
           </button>
         )}
+        <button
+          onClick={() => setTourOpen(true)}
+          className="shrink-0 w-8 h-8 rounded-full text-sm font-bold border backdrop-blur-sm flex items-center justify-center"
+          style={{
+            backgroundColor: mode === "dark" ? "rgba(30,41,59,0.9)" : "rgba(255,255,255,0.9)",
+            borderColor: surface.panelBorder,
+            color: surface.textSecondary,
+          }}
+          title="Como usar el mapa"
+          aria-label="Ayuda"
+        >
+          ?
+        </button>
       </div>
+
+      <Tour open={tourOpen} onClose={() => setTourOpen(false)} isMobile={isMobile} />
     </div>
   );
 }

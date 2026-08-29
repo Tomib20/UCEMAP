@@ -6,6 +6,7 @@ Mapa interactivo de correlatividades para carreras de la Universidad del CEMA, i
 
 - `npm run dev` — levanta el dev server (Vite)
 - `npm run validate` — valida los JSON de carreras (`scripts/validate-carreras.mjs`)
+- `node scripts/generate-icons.mjs` — regenera los iconos de la PWA y el og-image en `public/`
 - `npx vite build` — build de produccion (verificar errores rapido, no usa tsc)
 - `npm run build` — build completo: validate + type-check (tsc) + vite
 
@@ -45,10 +46,13 @@ src/
     ui/
       MateriaDetail.tsx  — sidebar derecha con detalle, botones cursando/aprobada, notas
       ProgressBar.tsx    — isla flotante inferior con barra unificada + promedio
+      Tour.tsx           — modal "Como usar el mapa" (primera visita + boton "?")
+  pages/Welcome.tsx      — home con la grilla de carreras (ruta "/" sin sesion)
   pages/MapPage.tsx      — composicion: GraphView + ProgressBar + MateriaDetail
   App.tsx                — carga JSON de carrera, auto-login, beforeunload warning
   hooks/
     useIsMobile.ts       — hook de matchMedia para breakpoint mobile (768px)
+    useInstallPrompt.ts  — evento beforeinstallprompt para el boton "Instalar app"
   pages/MapPage.tsx      — composicion: GraphView + ProgressBar + MateriaDetail + SearchPalette
   App.tsx                — BrowserRouter con rutas /carrera/:carreraId
 data/
@@ -92,6 +96,30 @@ scripts/
 - Cambiar carrera en el Header dropdown navega a la nueva URL y recarga el JSON
 - Loop prevention: checks explicitos antes de setState
 
+## Modo "que puedo cursar"
+
+- Boton en la barra del mapa: atenua todo menos las materias con status `disponible`,
+  que quedan con halo celeste (`AVAILABLE_GLOW` en theme.ts, role `available` del nodo).
+- Tocar cualquier materia sale del modo y pasa a resaltar su cadena de correlativas.
+- Se apaga solo al cambiar de carrera.
+
+## PWA (instalable + offline)
+
+- `vite-plugin-pwa` en `vite.config.ts`, `registerType: "autoUpdate"` (no queda una version
+  vieja cacheada: se actualiza sola al deployar).
+- Los iconos y el og-image se generan con `scripts/generate-icons.mjs`, que dibuja los PNG
+  a mano con zlib (sin dependencias de imagen). Si cambia el branding, editar ese script
+  y volver a correrlo.
+- El boton "Instalar app" del Header solo aparece si el browser disparo `beforeinstallprompt`
+  (Chrome/Edge). En iOS se instala a mano con Compartir -> Agregar a inicio.
+
+## Home de bienvenida
+
+- Ruta `/`: sin sesion iniciada muestra `Welcome` (grilla de las 12 carreras con color por
+  carrera + login inline). Con sesion, redirige a la ultima carrera del usuario.
+- El chequeo de sesion lee directo `localStorage["ucema-map-usuario"]`, la misma clave que
+  escribe `useUserStore`.
+
 ## Search Palette
 
 - Ctrl+K / Cmd+K abre un command palette para buscar materias
@@ -103,6 +131,9 @@ scripts/
 ## Mobile responsive
 
 - Breakpoint 768px via `useIsMobile()` hook con matchMedia
+- **Gestos**: mientras hay pinch (2 dedos) no se selecciona ninguna materia, y solo la
+  materia seleccionada es arrastrable. Asi el pinch/zoom llega al lienzo en vez de que lo
+  capture un nodo.
 - Header: hamburger menu, elementos condensados
 - MateriaDetail: bottom sheet en vez de sidebar derecha, swipe-to-close
 - ProgressBar: layout compacto horizontal

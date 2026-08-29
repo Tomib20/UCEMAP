@@ -5,6 +5,7 @@ import type { Carrera } from "@/types/carrera";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 
 interface CarreraEntry {
   id: string;
@@ -30,6 +31,8 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
   const login = useUserStore((s) => s.login);
   const logout = useUserStore((s) => s.logout);
   const saveToCloud = useUserStore((s) => s.saveToCloud);
+
+  const { canInstall, promptInstall } = useInstallPrompt();
 
   const [input, setInput] = useState("");
   const [loginOpen, setLoginOpen] = useState(false);
@@ -62,6 +65,17 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
       )}
     </button>
   );
+
+  // Solo aparece si el navegador ofrecio instalar la app (Chrome/Edge).
+  const installButton = canInstall ? (
+    <button
+      onClick={promptInstall}
+      className="text-xs font-semibold px-2.5 py-1.5 rounded-lg flex items-center gap-1.5 bg-teal hover:bg-teal-light transition-colors text-white"
+      title="Instalar UCEMA Map en tu dispositivo"
+    >
+      <span aria-hidden>{"⬇"}</span> Instalar app
+    </button>
+  ) : null;
 
   const themeButton = (
     <button
@@ -208,6 +222,14 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
               onClick={() => setMenuOpen(false)}
             />
             <div className="absolute top-[44px] left-0 right-0 z-30 bg-navy border-t border-white/10 px-4 py-3 shadow-lg flex flex-col gap-3">
+              {canInstall && (
+                <button
+                  onClick={() => { promptInstall(); setMenuOpen(false); }}
+                  className="w-full text-sm font-bold px-3 py-2 rounded-lg flex items-center justify-center gap-2 bg-teal hover:bg-teal-light transition-colors text-white"
+                >
+                  <span aria-hidden>{"⬇"}</span> Instalar app
+                </button>
+              )}
               {userControls}
               <div className="flex items-center gap-2 pt-1 border-t border-white/10">
                 {themeButton}
@@ -256,6 +278,7 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-2">
+        {installButton}
         {userControls}
         {searchButton}
         {themeButton}

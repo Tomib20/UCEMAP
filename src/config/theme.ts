@@ -59,6 +59,9 @@ export const CHAIN_COLORS = {
   edgeDescendant: "#8b5cf6",
 };
 
+/** Halo del modo "que puedo cursar": resalta las materias disponibles. */
+export const AVAILABLE_GLOW = { border: "#0891b2", glow: "rgba(8,145,178,0.28)" };
+
 export const EDGE_COLORS = {
   light: { default: "#cbd5e1", dimmed: "#f1f5f9" },
   dark: { default: "#475569", dimmed: "#1e293b" },

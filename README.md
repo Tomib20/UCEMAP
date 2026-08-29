@@ -2,6 +2,7 @@
 
 Mapa interactivo de correlatividades para las carreras de la Universidad del CEMA.
 Marcas las materias que aprobaste o estas cursando y el grafo te muestra que se te habilita.
+Se instala como app en el celular y funciona sin conexion.
 
 Inspirado en [FIUBA-Map](https://fede.dm/FIUBA-Map/).
 
@@ -21,6 +22,15 @@ Inspirado en [FIUBA-Map](https://fede.dm/FIUBA-Map/).
 Ademas hay planes legacy (`*-old.json`, `*-m.json`, `*-2025.json`) que quedan como referencia y no
 aparecen en el selector.
 
+## Que hace
+
+- Grafo de correlatividades por anio, con electivas y talleres aparte.
+- Modo **"que puedo cursar"**: ilumina solo las materias que ya podes anotarte.
+- Progreso por bloque, promedio, notas por materia (incluida "AP").
+- Buscador con Ctrl/Cmd+K, modo oscuro y export del mapa a PNG.
+- Cuenta con tu usuario de UCEMA para tener el mapa en cualquier dispositivo.
+- PWA: instalable desde el navegador y usable offline.
+
 ## Stack
 
 React 19 + TypeScript + Vite - [@xyflow/react](https://reactflow.dev) para el grafo - Zustand para
@@ -32,7 +42,8 @@ usa Google Sheets como "DB" y Google Forms como write API, sin backend propio.
 ```
 data/carreras/          # JSONs de materias y correlatividades + index.json + schema.json
 docs/planes-de-estudio/ # PDFs oficiales de los planes de UCEMA
-scripts/                # validador de datos (Node) y parsers de PDF (Python)
+public/                 # favicon, iconos de la PWA y og-image (generados por script)
+scripts/                # validador de datos, generador de iconos y parsers de PDF
 src/
   api/                  # backend serverless (Google Sheets + Forms)
   components/           # graph/ (React Flow), layout/, ui/
@@ -52,6 +63,7 @@ npm run dev
 - `npm run dev` - dev server
 - `npm run validate` - valida los JSON de carreras
 - `npm run build` - valida, type-checkea y buildea a `dist/`
+- `node scripts/generate-icons.mjs` - regenera los iconos de la PWA y el og-image
 
 ## Como agregar una carrera
 

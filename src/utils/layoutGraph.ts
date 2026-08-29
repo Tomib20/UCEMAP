@@ -2,10 +2,13 @@ import type { Node, Edge } from "@xyflow/react";
 import type { Materia } from "@/types/carrera";
 import { NODE_WIDTH, NODE_HEIGHT, NODE_WIDTH_MOBILE, NODE_HEIGHT_MOBILE } from "@/config/theme";
 
+/** Papel visual de un nodo: cadena de correlativas, o "available" en el modo cursables. */
+export type MateriaRole = "selected" | "ancestor" | "descendant" | "available" | "none";
+
 export interface MateriaNodeData extends Record<string, unknown> {
   materia: Materia;
   dimmed?: boolean;
-  role?: "selected" | "ancestor" | "descendant" | "none";
+  role?: MateriaRole;
 }
 
 const COL_WIDTH = 250;

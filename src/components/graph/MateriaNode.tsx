@@ -1,7 +1,7 @@
 import { memo, useMemo } from "react";
 import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
 import type { MateriaNodeData } from "@/utils/layoutGraph";
-import { GRUPO_COLORS, STATUS_STYLES, CHAIN_COLORS, NODE_WIDTH_MOBILE } from "@/config/theme";
+import { GRUPO_COLORS, STATUS_STYLES, CHAIN_COLORS, AVAILABLE_GLOW, NODE_WIDTH_MOBILE } from "@/config/theme";
 import { getMateriaStatus } from "@/utils/materiaStatus";
 import { useProgressStore, selectAprobadasArray, selectCursandoArray, selectNotasRecord } from "@/store/useProgressStore";
 import { useThemeStore } from "@/store/useThemeStore";
@@ -44,6 +44,10 @@ function MateriaNodeComponent({ data }: NodeProps<MateriaNode>) {
   } else if (role === "descendant") {
     borderColor = CHAIN_COLORS.descendant.border;
     boxShadow = `0 0 0 3px ${CHAIN_COLORS.descendant.glow}`;
+  } else if (role === "available") {
+    // Modo "que puedo cursar": las disponibles quedan con halo celeste.
+    borderColor = AVAILABLE_GLOW.border;
+    boxShadow = `0 0 0 3px ${AVAILABLE_GLOW.glow}`;
   }
 
   const opacity = dimmed ? 0.12 : 1;

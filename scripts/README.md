@@ -15,6 +15,18 @@ node scripts/validate-carreras.mjs --all   # incluye los planes legacy
 
 Sale con codigo 1 si hay errores; corre automaticamente antes de `npm run build`.
 
+## Assets graficos (Node)
+
+`generate-icons.mjs` genera en `public/` el favicon SVG, los iconos de la PWA
+(64/192/512 + maskable + apple-touch) y el `og-image.png` que se ve al compartir el link.
+Dibuja los PNG a mano (buffer RGBA + zlib), asi que no necesita ninguna libreria de imagenes.
+
+```bash
+node scripts/generate-icons.mjs
+```
+
+Los assets estan commiteados: solo hay que correrlo si cambia el branding o el diseno.
+
 ## Parseo de PDFs (Python)
 
 Requiere `pymupdf` (`pip install pymupdf`).
