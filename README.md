@@ -4,8 +4,6 @@ Mapa interactivo de correlatividades para las carreras de la Universidad del CEM
 Marcas las materias que aprobaste o estas cursando y el grafo te muestra que se te habilita.
 Se instala como app en el celular y funciona sin conexion.
 
-Inspirado en [FIUBA-Map](https://fede.dm/FIUBA-Map/).
-
 ## Carreras disponibles
 
 12 carreras activas (`data/carreras/index.json`):
@@ -28,14 +26,14 @@ aparecen en el selector.
 - Modo **"que puedo cursar"**: ilumina solo las materias que ya podes anotarte.
 - Progreso por bloque, promedio, notas por materia (incluida "AP").
 - Buscador con Ctrl/Cmd+K, modo oscuro y export del mapa a PNG.
-- Cuenta con tu usuario de UCEMA para tener el mapa en cualquier dispositivo.
+- Sesion con Google opcional: tu progreso se guarda en tu propio Google Drive.
 - PWA: instalable desde el navegador y usable offline.
 
 ## Stack
 
 React 19 + TypeScript + Vite - [@xyflow/react](https://reactflow.dev) para el grafo - Zustand para
-el estado (persistido en localStorage) - Tailwind CSS v4 - React Router v7. El sistema de cuentas
-usa Google Sheets como "DB" y Google Forms como write API, sin backend propio.
+el estado (persistido en localStorage) - Tailwind CSS v4 - React Router v7. El sync opcional guarda
+el progreso en el Google Drive del propio usuario (carpeta `appDataFolder`), sin backend propio.
 
 ## Estructura del proyecto
 
@@ -45,7 +43,7 @@ docs/planes-de-estudio/ # PDFs oficiales de los planes de UCEMA
 public/                 # favicon, iconos de la PWA y og-image (generados por script)
 scripts/                # validador de datos, generador de iconos y parsers de PDF
 src/
-  api/                  # backend serverless (Google Sheets + Forms)
+  lib/googleDrive.ts    # login con Google y sync del progreso en Drive
   components/           # graph/ (React Flow), layout/, ui/
   config/theme.ts       # colores light/dark, branding, medidas del layout
   store/                # Zustand: progreso, usuario, tema, sync watcher
@@ -59,6 +57,9 @@ src/
 npm install
 npm run dev
 ```
+
+Para probar el login con Google hay que copiar `.env.example` a `.env` y completar
+`VITE_GOOGLE_CLIENT_ID`. Sin esa variable la app funciona igual, pero solo local.
 
 - `npm run dev` - dev server
 - `npm run validate` - valida los JSON de carreras

@@ -1,38 +1,33 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
-import { useProgressStore } from "@/store/useProgressStore";
 import { Welcome } from "@/pages/Welcome";
 import { initSyncWatcher } from "@/store/syncWatcher";
+import { useUserStore } from "@/store/useUserStore";
 
 // Inicia el watcher de sincronización una sola vez (a nivel de módulo).
 initSyncWatcher();
 
-/** Hay sesion iniciada? (la clave la escribe useUserStore al loguear). */
-function estaLogueado(): boolean {
-  try {
-    return !!localStorage.getItem("ucema-map-usuario");
-  } catch {
-    return false;
-  }
+// Si el usuario ya se logueó antes en este dispositivo, intentamos reconectar en
+// silencio para que no tenga que apretar nada. Si Google no lo reconoce, no pasa
+// nada: queda el botón "Continuar como ...".
+void useUserStore.getState().restoreSession();
+
+// Basura del sistema de cuentas anterior (usuario UCEMA + Google Sheets).
+// Se limpia una sola vez para que no quede nada de aquel login dando vueltas.
+try {
+  localStorage.removeItem("ucema-map-usuario");
+} catch {
+  /* ignore */
 }
 
 /**
- * Raiz: mostramos la bienvenida mientras no haya sesion, asi cada visita elige
- * su carrera en vez de caer siempre en Ingenieria en Informatica. Con sesion
- * iniciada se entra derecho a la ultima carrera del usuario.
+ * La raiz es siempre la bienvenida: es la puerta de entrada donde elegis carrera
+ * o retomas tu sesion. Para ir directo a un mapa esta la URL /carrera/:id.
  */
-function DefaultRoute() {
-  const carreraId = useProgressStore((s) => s.carreraId);
-  if (estaLogueado()) {
-    return <Navigate to={`/carrera/${carreraId}`} replace />;
-  }
-  return <Welcome />;
-}
-
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <DefaultRoute />,
+    element: <Welcome />,
   },
   {
     path: "/carrera/:carreraId",
@@ -40,7 +35,7 @@ const router = createBrowserRouter([
   },
   {
     path: "*",
-    element: <DefaultRoute />,
+    element: <Navigate to="/" replace />,
   },
 ]);
 

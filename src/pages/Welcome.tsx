@@ -1,9 +1,9 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BRANDING, SURFACE } from "@/config/theme";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useProgressStore } from "@/store/useProgressStore";
+import { isSyncConfigured } from "@/lib/googleDrive";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import carrerasIndex from "../../data/carreras/index.json";
 
@@ -54,17 +54,15 @@ export function Welcome() {
   const carreras = carrerasIndex.carreras;
 
   const login = useUserStore((s) => s.login);
+  const remembered = useUserStore((s) => s.remembered);
   const status = useUserStore((s) => s.status);
   const errorMsg = useUserStore((s) => s.error);
   const { canInstall, promptInstall } = useInstallPrompt();
 
-  const [loginOpen, setLoginOpen] = useState(false);
-  const [input, setInput] = useState("");
-
   const handleLogin = async () => {
-    const ok = await login(input);
+    const ok = await login();
     if (ok) {
-      // login() ya dejo en el store la ultima carrera del usuario.
+      // El login ya trajo de Drive la ultima carrera del usuario.
       navigate(`/carrera/${useProgressStore.getState().carreraId}`);
     }
   };
@@ -119,49 +117,21 @@ export function Welcome() {
           venís con el promedio. Elegí tu carrera para empezar.
         </p>
 
-        {loginOpen ? (
-          <div className="mt-5 flex flex-col sm:flex-row items-center justify-center gap-2">
-            <input
-              type="text"
-              value={input}
-              autoFocus
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleLogin();
-                if (e.key === "Escape") setLoginOpen(false);
-              }}
-              placeholder="usuario UCEMA (ej: tbruner27)"
-              className="text-sm rounded-lg px-3 py-2 border outline-none w-full sm:w-72"
-              style={{
-                backgroundColor: surface.panel,
-                borderColor: surface.panelBorder,
-                color: surface.textPrimary,
-              }}
-            />
-            <div className="flex gap-2">
-              <button
-                onClick={handleLogin}
-                disabled={status === "loading" || !input.trim()}
-                className="text-sm font-semibold px-4 py-2 rounded-lg bg-navy text-white hover:bg-navy-light transition-colors disabled:opacity-50"
-              >
-                {status === "loading" ? "Entrando..." : "Entrar"}
-              </button>
-              <button
-                onClick={() => setLoginOpen(false)}
-                className="text-sm px-3 py-2 rounded-lg border"
-                style={{ borderColor: surface.panelBorder, color: surface.textSecondary }}
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        ) : (
+        {isSyncConfigured() && (
           <button
-            onClick={() => setLoginOpen(true)}
-            className="mt-5 text-sm font-semibold hover:underline"
+            onClick={handleLogin}
+            disabled={status === "loading"}
+            className="mt-5 text-sm font-semibold hover:underline disabled:opacity-50 inline-flex items-center gap-2"
             style={{ color: "#0d9488" }}
           >
-            ¿Ya tenés tu mapa guardado? Iniciá sesión →
+            {remembered?.picture && (
+              <img src={remembered.picture} alt="" className="w-5 h-5 rounded-full" referrerPolicy="no-referrer" />
+            )}
+            {status === "loading"
+              ? "Conectando con Google..."
+              : remembered
+                ? `Continuar como ${remembered.name.split(" ")[0]} →`
+                : "¿Ya tenés tu mapa guardado? Iniciá sesión con Google →"}
           </button>
         )}
         {errorMsg && status === "error" && (
@@ -201,7 +171,7 @@ export function Welcome() {
         </div>
 
         <p className="text-center text-[11px] mt-8" style={{ color: surface.textSecondary }}>
-          Hecho por un alumno, con los planes de estudio oficiales. Inspirado en FIUBA-Map.
+          Hecho por un alumno de la UCEMA, con los planes de estudio oficiales.
         </p>
       </section>
     </div>

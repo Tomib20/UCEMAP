@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, Navigate, useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback } from "react";
+import { useParams, Navigate } from "react-router-dom";
 import type { Carrera } from "@/types/carrera";
 import { Header } from "@/components/layout/Header";
 import { MapPage } from "@/pages/MapPage";
+import { RecuperarProgreso } from "@/components/ui/RecuperarProgreso";
 import { useProgressStore } from "@/store/useProgressStore";
 import { useUserStore } from "@/store/useUserStore";
 import carrerasIndex from "../../../data/carreras/index.json";
@@ -24,9 +25,7 @@ async function loadCarrera(id: string): Promise<Carrera | null> {
 
 export function AppLayout() {
   const { carreraId } = useParams<{ carreraId: string }>();
-  const navigate = useNavigate();
   const setCarreraStore = useProgressStore((s) => s.setCarrera);
-  const bootFromStorage = useUserStore((s) => s.bootFromStorage);
   const [carrera, setCarreraData] = useState<Carrera | null>(null);
   const [invalidId, setInvalidId] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -46,26 +45,11 @@ export function AppLayout() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // Auto-login. If login changes the carrera in the store, redirect to it.
-  const bootedRef = useRef(false);
-  useEffect(() => {
-    if (bootedRef.current) return;
-    bootedRef.current = true;
-    bootFromStorage().then(() => {
-      const storeId = useProgressStore.getState().carreraId;
-      if (storeId && storeId !== carreraId) {
-        const exists = carrerasIndex.carreras.some((c) => c.id === storeId);
-        if (exists) {
-          navigate(`/carrera/${storeId}`, { replace: true });
-        }
-      }
-    });
-  }, [bootFromStorage, carreraId, navigate]);
-
   // Beforeunload warning
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (useUserStore.getState().isDirty) {
+      // Solo si quedo un guardado en vuelo hacia Drive (debounce de 1,5s).
+      if (useUserStore.getState().pendingSave) {
         e.preventDefault();
         e.returnValue = "";
       }
@@ -117,6 +101,7 @@ export function AppLayout() {
     <div className="h-screen flex flex-col overflow-hidden">
       <Header carrera={carrera} carreras={carrerasIndex.carreras} onSearchOpen={openSearch} />
       <MapPage key={carrera.id} carrera={carrera} searchOpen={searchOpen} onSearchClose={closeSearch} />
+      <RecuperarProgreso />
     </div>
   );
 }

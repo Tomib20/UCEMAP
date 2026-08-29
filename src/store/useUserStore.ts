@@ -1,181 +1,228 @@
 import { create } from "zustand";
-import { fetchUsuario, postRegistro, postUsuario } from "@/api/sheetsBackend";
-import type { CarreraMapa } from "@/api/sheetsBackend";
+import {
+  driveLoad,
+  driveSave,
+  fetchUserInfo,
+  isSyncConfigured,
+  requestToken,
+  revokeToken,
+  type CloudProgreso,
+  type GoogleUser,
+} from "@/lib/googleDrive";
 import { useProgressStore } from "./useProgressStore";
-import { setLastPostedCarrera } from "./syncWatcher";
 
-const STORAGE_KEY = "ucema-map-usuario";
+/**
+ * Perfil de la ultima sesion. Guardamos SOLO nombre/mail/foto para poder ofrecer
+ * "Continuar como ..." al volver; el token nunca se persiste, asi que reconectar
+ * siempre es un click explicito del usuario.
+ */
+const PROFILE_KEY = "ucema-map-perfil";
+const TOKEN_KEY = "ucema-map-token";
 
-export type LoginStatus = "idle" | "loading" | "syncing" | "ready" | "error";
-
-interface UserState {
-  usuario: string | null;
-  status: LoginStatus;
-  error: string | null;
-  lastSyncedAt: number | null;
-  isDirty: boolean;
-
-  login: (usuario: string) => Promise<boolean>;
-  logout: () => Promise<void>;
-  bootFromStorage: () => Promise<void>;
-  saveToCloud: () => Promise<void>;
-  markDirty: () => void;
+interface TokenGuardado {
+  token: string;
+  expiraEn: number;
 }
 
-async function pushAllCarrerasToCloud(usuario: string): Promise<void> {
-  const progress = useProgressStore.getState();
-  const carreraIds = new Set([
-    ...Object.keys(progress.aprobadas),
-    ...Object.keys(progress.cursando),
-    ...Object.keys(progress.notas),
-  ]);
-  // Postea TODA carrera tocada en local, incluso si esta vacia. Esto permite
-  // "borrar todo" guardando explicitamente un mapa vacio (caso contrario, el
-  // ultimo registro no-vacio quedaria como vigente en la nube para siempre).
-  for (const cid of carreraIds) {
-    const mapa: CarreraMapa = {
-      aprobadas: progress.aprobadas[cid] ?? [],
-      cursando: progress.cursando[cid] ?? [],
-      notas: progress.notas[cid] ?? {},
-    };
-    await postRegistro(usuario, cid, mapa).catch(() => undefined);
-  }
-}
-
-function readStored(): string | null {
+/**
+ * El token se guarda para no tener que reconectar en cada recarga. Dura lo que
+ * dura el de Google (~1h) y solo habilita el `appDataFolder` de esta app y el
+ * perfil basico, asi que el alcance de que lo roben es acotado.
+ */
+function readToken(): TokenGuardado | null {
   try {
-    return window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(TOKEN_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as TokenGuardado;
+    // Margen de 1 minuto: no vale la pena estrenar un token que expira ya.
+    return parsed.expiraEn > Date.now() + 60_000 ? parsed : null;
   } catch {
     return null;
   }
 }
 
-function writeStored(value: string | null) {
+function writeToken(value: TokenGuardado | null) {
   try {
-    if (value == null) window.localStorage.removeItem(STORAGE_KEY);
-    else window.localStorage.setItem(STORAGE_KEY, value);
+    if (value) window.localStorage.setItem(TOKEN_KEY, JSON.stringify(value));
+    else window.localStorage.removeItem(TOKEN_KEY);
   } catch {
     /* ignore */
   }
 }
 
+function readRemembered(): GoogleUser | null {
+  try {
+    const raw = window.localStorage.getItem(PROFILE_KEY);
+    return raw ? (JSON.parse(raw) as GoogleUser) : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeRemembered(user: GoogleUser | null) {
+  try {
+    if (user) window.localStorage.setItem(PROFILE_KEY, JSON.stringify(user));
+    else window.localStorage.removeItem(PROFILE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+export type SyncStatus = "idle" | "loading" | "syncing" | "ready" | "error";
+
+interface UserState {
+  user: GoogleUser | null;
+  /** Access token de Google. Vive solo en memoria: nunca se persiste. */
+  token: string | null;
+  /** Perfil de la sesion anterior, sin token: sirve para ofrecer reconectar. */
+  remembered: GoogleUser | null;
+  status: SyncStatus;
+  error: string | null;
+  lastSyncedAt: number | null;
+  /** Hay cambios que todavia no llegaron a Drive (guardado en vuelo o esperando el debounce). */
+  pendingSave: boolean;
+
+  login: () => Promise<boolean>;
+  /** Reconecta sin molestar al usuario si Google todavia lo reconoce. */
+  restoreSession: () => Promise<void>;
+  logout: () => void;
+  saveNow: () => Promise<void>;
+  scheduleSave: () => void;
+}
+
+/** Foto del progreso local, con la forma que se guarda en Drive. */
+function snapshot(): CloudProgreso {
+  const p = useProgressStore.getState();
+  return {
+    aprobadas: p.aprobadas,
+    cursando: p.cursando,
+    notas: p.notas,
+    carreraId: p.carreraId,
+  };
+}
+
+/**
+ * Fusiona lo local con lo que haya en Drive. La nube gana carrera por carrera:
+ * si el usuario ya cargo esa carrera en otro dispositivo, esa version manda.
+ * Las carreras que solo existen en local se conservan (asi no se pierde lo que
+ * alguien venia cargando sin sesion antes de loguearse por primera vez).
+ */
+function mergeCloudIntoLocal(remoto: CloudProgreso) {
+  const local = useProgressStore.getState();
+  useProgressStore.setState({
+    aprobadas: { ...local.aprobadas, ...remoto.aprobadas },
+    cursando: { ...local.cursando, ...remoto.cursando },
+    notas: { ...local.notas, ...remoto.notas },
+    carreraId: remoto.carreraId ?? local.carreraId,
+    selectedMateria: null,
+  });
+}
+
+const SAVE_DEBOUNCE_MS = 1500;
+let saveTimer: ReturnType<typeof setTimeout> | null = null;
+
 export const useUserStore = create<UserState>((set, get) => ({
-  usuario: null,
+  user: null,
+  token: null,
+  remembered: readRemembered(),
   status: "idle",
   error: null,
   lastSyncedAt: null,
-  isDirty: false,
+  pendingSave: false,
 
-  login: async (usuarioRaw: string) => {
-    const usuario = usuarioRaw.trim().toLowerCase();
-    if (!usuario) {
-      set({ error: "Usuario vacio", status: "error" });
-      return false;
+  /**
+   * Retoma la sesion con el token guardado, sin abrir ninguna ventana de Google.
+   * Si el token ya vencio, no hacemos nada: queda el boton "Continuar como ...".
+   * No se puede renovar de fondo — el flujo de Google siempre abre un popup y
+   * eso solo puede salir de un click del usuario.
+   */
+  restoreSession: async () => {
+    if (get().token || !isSyncConfigured()) return;
+    const guardado = readToken();
+    const perfil = get().remembered;
+    if (!guardado || !perfil) return;
+
+    // Optimista: mostramos la sesion ya activa y confirmamos con Drive.
+    set({ user: perfil, token: guardado.token, status: "ready" });
+    try {
+      const remoto = await driveLoad(guardado.token);
+      if (remoto) mergeCloudIntoLocal(remoto);
+      set({ lastSyncedAt: Date.now(), error: null });
+    } catch {
+      // El token no sirvio (revocado, permisos cambiados): volvemos a pedir login.
+      writeToken(null);
+      set({ user: null, token: null, status: "idle" });
     }
+  },
+
+  login: async () => {
     set({ status: "loading", error: null });
     try {
-      const remoto = await fetchUsuario(usuario);
-      const progress = useProgressStore.getState();
+      const { token, expiraEn } = await requestToken();
+      const [user, remoto] = await Promise.all([fetchUserInfo(token), driveLoad(token)]);
 
-      // Login = SOLO cargar del cloud. Nunca pushea data local.
-      // Reemplaza local con lo que haya en la nube (aunque este vacio).
-      const aprobadas: Record<string, number[]> = {};
-      const cursando: Record<string, number[]> = {};
-      const notas: Record<string, Record<string, CarreraMapa["notas"][string]>> = {};
-      for (const reg of remoto.registros) {
-        aprobadas[reg.carreraId] = reg.mapa.aprobadas ?? [];
-        cursando[reg.carreraId] = reg.mapa.cursando ?? [];
-        notas[reg.carreraId] = reg.mapa.notas ?? {};
-      }
-      const carreraId = remoto.carreraActual ?? progress.carreraId;
-      useProgressStore.setState({
-        aprobadas,
-        cursando,
-        notas,
-        carreraId,
-        selectedMateria: null,
-      });
+      if (remoto) mergeCloudIntoLocal(remoto);
 
-      // Si el usuario es brand new, lo registramos en `usuarios` (sin tocar
-      // sus materias) para que la proxima vez sea reconocido. No pushea
-      // ninguna materia — para eso esta el boton Guardar.
-      if (!remoto.isKnown) {
-        await postUsuario(usuario, carreraId);
-      }
+      writeRemembered(user);
+      writeToken({ token, expiraEn });
+      set({ user, token, remembered: user, status: "ready", error: null, lastSyncedAt: Date.now() });
 
-      // Sincronizar el cache del syncWatcher para no repostear la misma carrera
-      setLastPostedCarrera(carreraId);
-
-      writeStored(usuario);
-      set({
-        usuario,
-        status: "ready",
-        error: null,
-        lastSyncedAt: Date.now(),
-        isDirty: false,
-      });
+      // Primer login del usuario (todavia no hay archivo): subimos lo que tenga
+      // local para que el archivo exista desde el arranque.
+      if (!remoto) await get().saveNow();
       return true;
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Error desconocido";
-      set({ status: "error", error: msg });
+      set({ status: "error", error: msg, user: null, token: null });
       return false;
     }
   },
 
-  logout: async () => {
-    // Si hay cambios sin guardar, pedimos confirmacion. Logout NO guarda
-    // automaticamente — si el usuario sale sin haber apretado "Guardar",
-    // los cambios se pierden. Esto mantiene la pureza del modelo manual.
-    if (get().isDirty) {
-      const ok = window.confirm(
-        "Tenés cambios sin guardar que se van a perder. ¿Salir igual?"
-      );
-      if (!ok) return;
+  logout: () => {
+    if (saveTimer) {
+      clearTimeout(saveTimer);
+      saveTimer = null;
     }
-
-    // 1. Limpiar usuario y cache del syncWatcher primero para que no marque
-    // dirty al limpiar el progress.
-    setLastPostedCarrera(null);
-    writeStored(null);
-    set({
-      usuario: null,
-      status: "idle",
-      error: null,
-      lastSyncedAt: null,
-      isDirty: false,
-    });
-
-    // 2. Limpiar la data local del progreso. fullChain y carreraId se mantienen
-    // (preferencias de UI, no son del usuario logueado).
-    useProgressStore.setState({
-      aprobadas: {},
-      cursando: {},
-      notas: {},
-      selectedMateria: null,
-    });
+    const token = get().token;
+    if (token) revokeToken(token);
+    // Salir es explicito: tambien olvidamos el perfil, asi no queda el nombre de
+    // otra persona ofrecido en un dispositivo compartido.
+    writeRemembered(null);
+    writeToken(null);
+    set({ user: null, token: null, remembered: null, status: "idle", error: null, pendingSave: false });
   },
 
-  bootFromStorage: async () => {
-    const stored = readStored();
-    if (!stored) return;
-    await get().login(stored);
-  },
-
-  saveToCloud: async () => {
-    const usuarioActual = get().usuario;
-    if (!usuarioActual) return;
+  saveNow: async () => {
+    const token = get().token;
+    if (!token) return;
     set({ status: "syncing" });
     try {
-      await pushAllCarrerasToCloud(usuarioActual);
-      set({ status: "ready", isDirty: false, lastSyncedAt: Date.now() });
-    } catch {
-      set({ status: "ready" });
+      await driveSave(token, snapshot());
+      // Ya esta a salvo en la nube: podemos soltar la copia que dejo la version
+      // vieja de la app en localStorage (hoy el progreso vive en sessionStorage).
+      try {
+        window.localStorage.removeItem("ucema-map-progress");
+      } catch {
+        /* ignore */
+      }
+      set({ status: "ready", error: null, lastSyncedAt: Date.now(), pendingSave: false });
+    } catch (e) {
+      // Tipico: el token vencio (duran ~1h). Soltamos la sesion para que el
+      // header ofrezca reconectar de un click; el progreso sigue en la pestania.
+      const msg = e instanceof Error ? e.message : "No se pudo guardar";
+      writeToken(null);
+      set({ status: "error", error: msg, user: null, token: null });
     }
   },
 
-  markDirty: () => {
-    if (get().usuario && !get().isDirty) {
-      set({ isDirty: true });
-    }
+  /** Agenda un guardado; cada cambio nuevo reinicia la cuenta regresiva. */
+  scheduleSave: () => {
+    if (!get().token) return;
+    set({ pendingSave: true });
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      saveTimer = null;
+      void get().saveNow();
+    }, SAVE_DEBOUNCE_MS);
   },
 }));

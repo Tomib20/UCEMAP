@@ -807,8 +807,8 @@ export function GraphView({ carrera }: GraphViewProps) {
         },
       });
       const link = document.createElement("a");
-      const user = useUserStore.getState().usuario ?? "anonimo";
-      link.download = `${carrera.nombre} - ${user}.png`;
+      const user = useUserStore.getState().user;
+      link.download = user ? `${carrera.nombre} - ${user.name}.png` : `${carrera.nombre}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {

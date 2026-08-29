@@ -1,6 +1,6 @@
 # UCEMA Map
 
-Mapa interactivo de correlatividades para carreras de la Universidad del CEMA, inspirado en [FIUBA-Map](https://fede.dm/FIUBA-Map/).
+Mapa interactivo de correlatividades para las carreras de la Universidad del CEMA.
 
 ## Comandos
 
@@ -17,7 +17,7 @@ Mapa interactivo de correlatividades para carreras de la Universidad del CEMA, i
 - **Zustand** — estado global con persistencia en localStorage
 - **Tailwind CSS v4** — estilos utility-first via @tailwindcss/vite plugin
 - **Manrope** — tipografia (Google Fonts, cargada en index.html)
-- **Google Sheets + Google Forms** — backend serverless estilo FIUBA-Map (lectura via Sheets API con key restringida por dominio, escritura via POST `mode: "no-cors"` a Forms publicos)
+- **Google Identity Services + Google Drive** — sync opcional del progreso en el `appDataFolder` del usuario (sin backend propio)
 
 ## Arquitectura
 
@@ -25,14 +25,13 @@ Mapa interactivo de correlatividades para carreras de la Universidad del CEMA, i
 src/
   config/theme.ts        — colores (light/dark), branding, constantes de layout
   types/carrera.ts       — tipos: Materia, Carrera, MateriaStatus, MateriaGrupo
-  api/
-    sheetsConfig.ts      — IDs/URLs hardcodeados del spreadsheet, forms y API key
-    sheetsBackend.ts     — fetchUsuario (GET Sheets API), postUsuario/postRegistro (POST Forms)
+  lib/
+    googleDrive.ts       — login con Google (GIS) + leer/guardar el progreso en Drive
   store/
-    useProgressStore.ts  — aprobadas, cursando, notas por carrera (persiste en localStorage)
+    useProgressStore.ts  — aprobadas, cursando, notas por carrera (persiste en sessionStorage)
     useThemeStore.ts     — light/dark mode (persiste en localStorage)
-    useUserStore.ts      — usuario logueado, isDirty, login/logout/saveToCloud
-    syncWatcher.ts       — observa progressStore y marca dirty cuando hay cambios
+    useUserStore.ts      — sesion de Google, token en memoria, guardado en Drive
+    syncWatcher.ts       — observa progressStore y agenda el guardado automatico
   utils/
     layoutGraph.ts       — posiciona nodos en grilla por año (5 cols) + electivas
     materiaStatus.ts     — calcula status: aprobada > cursando > disponible > bloqueada
@@ -149,22 +148,54 @@ scripts/
 - **No hover highlight**: el highlight solo se activa al hacer click (seleccion), no al pasar el mouse
 - **Flechas directas**: al seleccionar una materia solo se iluminan las correlativas inmediatas (no toda la cadena recursiva)
 
-## Sistema de cuentas y sync (cloud)
+## Donde vive el progreso
 
-Inspirado en FIUBA-Map. Backend serverless: Google Sheets como "DB" + Google Forms como write API.
+- **`sessionStorage`**: aguanta recargas mientras la pestania siga abierta, pero
+  al cerrarla no queda nada en el dispositivo. Lo unico que persiste de verdad es
+  lo que se sincroniza al Drive del usuario.
+- **Mapas de versiones viejas**: las versiones anteriores guardaban en
+  `localStorage`. Ese progreso NO se adopta solo — `RecuperarProgreso` pregunta
+  si conservarlo o empezar de cero. La copia vieja se borra cuando el usuario la
+  descarta, o cuando el progreso ya llego sano a Drive (`saveNow`).
+- En `localStorage` solo quedan preferencias y la sesion: `ucema-map-theme`,
+  `ucema-map-tour-v1`, `ucema-map-perfil` y `ucema-map-token`.
 
-- **No hay password**: solo usuario UCEMA tipo `tbruner27`. Cualquiera que conozca el usuario puede leer/sobreescribir su data. Es por diseño (igual que FIUBA-Map con el padron).
-- **Spreadsheet con 2 sheets**:
-  - `usuarios`: `timestamp | usuario | carrera_actual` — registra qué carrera tenia seleccionada cada usuario
-  - `registros`: `timestamp | usuario | carrera | mapa` — el `mapa` es JSON stringificado con `{aprobadas, cursando, notas}`
-- **Forms appendea, nunca actualiza**: cada save crea una fila nueva. `fetchUsuario` toma la última fila por `(usuario, carrera)` iterando de arriba abajo y sobreescribiendo la entrada en un Map.
-- **Save manual con boton "Guardar"**: cualquier cambio en aprobadas/cursando/notas estando logueado marca `isDirty: true`. El boton del header se pone verde. Click → `saveToCloud()` → reset dirty. NO hay debounce ni auto-sync (el usuario lo pidió explícito).
-- **Login = solo lectura**: `login()` SIEMPRE reemplaza el local con lo que esté en la nube (incluso si está vacío). Nunca pushea local. El campo `isKnown` de `fetchUsuario` distingue usuarios brand-new (que reciben un `postUsuario` para registrarlos en `usuarios`) de los que ya existen.
-- **Logout = limpiar local + warning si dirty**: NO flushea automáticamente. Si `isDirty === true`, muestra `window.confirm("¿Salir igual?")` antes de limpiar. Esto fuerza al usuario a guardar explícitamente o aceptar la pérdida.
-- **`pushAllCarrerasToCloud` postea estado vacío**: importante para que "desmarcar todo y guardar" se persista en la nube. Postea cualquier carrera con key en local, sin filtrar por contenido.
-- **`beforeunload` warning**: en `App.tsx`, si `isDirty === true`, el browser muestra el dialog nativo de "abandonar sitio".
-- **Auto-cambio de carrera**: cambiar carrera sí postea automáticamente a `usuarios` (sin debounce, sin marcar dirty), porque eso es preferencia de UI, no data del usuario. Lo maneja el `syncWatcher`.
-- **API key restringida por dominio**: la key vive hardcodeada en `sheetsConfig.ts` pero está restringida en Google Cloud Console por HTTP referrer (localhost + dominio de prod). Por eso es seguro committearla.
+## Cuentas y sync (Google Drive)
+
+El progreso se guarda en un archivo `ucema-map-progreso.json` dentro de
+`appDataFolder`: una carpeta oculta del Drive **del propio usuario**, que solo
+esta app ve. No hay backend, no hay base de datos compartida y nadie mas puede
+leer el progreso de nadie.
+
+- **Configuracion**: `VITE_GOOGLE_CLIENT_ID` (ver `.env.example`). Si no esta
+  seteada, `isSyncConfigured()` devuelve false, la UI de login no se muestra y
+  la app queda 100% local (localStorage). En Vercel se carga como env var.
+- **Scopes**: `drive.appdata` + `userinfo.profile/email`. Son de bajo riesgo:
+  Google no exige verificar la app para usarlos.
+- **El script de Google se carga bajo demanda** (`loadGis()`), no en el
+  index.html: quien nunca se loguea no le pide nada a Google.
+- **El login sale siempre de un click**: el flujo de token de Google abre una
+  ventana emergente incluso con `prompt: ""`, asi que no hay forma de renovar de
+  fondo. Nunca se dispara al cargar la pagina.
+- **El token se guarda** en `localStorage` con su vencimiento (`ucema-map-token`,
+  ~1h). Al recargar, `restoreSession()` lo reusa y la sesion sigue activa sin
+  pedir nada; si vencio o no sirve, se descarta y el header ofrece "Continuar
+  como ...". Es una credencial en el navegador, pero solo habilita el
+  `appDataFolder` de esta app y el perfil basico.
+- **No existe la sesion permanente**: Google no entrega refresh tokens a las apps
+  que corren solo en el navegador. El techo es ~1 hora y despues un click.
+- **El perfil recordado** (`ucema-map-perfil`: nombre, mail y foto, sin token)
+  es lo que permite ofrecer "Continuar como ..." en el header y en la home.
+- **Merge al loguearse**: la nube pisa carrera por carrera, y las carreras que
+  solo existen en local se conservan (no se pierde lo cargado sin sesion).
+- **Guardado automatico con debounce de 1,5s** (`scheduleSave`): cada cambio
+  reinicia la cuenta regresiva. `pendingSave` es true mientras hay algo por
+  guardar, y `App.tsx` usa ese flag para el warning de `beforeunload`.
+- **Logout**: revoca el token y corta la sincronizacion, pero **no borra el
+  progreso local** (es de este dispositivo y el usuario lo sigue viendo).
+- Si el token expira con la pestania abierta, el guardado falla: se suelta la
+  sesion y el header muestra "Continuar como ...". El progreso de la sesion no se
+  pierde (vive en `sessionStorage`), solo deja de sincronizarse hasta reconectar.
 
 ## Validaciones de negocio
 

@@ -1,28 +1,17 @@
 /**
- * Observa cambios en useProgressStore y los marca como "dirty" para que el
- * usuario los pueda guardar manualmente con el boton del header.
- *
- * Tambien postea a USER_FORM cuando cambia la carrera actual seleccionada,
- * para que el proximo login arranque en la carrera correcta. Eso si es
- * automatico porque no es data del usuario, es solo una preferencia.
+ * Observa el progreso y, si hay sesion de Google iniciada, agenda el guardado
+ * en Drive. El guardado es automatico con debounce (ver useUserStore), asi que
+ * el usuario no tiene que acordarse de apretar nada.
  */
 
 import { useProgressStore } from "./useProgressStore";
 import { useUserStore } from "./useUserStore";
-import { postUsuario } from "@/api/sheetsBackend";
 import type { Nota } from "./useProgressStore";
 
 interface CarreraSnapshot {
   aprobadas: number[];
   cursando: number[];
   notas: Record<string, Nota>;
-}
-
-function snapshotEquals(a: CarreraSnapshot, b: CarreraSnapshot): boolean {
-  if (a.aprobadas !== b.aprobadas && !arraysEqual(a.aprobadas, b.aprobadas)) return false;
-  if (a.cursando !== b.cursando && !arraysEqual(a.cursando, b.cursando)) return false;
-  if (a.notas !== b.notas && !notasEqual(a.notas, b.notas)) return false;
-  return true;
 }
 
 function arraysEqual(a: number[], b: number[]): boolean {
@@ -33,43 +22,33 @@ function arraysEqual(a: number[], b: number[]): boolean {
 
 function notasEqual(a: Record<string, Nota>, b: Record<string, Nota>): boolean {
   const ka = Object.keys(a);
-  const kb = Object.keys(b);
-  if (ka.length !== kb.length) return false;
+  if (ka.length !== Object.keys(b).length) return false;
   for (const k of ka) if (a[k] !== b[k]) return false;
   return true;
 }
 
-let initialized = false;
-
-/**
- * Ultima carrera posteada al sheet "usuarios" para este usuario.
- * Evita postear filas duplicadas si la carrera no cambio realmente.
- */
-let lastPostedCarrera: string | null = null;
-
-/** Llamar despues de login/logout para sincronizar el cache. */
-export function setLastPostedCarrera(carreraId: string | null) {
-  lastPostedCarrera = carreraId;
+function snapshotEquals(a: CarreraSnapshot, b: CarreraSnapshot): boolean {
+  if (a.aprobadas !== b.aprobadas && !arraysEqual(a.aprobadas, b.aprobadas)) return false;
+  if (a.cursando !== b.cursando && !arraysEqual(a.cursando, b.cursando)) return false;
+  if (a.notas !== b.notas && !notasEqual(a.notas, b.notas)) return false;
+  return true;
 }
+
+let initialized = false;
 
 export function initSyncWatcher() {
   if (initialized) return;
   initialized = true;
 
   useProgressStore.subscribe((state, prev) => {
-    // 1. Cambio de carrera seleccionada → postear a USER_FORM solo si es diferente
-    //    a lo que ya esta en la nube (evita filas duplicadas).
-    if (state.carreraId !== prev.carreraId) {
-      const usuario = useUserStore.getState().usuario;
-      if (usuario && state.carreraId !== lastPostedCarrera) {
-        lastPostedCarrera = state.carreraId;
-        postUsuario(usuario, state.carreraId).catch(() => undefined);
-      }
-    }
+    if (!useUserStore.getState().token) return;
 
-    // 2. Cambios en data de cualquier carrera → marcar dirty si hay usuario.
-    const usuario = useUserStore.getState().usuario;
-    if (!usuario) return;
+    // La carrera seleccionada tambien viaja a Drive: al entrar desde otro
+    // dispositivo se abre donde estabas.
+    if (state.carreraId !== prev.carreraId) {
+      useUserStore.getState().scheduleSave();
+      return;
+    }
 
     const carreraIds = new Set([
       ...Object.keys(state.aprobadas),
@@ -91,7 +70,7 @@ export function initSyncWatcher() {
         notas: prev.notas[cid] ?? {},
       };
       if (!snapshotEquals(cur, old)) {
-        useUserStore.getState().markDirty();
+        useUserStore.getState().scheduleSave();
         return;
       }
     }

@@ -1,5 +1,68 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
+
+const STORAGE_KEY = "ucema-map-progress";
+
+/**
+ * El progreso se guarda en `sessionStorage`: sobrevive recargas mientras la
+ * pestania siga abierta, pero al cerrarla no queda nada en el dispositivo.
+ * Lo unico que persiste de verdad es lo que se sincroniza al Drive del usuario.
+ *
+ * Las versiones viejas guardaban en localStorage. Ese mapa NO se adopta solo:
+ * `RecuperarProgreso` le pregunta al usuario si quiere conservarlo o arrancar
+ * limpio, asi a nadie le aparece progreso que no pidio.
+ */
+interface ProgresoGuardado {
+  carreraId?: string;
+  aprobadas?: Record<string, number[]>;
+  cursando?: Record<string, number[]>;
+  notas?: Record<string, Record<string, Nota>>;
+}
+
+/**
+ * Se evalua al cargar el modulo, ANTES de que el store escriba nada: apenas la
+ * app toca el progreso, `sessionStorage` deja de estar vacio y ya no se podria
+ * distinguir "sesion recien empezada" de "sesion en curso".
+ */
+const LEGACY_AL_INICIO: ProgresoGuardado | null = (() => {
+  try {
+    if (window.sessionStorage.getItem(STORAGE_KEY)) return null; // sesion ya empezada
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { state?: ProgresoGuardado };
+    const state = parsed.state;
+    if (!state) return null;
+    const materias = Object.values(state.aprobadas ?? {}).reduce((n, arr) => n + arr.length, 0);
+    return materias > 0 ? state : null;
+  } catch {
+    return null;
+  }
+})();
+
+/** Mapa de una version anterior que quedo en localStorage, si hay alguno. */
+export function leerProgresoLegacy(): ProgresoGuardado | null {
+  return LEGACY_AL_INICIO;
+}
+
+/** Adopta ese mapa: pasa a ser el progreso de esta sesion. */
+export function adoptarProgresoLegacy(state: ProgresoGuardado) {
+  useProgressStore.setState({
+    aprobadas: state.aprobadas ?? {},
+    cursando: state.cursando ?? {},
+    notas: state.notas ?? {},
+    carreraId: state.carreraId ?? useProgressStore.getState().carreraId,
+    selectedMateria: null,
+  });
+}
+
+/** Lo descarta para siempre: el usuario eligio arrancar de cero. */
+export function descartarProgresoLegacy() {
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
 
 /** Nota: 4-10 or "AP" (aprobada sin nota, no afecta promedio) */
 export type Nota = number | "AP";
@@ -100,7 +163,8 @@ export const useProgressStore = create<ProgressState>()(
       clearCenterOn: () => set({ centerOnMateria: null }),
     }),
     {
-      name: "ucema-map-progress",
+      name: STORAGE_KEY,
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         carreraId: state.carreraId,
         aprobadas: state.aprobadas,

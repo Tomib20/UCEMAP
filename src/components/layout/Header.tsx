@@ -4,6 +4,7 @@ import { BRANDING } from "@/config/theme";
 import type { Carrera } from "@/types/carrera";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useUserStore } from "@/store/useUserStore";
+import { isSyncConfigured } from "@/lib/googleDrive";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 
@@ -18,33 +19,26 @@ interface HeaderProps {
   onSearchOpen?: () => void;
 }
 
+/** Sin Client ID de Google, la app es 100% local y no se muestra nada de login. */
+const SYNC_CONFIGURADO = isSyncConfigured();
+
 export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const mode = useThemeStore((s) => s.mode);
   const toggle = useThemeStore((s) => s.toggle);
 
-  const usuario = useUserStore((s) => s.usuario);
+  const user = useUserStore((s) => s.user);
+  const remembered = useUserStore((s) => s.remembered);
   const status = useUserStore((s) => s.status);
   const errorMsg = useUserStore((s) => s.error);
-  const isDirty = useUserStore((s) => s.isDirty);
+  const pendingSave = useUserStore((s) => s.pendingSave);
   const login = useUserStore((s) => s.login);
   const logout = useUserStore((s) => s.logout);
-  const saveToCloud = useUserStore((s) => s.saveToCloud);
 
   const { canInstall, promptInstall } = useInstallPrompt();
 
-  const [input, setInput] = useState("");
-  const [loginOpen, setLoginOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const handleLogin = async () => {
-    const ok = await login(input);
-    if (ok) {
-      setInput("");
-      setLoginOpen(false);
-    }
-  };
 
   /* ── Shared UI pieces ── */
 
@@ -87,85 +81,84 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
     </button>
   );
 
+  // Estado del guardado automatico en Drive.
+  const syncLabel =
+    status === "syncing" || pendingSave
+      ? "Guardando..."
+      : status === "error"
+        ? "Sin guardar"
+        : "Guardado";
+
   const userControls = (
     <>
-      {usuario ? (
-        <div className={`flex ${isMobile ? "flex-col" : "flex-row"} items-${isMobile ? "stretch" : "center"} gap-2`}>
-          <span className="text-sm font-semibold">{usuario}</span>
-          <button
-            onClick={saveToCloud}
-            disabled={!isDirty || status === "syncing"}
-            className={`text-xs px-2 py-1 rounded-lg transition-colors ${
-              isDirty
-                ? "bg-emerald-500/80 hover:bg-emerald-500 text-white"
-                : "bg-white/10 text-slate-400"
-            } disabled:cursor-default`}
+      {!SYNC_CONFIGURADO ? null : user ? (
+        <div className={`flex ${isMobile ? "flex-col items-stretch" : "flex-row items-center"} gap-2`}>
+          <div className="flex items-center gap-2 min-w-0">
+            {user.picture && (
+              <img
+                src={user.picture}
+                alt=""
+                className="w-6 h-6 rounded-full shrink-0"
+                referrerPolicy="no-referrer"
+              />
+            )}
+            <span className="text-sm font-semibold truncate" title={user.email}>
+              {user.name}
+            </span>
+          </div>
+          <span
+            className={`text-[11px] px-2 py-1 rounded-lg ${
+              status === "error" ? "bg-red-500/20 text-red-200" : "bg-white/10 text-slate-200"
+            }`}
             title={
-              status === "syncing"
-                ? "Guardando..."
-                : isDirty
-                  ? "Guardar cambios en la nube"
-                  : "Sin cambios pendientes"
+              status === "error"
+                ? errorMsg ?? "No se pudo guardar"
+                : "Tu progreso se guarda solo en tu Google Drive"
             }
           >
-            {status === "syncing"
-              ? "Guardando..."
-              : isDirty
-                ? "Guardar"
-                : "Guardado"}
-          </button>
+            {syncLabel}
+          </span>
           <button
             onClick={() => { logout(); setMenuOpen(false); }}
-            className="text-xs px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+            className="text-xs font-semibold text-white px-2 py-1 rounded-lg bg-white/15 hover:bg-white/25 transition-colors"
             title="Cerrar sesion"
           >
             Salir
           </button>
         </div>
-      ) : loginOpen ? (
-        <div className={`flex ${isMobile ? "flex-col" : "flex-row"} items-${isMobile ? "stretch" : "center"} gap-1`}>
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleLogin();
-              if (e.key === "Escape") {
-                setLoginOpen(false);
-                setInput("");
-              }
-            }}
-            placeholder="usuario UCEMA"
-            autoFocus
-            className="bg-white/10 text-white placeholder-slate-400 text-sm rounded-lg px-2 py-1 border border-white/20 outline-none focus:bg-white/20 w-full"
-          />
-          <div className="flex gap-1">
-            <button
-              onClick={handleLogin}
-              disabled={status === "loading" || !input.trim()}
-              className="text-xs px-2 py-1 rounded-lg bg-white/20 hover:bg-white/30 transition-colors disabled:opacity-50 flex-1"
-            >
-              {status === "loading" ? "..." : "Entrar"}
-            </button>
-            <button
-              onClick={() => { setLoginOpen(false); setInput(""); }}
-              className="text-xs px-2 py-1 rounded-lg hover:bg-white/10 transition-colors"
-              title="Cancelar"
-            >
-              {"\u00D7"}
-            </button>
-          </div>
+      ) : remembered ? (
+        // Sesion anterior recordada: reconectar es un click, pero mientras tanto
+        // avisamos que lo que se toque no esta yendo a Drive.
+        <div className={`flex ${isMobile ? "flex-col items-stretch" : "flex-row items-center"} gap-2`}>
+          <button
+            onClick={() => { void login(); setMenuOpen(false); }}
+            disabled={status === "loading"}
+            className="text-xs font-semibold text-white px-3 py-1.5 rounded-lg bg-emerald-500/80 hover:bg-emerald-500 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+            title={`Reconectar con ${remembered.email} para volver a sincronizar`}
+          >
+            {remembered.picture && (
+              <img src={remembered.picture} alt="" className="w-5 h-5 rounded-full" referrerPolicy="no-referrer" />
+            )}
+            {status === "loading" ? "Conectando..." : `Continuar como ${remembered.name.split(" ")[0]}`}
+          </button>
+          <span
+            className="text-[11px] px-2 py-1 rounded-lg bg-amber-400/20 text-amber-200"
+            title="Tus cambios se guardan en este dispositivo, pero no se estan sincronizando con Drive"
+          >
+            Sin sincronizar
+          </span>
         </div>
       ) : (
         <button
-          onClick={() => setLoginOpen(true)}
-          className="text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
-          title="Iniciar sesion para sincronizar entre dispositivos"
+          onClick={() => { void login(); setMenuOpen(false); }}
+          disabled={status === "loading"}
+          className="text-xs font-semibold text-white px-3 py-1.5 rounded-lg bg-white/20 border border-white/30 hover:bg-white/30 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+          title="Guarda tu progreso en tu Google Drive y usalo en cualquier dispositivo"
         >
-          Iniciar sesion
+          {status === "loading" ? "Conectando..." : "Iniciar sesion con Google"}
         </button>
       )}
-      {errorMsg && status === "error" && (
+      {errorMsg && status === "error" && !user && (
         <span className="text-xs text-red-300" title={errorMsg}>
           Error
         </span>
@@ -180,9 +173,13 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
         <header className="bg-navy text-white px-3 py-2 flex items-center justify-between shadow-md relative z-30">
           {/* Left: compact branding + carrera */}
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <h1 className="text-sm font-bold tracking-tight shrink-0">
+            <button
+              onClick={() => navigate("/")}
+              className="text-sm font-bold tracking-tight shrink-0 hover:opacity-80 transition-opacity"
+              title="Volver a elegir carrera"
+            >
               {BRANDING.name}
-            </h1>
+            </button>
             <div className="h-5 w-px bg-white/20 shrink-0" />
             {carreras.length > 1 ? (
               <select
@@ -248,12 +245,16 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
   return (
     <header className="bg-navy text-white px-6 py-2.5 flex items-center justify-between shadow-md">
       <div className="flex items-center gap-4">
-        <div>
-          <h1 className="text-lg font-bold tracking-tight leading-tight">
+        <button
+          onClick={() => navigate("/")}
+          className="text-left hover:opacity-80 transition-opacity"
+          title="Volver a elegir carrera"
+        >
+          <span className="block text-lg font-bold tracking-tight leading-tight">
             {BRANDING.name}
-          </h1>
-          <p className="text-[11px] text-slate-300">{BRANDING.university}</p>
-        </div>
+          </span>
+          <span className="block text-[11px] text-slate-300">{BRANDING.university}</span>
+        </button>
         <div className="h-8 w-px bg-white/20" />
         <div>
           {carreras.length > 1 ? (
