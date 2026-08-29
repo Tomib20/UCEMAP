@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BRANDING, SURFACE } from "@/config/theme";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useUserStore } from "@/store/useUserStore";
@@ -170,9 +170,21 @@ export function Welcome() {
           ))}
         </div>
 
-        <p className="text-center text-[11px] mt-8" style={{ color: surface.textSecondary }}>
-          Hecho por un alumno de la UCEMA, con los planes de estudio oficiales.
-        </p>
+        <div className="text-center text-[11px] mt-8" style={{ color: surface.textSecondary }}>
+          <p>
+            Hecho por un alumno de la UCEMA, con los planes de estudio oficiales. Proyecto no oficial,
+            sin relación con la universidad.
+          </p>
+          <p className="mt-1">
+            <Link to="/privacidad" className="underline hover:opacity-70">
+              Privacidad
+            </Link>
+            {" · "}
+            <Link to="/terminos" className="underline hover:opacity-70">
+              Condiciones
+            </Link>
+          </p>
+        </div>
       </section>
     </div>
   );

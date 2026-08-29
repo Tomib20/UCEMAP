@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Welcome } from "@/pages/Welcome";
+import { Privacidad, Terminos } from "@/pages/Legal";
 import { initSyncWatcher } from "@/store/syncWatcher";
 import { useUserStore } from "@/store/useUserStore";
 
@@ -32,6 +33,14 @@ const router = createBrowserRouter([
   {
     path: "/carrera/:carreraId",
     element: <AppLayout />,
+  },
+  {
+    path: "/privacidad",
+    element: <Privacidad />,
+  },
+  {
+    path: "/terminos",
+    element: <Terminos />,
   },
   {
     path: "*",
