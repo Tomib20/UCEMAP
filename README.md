@@ -1,31 +1,45 @@
 # UCEMA Map
 
-Mapa interactivo de correlatividades para carreras de la Universidad del CEMA.
+Mapa interactivo de correlatividades para las carreras de la Universidad del CEMA.
+Marcas las materias que aprobaste o estas cursando y el grafo te muestra que se te habilita.
 
 Inspirado en [FIUBA-Map](https://fede.dm/FIUBA-Map/).
 
 ## Carreras disponibles
 
-- [ ] Ingenieria en Informatica
-- [ ] Licenciatura en Economia
-- [ ] Licenciatura en Direccion de Empresas
-- [ ] (mas por agregar)
+12 carreras activas (`data/carreras/index.json`):
+
+| | |
+|---|---|
+| Ingenieria en Informatica | Licenciatura en Economia |
+| Abogacia | Licenciatura en Finanzas |
+| Actuario | Licenciatura en Marketing |
+| Business Administration | Licenciatura en Negocios Digitales |
+| Contador Publico | Licenciatura en Relaciones Internacionales |
+| Licenciatura en Ciencias Politicas | Licenciatura en Direccion de Empresas |
+
+Ademas hay planes legacy (`*-old.json`, `*-m.json`, `*-2025.json`) que quedan como referencia y no
+aparecen en el selector.
+
+## Stack
+
+React 19 + TypeScript + Vite - [@xyflow/react](https://reactflow.dev) para el grafo - Zustand para
+el estado (persistido en localStorage) - Tailwind CSS v4 - React Router v7. El sistema de cuentas
+usa Google Sheets como "DB" y Google Forms como write API, sin backend propio.
 
 ## Estructura del proyecto
 
 ```
-docs/
-  planes-de-estudio/    # PDFs oficiales de los planes de estudio de UCEMA
-data/
-  carreras/             # JSONs con materias, correlatividades y metadata por carrera
+data/carreras/          # JSONs de materias y correlatividades + index.json + schema.json
+docs/planes-de-estudio/ # PDFs oficiales de los planes de UCEMA
+scripts/                # validador de datos (Node) y parsers de PDF (Python)
 src/
-  components/           # Componentes de UI (nodos, grafo, filtros, etc.)
-  pages/                # Paginas de la app
-  styles/               # Estilos globales y variables
-  utils/                # Helpers (parseo de datos, layout del grafo, etc.)
-  assets/               # Imagenes, iconos, fuentes
-public/                 # Archivos estaticos
-scripts/                # Scripts auxiliares (ej: parsear PDF a JSON)
+  api/                  # backend serverless (Google Sheets + Forms)
+  components/           # graph/ (React Flow), layout/, ui/
+  config/theme.ts       # colores light/dark, branding, medidas del layout
+  store/                # Zustand: progreso, usuario, tema, sync watcher
+  utils/                # layout del grafo, status de materias, cadena de correlativas
+  types/carrera.ts      # contrato de los JSON de carreras
 ```
 
 ## Desarrollo
@@ -35,8 +49,13 @@ npm install
 npm run dev
 ```
 
+- `npm run dev` - dev server
+- `npm run validate` - valida los JSON de carreras
+- `npm run build` - valida, type-checkea y buildea a `dist/`
+
 ## Como agregar una carrera
 
-1. Subir el PDF del plan de estudio a `docs/planes-de-estudio/`
-2. Generar el JSON de correlatividades en `data/carreras/` (manual o con script)
-3. Registrar la carrera en `data/carreras/index.json`
+1. Subir el PDF del plan a `docs/planes-de-estudio/`.
+2. Generar el JSON: `python scripts/generate_carreras.py` (ver [scripts/README.md](scripts/README.md)).
+3. Registrar la carrera en `data/carreras/index.json`.
+4. Correr `npm run validate`.

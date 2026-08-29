@@ -113,6 +113,22 @@ def clean_name(name, aggressive=False):
     return name
 
 
+def normalize_cuatrimestre(periodo, nro, nombre):
+    """
+    La app solo modela cuatrimestre 1 o 2 (types/carrera.ts). Algunos planes
+    traen el periodo con otra numeracion (ej: LIRI trae el Trabajo Final como
+    periodo 4), asi que lo mapeamos a 1/2 por paridad y avisamos por stderr.
+    """
+    if periodo in (1, 2):
+        return periodo
+    normalizado = 2 if periodo % 2 == 0 else 1
+    print(
+        f"  aviso: {nro} ({nombre}) tiene periodo {periodo}; se normaliza a cuatrimestre {normalizado}",
+        file=sys.stderr,
+    )
+    return normalizado
+
+
 def determine_anios(materias):
     """Get the max year value from obligatorias."""
     obls = [m for m in materias if m.get("grupo") == "obligatoria"]
@@ -186,7 +202,7 @@ def build_carrera(pdf_path, parsed):
                 "nro": nro,
                 "nombre": clean_name(item["nombre"], aggressive=aggressive),
                 "anio": item["anio"],
-                "cuatrimestre": item["cuatrimestre"],
+                "cuatrimestre": normalize_cuatrimestre(item["cuatrimestre"], nro, item["nombre"]),
                 "grupo": grupo_key,
                 "correlativas": [],
                 "creditos": item["creditos"],

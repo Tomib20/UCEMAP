@@ -5,8 +5,9 @@ Mapa interactivo de correlatividades para carreras de la Universidad del CEMA, i
 ## Comandos
 
 - `npm run dev` — levanta el dev server (Vite)
+- `npm run validate` — valida los JSON de carreras (`scripts/validate-carreras.mjs`)
 - `npx vite build` — build de produccion (verificar errores rapido, no usa tsc)
-- `npm run build` — build completo con type-check (tsc + vite)
+- `npm run build` — build completo: validate + type-check (tsc) + vite
 
 ## Stack
 
@@ -57,12 +58,14 @@ data/
     abogacia.json, actuario.json, business-administration.json,
     contador-publico.json, licenciatura-*.json  — 11 carreras mas
     *-old.json, *-m.json, *-2025.json           — planes legacy (no en index)
-  schema.json                      — schema JSON (desactualizado, usar types/carrera.ts)
+  schema.json                      — JSON Schema espejo de types/carrera.ts
 docs/planes-de-estudio/            — PDFs oficiales de planes de UCEMA
 scripts/
+  validate-carreras.mjs            — valida los JSONs (corre en npm run build)
   generate_carreras.py             — genera todos los JSONs desde PDFs
   parse_plan.py                    — parser de tabla PDF con PyMUPDF
   parse_pdf.py                     — parser alternativo (referencia)
+  extract_pdfs.py, debug_pdf.py    — helpers para depurar el parseo
 ```
 
 ## Datos de carreras
@@ -74,6 +77,13 @@ scripts/
 - Las electivas (topico) se ocultan por defecto, se muestran con el toggle
 - 12 carreras activas en index.json, mas planes legacy/alternativos como referencia
 - Los JSONs se generan con `scripts/generate_carreras.py` a partir de los PDFs en `docs/planes-de-estudio/`
+- Despues de tocar o regenerar un JSON: `npm run validate`. Chequea campos obligatorios, `nro`
+  duplicados, grupos/cuatrimestres validos, correlativas que existan, ciclos de correlativas
+  (dejarian materias bloqueadas para siempre) y cupos (`topicos_requeridos` vs topicos cargados).
+  Con `--all` valida tambien los planes legacy. Como corre dentro de `npm run build`, un JSON roto
+  frena el deploy.
+- El parser normaliza el `cuatrimestre` a 1 o 2: algunos PDFs traen periodos con otra numeracion
+  (el Trabajo Final de RRII venia como periodo 4) y la app solo modela dos cuatrimestres.
 
 ## Routing
 

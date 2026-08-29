@@ -132,17 +132,15 @@ function clearEdgeStyles(edges: Edge[], mode: "light" | "dark"): Edge[] {
   }));
 }
 
-function applyChainHighlight(
+function highlightNodes(
   nodes: Node[],
-  edges: Edge[],
   selectedNro: number,
   prereqs: Set<number>,
-  dependents: Set<number>,
-  mode: "light" | "dark"
-): { nodes: Node[]; edges: Edge[] } {
+  dependents: Set<number>
+): Node[] {
   const visible = new Set([...prereqs, ...dependents, selectedNro]);
 
-  const updatedNodes = nodes.map((n) => {
+  return nodes.map((n) => {
     const nro = Number(n.id);
     let role: "selected" | "ancestor" | "descendant" | "none" = "none";
     if (nro === selectedNro) role = "selected";
@@ -150,8 +148,16 @@ function applyChainHighlight(
     else if (dependents.has(nro)) role = "descendant";
     return { ...n, data: { ...n.data, dimmed: !visible.has(nro), role } };
   });
+}
 
-  const updatedEdges = edges.map((e) => {
+function highlightEdges(
+  edges: Edge[],
+  selectedNro: number,
+  prereqs: Set<number>,
+  dependents: Set<number>,
+  mode: "light" | "dark"
+): Edge[] {
+  return edges.map((e) => {
     const src = Number(e.source);
     const tgt = Number(e.target);
     const isAncestorEdge = prereqs.has(src) && (tgt === selectedNro || prereqs.has(tgt));
@@ -164,8 +170,6 @@ function applyChainHighlight(
     }
     return { ...e, animated: false, style: dimmedEdgeStyle(mode), markerEnd: dimmedMarker(mode) };
   });
-
-  return { nodes: updatedNodes, edges: updatedEdges };
 }
 
 /* ── Hover info (fixed bottom-right) ── */
@@ -429,8 +433,8 @@ function FlowInner({ carrera, electivasMode, isMobile }: FlowInnerProps) {
       const dependents = full
         ? getDescendants(nro, adjacency)
         : adjacency.dependentsOf.get(nro) ?? new Set();
-      setNodes((cur) => applyChainHighlight(cur, [], nro, prereqs, dependents, mode).nodes as typeof cur);
-      setEdges((cur) => applyChainHighlight([], cur, nro, prereqs, dependents, mode).edges as typeof cur);
+      setNodes((cur) => highlightNodes(cur, nro, prereqs, dependents) as typeof cur);
+      setEdges((cur) => highlightEdges(cur, nro, prereqs, dependents, mode) as typeof cur);
     },
     [adjacency, setNodes, setEdges, mode]
   );

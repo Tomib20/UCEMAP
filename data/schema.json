@@ -1,33 +1,41 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Carrera UCEMA",
-  "description": "Schema para los archivos JSON de carreras",
+  "description": "Estructura de los JSON de data/carreras/. Espejo de src/types/carrera.ts; las reglas que un schema no expresa (correlativas que existan, sin ciclos, cupos coherentes) las chequea scripts/validate-carreras.mjs.",
   "type": "object",
-  "required": ["id", "nombre", "materias"],
+  "required": ["id", "nombre", "plan", "titulo", "anios", "materias", "topicos_requeridos"],
   "properties": {
-    "id": { "type": "string" },
+    "id": { "type": "string", "description": "Debe coincidir con el id del index.json" },
     "nombre": { "type": "string" },
-    "planEstudio": { "type": "string" },
-    "anios": { "type": "integer" },
+    "programa": { "type": "string", "description": "Nombre del programa segun el PDF oficial" },
+    "plan": { "type": "string", "description": "Version del plan de estudios" },
+    "resolucion": { "type": "string" },
+    "titulo": { "type": "string" },
+    "anios": { "type": "integer", "minimum": 1, "description": "Cantidad de anios de la carrera (una columna del grafo por anio)" },
+    "topicos_requeridos": { "type": "integer", "minimum": 0, "description": "Electivas (topicos) que hay que aprobar para recibirse" },
+    "talleres_requeridos": { "type": "integer", "minimum": 0 },
     "materias": {
       "type": "array",
+      "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "nombre", "anio", "cuatrimestre", "correlativas"],
+        "required": ["nro", "nombre", "anio", "cuatrimestre", "grupo", "correlativas", "creditos"],
         "properties": {
-          "id": { "type": "string", "description": "Identificador unico de la materia" },
-          "codigo": { "type": "string", "description": "Codigo oficial de la materia" },
-          "nombre": { "type": "string" },
+          "nro": { "type": "integer", "description": "ID unico de la materia, sale del plan oficial" },
+          "nombre": { "type": "string", "minLength": 1 },
           "anio": { "type": "integer", "minimum": 1 },
-          "cuatrimestre": { "type": "integer", "enum": [1, 2, 0], "description": "0 = anual" },
+          "cuatrimestre": { "type": "integer", "enum": [1, 2] },
+          "grupo": {
+            "type": "string",
+            "enum": ["obligatoria", "topico", "tesis", "requisito", "taller"],
+            "description": "topico = electiva; define color y ubicacion en el grafo"
+          },
           "correlativas": {
             "type": "array",
-            "items": { "type": "string" },
-            "description": "IDs de materias que son correlativas (prerequisitos)"
+            "items": { "type": "integer" },
+            "description": "nros de las materias que hay que tener aprobadas"
           },
-          "creditos": { "type": ["integer", "null"] },
-          "optativa": { "type": "boolean", "default": false },
-          "categoria": { "type": "string", "description": "Ej: basica, troncal, electiva" }
+          "creditos": { "type": "number", "minimum": 0 }
         }
       }
     }

@@ -8,9 +8,9 @@ export interface MateriaNodeData extends Record<string, unknown> {
   role?: "selected" | "ancestor" | "descendant" | "none";
 }
 
-export const COL_WIDTH = 250;
-export const ROW_HEIGHT = 92;
-export const CUATRI_GAP = 36;
+const COL_WIDTH = 250;
+const ROW_HEIGHT = 92;
+const CUATRI_GAP = 36;
 const TOP_OFFSET = 0;
 const LABEL_HEIGHT = 36;
 
@@ -230,15 +230,4 @@ export function buildGraphLayout(
   }
 
   return { nodes, edges };
-}
-
-export function getColumnLabels(): { label: string; x: number }[] {
-  const labels: { label: string; x: number }[] = [];
-  for (let anio = 1; anio <= 5; anio++) {
-    labels.push({
-      label: `${anio}\u00B0 Ano`,
-      x: (anio - 1) * COL_WIDTH + 40,
-    });
-  }
-  return labels;
 }

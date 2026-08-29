@@ -16,7 +16,6 @@ interface ProgressState {
   toggleAprobada: (nro: number) => void;
   toggleCursando: (nro: number) => void;
   setNota: (nro: number, nota: Nota) => void;
-  removeNota: (nro: number) => void;
   selectMateria: (nro: number | null) => void;
   setCarrera: (id: string) => void;
   toggleFullChain: () => void;
@@ -89,15 +88,6 @@ export const useProgressStore = create<ProgressState>()(
         set((state) => {
           const carreraNotas = { ...(state.notas[state.carreraId] ?? {}) };
           carreraNotas[String(nro)] = nota;
-          return {
-            notas: { ...state.notas, [state.carreraId]: carreraNotas },
-          };
-        }),
-
-      removeNota: (nro: number) =>
-        set((state) => {
-          const carreraNotas = { ...(state.notas[state.carreraId] ?? {}) };
-          delete carreraNotas[String(nro)];
           return {
             notas: { ...state.notas, [state.carreraId]: carreraNotas },
           };

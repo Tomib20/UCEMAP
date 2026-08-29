@@ -1,32 +1,58 @@
 # Ideas de mejoras - UCEMA Map
 
+Actualizado despues de la pasada de limpieza + validacion de datos.
+
 ## UX / Funcionalidad
 
-1. **Selector de carrera** — Usar `react-router-dom` (ya instalado) para rutas `/carrera/:id`. El `index.json` ya soporta multiples carreras pero `App.tsx` hardcodea ingenieria-informatica.
-2. **Busqueda de materias** — Buscador rapido (Ctrl+K o campo en header) que filtre y centre el grafo en la materia encontrada.
-3. **Highlight de cadena completa** — Toggle o tecla (Shift) para ver toda la cadena recursiva. `getAncestors`/`getDescendants` ya estan implementados en `prerequisiteChain.ts` pero no se usan.
-4. **Export/Import de progreso** — Boton para exportar/importar JSON del progreso (vive solo en localStorage). Opcionalmente, codificar estado en URL para compartir.
-5. **Simulador "que pasa si?"** — Estado "planeada" para simular que se desbloquea en cuatrimestres futuros, tipo planificador.
-6. **Responsive / Mobile** — Sidebar de 320px asume pantalla ancha. Bottom sheet para mobile.
-7. **Keyboard navigation** — Escape para cerrar sidebar, flechas para navegar, Enter para aprobar.
+1. **Export/Import de progreso en JSON** — hoy solo se exporta PNG. Un boton para bajar/subir el
+   progreso serviria de backup y para compartir sin depender de la cuenta. Opcionalmente, codificar
+   el estado en la URL.
+2. **Simulador "que pasa si?"** — estado "planeada" para simular que se desbloquea en cuatrimestres
+   futuros, tipo planificador. `getAncestors`/`getDescendants` ya estan y se usan para el toggle de
+   cadena completa.
+3. **Progreso por creditos** — la barra cuenta materias, pero `Materia` tiene `creditos` y UCEMA
+   cuenta oficialmente por creditos.
+4. **Keyboard navigation en el grafo** — Escape ya cierra, y la search palette navega con flechas.
+   Falta moverse entre materias y marcar con el teclado.
+5. **Animacion al aprobar/cursar** — hoy hay transiciones de color; falta un micro-feedback (pulse)
+   al marcar.
 
 ## Visual / UI
 
-8. **Labels de anio en el grafo** — `YearLabels.tsx` existe pero no se renderiza. Agregarlo a `GraphView`.
-9. **Separador visual de cuatrimestres** — Linea punteada o label "C1"/"C2" entre cuatrimestres dentro de cada columna.
-10. **Animacion al aprobar/cursar** — Micro-feedback visual (pulse, transicion) al marcar una materia.
-11. **Tooltip on hover** — Tooltip rapido mostrando nombre + status + correlativas sin abrir sidebar.
-12. **Progress bar: creditos** — La barra cuenta materias pero `Materia` tiene `creditos`. Mostrar progreso por creditos (como cuenta UCEMA oficialmente).
+6. **Tooltip on hover** — ya existe (`MateriaHoverInfo`), pero solo en desktop. Evaluar equivalente
+   en mobile mas alla del two-tap.
 
 ## Tecnico / Calidad de codigo
 
-13. **`react-router-dom` sin usar** — Instalado pero no importado. Usarlo para rutas o sacarlo.
-14. **`@dagrejs/dagre` sin usar** — Instalado pero no importado. Evaluar si se usa para auto-layout o sacarlo.
-15. **Casts `as unknown as`** — En `MateriaNode.tsx` y `GraphView.tsx`. Tipar nodos genericamente con `Node<MateriaNodeData>`.
-16. **`doHighlight` llama `applyChainHighlight` dos veces** — Refactorear para actualizar nodos y edges en una sola pasada.
-17. **Inline styles vs CSS variables** — Mucho `mode === "dark" ? ... : ...`. Usar CSS custom properties seteadas en root segun el modo y Tailwind con esas variables.
+7. **Inline styles vs CSS variables** — sigue habiendo mucho `mode === "dark" ? ... : ...`. Las
+   variables ya estan definidas en `index.css` (`--surface-*`, `--edge-*`) y las usa `html/body`;
+   falta migrar los componentes para leerlas en vez de ramificar por `mode`. El helper `cssVar` se
+   borro por no tener uso: si se encara la migracion, conviene volver a crearlo.
+8. **Casts `as unknown as`** — quedan dos: el evento del context menu en `GraphView.tsx` y el
+   `import.meta.glob` de carreras en `AppLayout.tsx`.
+9. **Bundle de 530 kB** — el build avisa. React Flow pesa; evaluar code-splitting si molesta.
 
 ## Datos
 
-18. **Mas carreras** — Agregar Lic. en Economia, Lic. en Direccion de Empresas, etc.
-19. **Validacion de datos** — Script de validacion en build time para verificar consistencia del JSON (correlativas referenciando `nro` existentes, etc.).
+10. **Mas carreras / planes nuevos** — cuando UCEMA publique planes nuevos, regenerar con
+    `generate_carreras.py` y validar.
+11. **Chequeos extra en el validador** — `scripts/validate-carreras.mjs` ya cubre campos, `nro`
+    duplicados, correlativas inexistentes, ciclos y cupos. Se le podria agregar deteccion de
+    correlativas "hacia atras" (una materia de 1er anio que dependa de una de 4to) como aviso.
+
+---
+
+## Hecho
+
+- Selector de carrera con rutas `/carrera/:id` (React Router).
+- Search palette con Ctrl/Cmd+K y busqueda fuzzy.
+- Toggle de cadena completa de correlativas.
+- Responsive / mobile: bottom sheet, two-tap, header condensado.
+- Labels de anio con stats por anio y separador de cuatrimestre.
+- Export PNG del mapa.
+- Cuentas y sync manual via Google Sheets + Forms.
+- Limpieza: se saco `YearLabels.tsx` (no se usaba), `getColumnLabels`, `cssVar`, `removeNota` y los
+  `validate.js` / `detailed_validation.js` sueltos en la raiz.
+- `doHighlight` ahora usa `highlightNodes` / `highlightEdges` en vez de llamar dos veces a la misma
+  funcion descartando la mitad del resultado.
+- Validacion de datos en build time (`npm run validate`), enganchada a `npm run build`.
