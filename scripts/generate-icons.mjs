@@ -16,10 +16,8 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "public");
 
-/* ── Paleta ── */
-// Bordo institucional de UCEMA (#940028): es el fondo de la marca.
-const BORDO = [148, 0, 40];
-// Colores de estado del mapa (config/theme.ts), para el mini mapa del og-image.
+/* ── Paleta (la misma del mapa, config/theme.ts) ── */
+const NAVY = [26, 39, 68];
 const APROBADA = [134, 239, 172];
 const OBLIGATORIA = [191, 219, 254];
 const CURSANDO = [254, 240, 138];
@@ -230,9 +228,9 @@ function encodePng(c) {
  * de la zona segura del 80%).
  */
 function drawIcon(size, { bleed = false } = {}) {
-  const c = createCanvas(size, size, bleed ? BORDO : [0, 0, 0, 0]);
+  const c = createCanvas(size, size, bleed ? NAVY : [0, 0, 0, 0]);
   const u = size / 100; // unidad relativa
-  if (!bleed) roundRect(c, 0, 0, size, size, size * 0.22, BORDO);
+  if (!bleed) roundRect(c, 0, 0, size, size, size * 0.22, NAVY);
 
   const scale = bleed ? 0.78 : 1; // zona segura del maskable
   const cx = size / 2, cy = size / 2;
@@ -245,19 +243,21 @@ function drawIcon(size, { bleed = false } = {}) {
   for (let i = 0; i < nodos.length - 1; i++) {
     const [x1, y1] = at(...nodos[i]);
     const [x2, y2] = at(...nodos[i + 1]);
-    line(c, x1, y1, x2, y2, 8 * u * scale, WHITE, 0.55);
+    line(c, x1, y1, x2, y2, 7 * u * scale, WHITE, 0.38);
   }
-  for (const n of nodos) {
+  // Aprobada, disponible y cursando: los mismos colores que ve el usuario en el mapa.
+  const colores = [APROBADA, OBLIGATORIA, CURSANDO];
+  nodos.forEach((n, i) => {
     const [x, y] = at(...n);
-    circle(c, x, y, radio, WHITE);
-  }
+    circle(c, x, y, radio, colores[i]);
+  });
   return c;
 }
 
 /** Imagen de preview 1200x630: titulo + mini mapa. */
 function drawOgImage() {
   const W = 1200, H = 630;
-  const c = createCanvas(W, H, BORDO);
+  const c = createCanvas(W, H, NAVY);
 
   // Trama de puntos como el fondo del grafo
   for (let y = 40; y < H; y += 40) {
@@ -269,8 +269,8 @@ function drawOgImage() {
   const tw = textWidth(title, s);
   drawText(c, title, (W - tw) / 2, 120, s, 14, WHITE);
 
-  // Subrayado
-  roundRect(c, (W - tw) / 2 + 6, 262, tw - 12, 8, 4, WHITE, 0.55);
+  // Subrayado dorado
+  roundRect(c, (W - tw) / 2 + 6, 262, tw - 12, 8, 4, [253, 224, 71]);
 
   // Mini mapa: 4 columnas de materias, con aristas encadenadas
   const cols = 4, rows = 3;
@@ -278,7 +278,7 @@ function drawOgImage() {
   const totalW = cols * nw + (cols - 1) * (gapX - nw + nw) - (gapX - 0);
   const startX = (W - (cols * nw + (cols - 1) * gapX)) / 2;
   const startY = 340;
-  const BLOQUEADA = [255, 255, 255];
+  const BLOQUEADA = [100, 116, 139];
   const colors = [APROBADA, APROBADA, OBLIGATORIA, OBLIGATORIA, CURSANDO, OBLIGATORIA];
   const pos = [];
   for (let col = 0; col < cols; col++) {
@@ -298,9 +298,9 @@ function drawOgImage() {
   }
   pos.forEach((p, i) => {
     // La ultima columna representa lo que todavia esta bloqueado.
-    // La ultima columna queda "bloqueada": blanco translucido sobre el bordo.
-    const bloqueada = p.col === cols - 1;
-    roundRect(c, p.x, p.y, nw, nh, 12, bloqueada ? BLOQUEADA : colors[i % colors.length], bloqueada ? 0.28 : 1);
+    // La ultima columna representa lo que todavia esta bloqueado.
+    const color = p.col === cols - 1 ? BLOQUEADA : colors[i % colors.length];
+    roundRect(c, p.x, p.y, nw, nh, 12, color);
   });
 
   void totalW;
@@ -310,11 +310,11 @@ function drawOgImage() {
 /* ── Favicon SVG (vectorial, mismo dibujo que el icono) ── */
 
 const FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="22" fill="#940028"/>
-  <path d="M28 72L50 50l22-22" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity=".55"/>
-  <circle cx="28" cy="72" r="11" fill="#ffffff"/>
-  <circle cx="50" cy="50" r="11" fill="#ffffff"/>
-  <circle cx="72" cy="28" r="11" fill="#ffffff"/>
+  <rect width="100" height="100" rx="22" fill="#1a2744"/>
+  <path d="M28 72L50 50l22-22" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" opacity=".38"/>
+  <circle cx="28" cy="72" r="11" fill="#86efac"/>
+  <circle cx="50" cy="50" r="11" fill="#bfdbfe"/>
+  <circle cx="72" cy="28" r="11" fill="#fef08a"/>
 </svg>
 `;
 

@@ -1,7 +1,7 @@
 /**
  * Marca de UCEMA Map: tres materias encadenadas que suben. Dice las dos cosas
- * que hace la app — correlatividad (los nodos conectados) y avance (la diagonal
- * ascendente) — sobre el bordo institucional de la universidad.
+ * que hace la app: correlatividad (los nodos conectados) y avance (la diagonal
+ * ascendente).
  *
  * Si se cambia el simbolo hay que tocar los dos lados: este componente (header,
  * home y paginas legales) y scripts/generate-icons.mjs, que genera los PNG.
@@ -9,18 +9,20 @@
 export function Logo({ size = 32 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden className="shrink-0">
-      <rect width="100" height="100" rx="22" fill="#940028" />
+      <rect width="100" height="100" rx="22" fill="#1a2744" />
       <path
         d="M28 72L50 50l22-22"
         fill="none"
         stroke="#ffffff"
-        strokeWidth="8"
+        strokeWidth="7"
         strokeLinecap="round"
-        opacity=".55"
+        opacity=".38"
       />
-      <circle cx="28" cy="72" r="11" fill="#ffffff" />
-      <circle cx="50" cy="50" r="11" fill="#ffffff" />
-      <circle cx="72" cy="28" r="11" fill="#ffffff" />
+      {/* Los nodos van en color: sobre el header navy, el cuadrado se funde y
+          son ellos los que despegan el icono del fondo. */}
+      <circle cx="28" cy="72" r="11" fill="#86efac" />
+      <circle cx="50" cy="50" r="11" fill="#bfdbfe" />
+      <circle cx="72" cy="28" r="11" fill="#fef08a" />
     </svg>
   );
 }
