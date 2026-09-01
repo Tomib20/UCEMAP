@@ -59,7 +59,10 @@ export function Welcome() {
   const accent = (id: string) => ACCENTS[id] ?? ACCENT_FALLBACK;
 
   return (
-    <div className="min-h-screen w-full overflow-y-auto" style={{ backgroundColor: surface.bg }}>
+    <div
+      className="h-full w-full overflow-y-auto overscroll-contain"
+      style={{ backgroundColor: surface.bg, WebkitOverflowScrolling: "touch" }}
+    >
       {/* Barra superior */}
       <header className="flex items-center justify-between px-5 sm:px-8 py-4">
         <div className="flex items-center gap-3">

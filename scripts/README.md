@@ -43,6 +43,10 @@ Al 29/08/2026 las 12 carreras coinciden con sus planes.
 
 Requiere `pymupdf` (`pip install pymupdf`).
 
+> Los PDF de los planes **no estan en el repositorio**: son material que la
+> universidad le entrega a sus alumnos. Para usar estos scripts hay que
+> conseguirlos y ponerlos en `docs/planes-de-estudio/`.
+
 | Script | Que hace |
 |---|---|
 | `generate_carreras.py` | Genera **todos** los JSON de `data/carreras/` a partir de los PDFs de `docs/planes-de-estudio/`. Es el que se usa en la practica. |

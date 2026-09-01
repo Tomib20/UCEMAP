@@ -18,5 +18,7 @@ Thumbs.db
 __pycache__/
 *.pyc
 
-# Generated TXT extracts from PDFs
-docs/planes-de-estudio/txt/
+# Planes de estudio en PDF: material que la universidad le entrega a sus
+# alumnos, no se publica. Se dejan en docs/planes-de-estudio/ para poder
+# regenerar y verificar los datos en local.
+docs/planes-de-estudio/

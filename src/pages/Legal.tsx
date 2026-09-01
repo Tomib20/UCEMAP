@@ -12,7 +12,10 @@ function PaginaLegal({ titulo, children }: { titulo: string; children: React.Rea
   const surface = SURFACE[mode];
 
   return (
-    <div className="min-h-screen w-full overflow-y-auto" style={{ backgroundColor: surface.bg }}>
+    <div
+      className="h-full w-full overflow-y-auto overscroll-contain"
+      style={{ backgroundColor: surface.bg, WebkitOverflowScrolling: "touch" }}
+    >
       <header className="px-5 sm:px-8 py-4">
         <Link
           to="/"

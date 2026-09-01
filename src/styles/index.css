@@ -54,6 +54,12 @@ html, body {
   overflow: hidden;
 }
 
+/* El mapa ocupa la pantalla completa y no scrollea, pero la home y las paginas
+   legales si: el gesto de arrastrar con el dedo tiene que llegarles. */
+.overflow-y-auto {
+  touch-action: pan-y;
+}
+
 .react-flow__attribution {
   display: none;
 }
