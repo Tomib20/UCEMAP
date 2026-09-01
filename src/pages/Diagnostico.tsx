@@ -224,11 +224,27 @@ export function Diagnostico() {
   );
 }
 
-/** Abre y cierra una ventana de prueba. Tiene que correr dentro del click. */
+/**
+ * Abre y cierra una ventana de prueba. Tiene que correr dentro del click.
+ *
+ * La geometria imita la que usa Google: grande y centrada. Una ventana chica y
+ * en coordenadas negativas es la firma de un pop-under publicitario, y los
+ * bloqueadores la matan mucho mas seguido que a la del login, asi que probar
+ * con esa forma daria bloqueado a gente que en realidad puede entrar.
+ */
 function popupChequeo(): Chequeo {
+  const ancho = 500;
+  const alto = 600;
+  const left = Math.max(0, Math.round(window.screenX + (window.outerWidth - ancho) / 2));
+  const top = Math.max(0, Math.round(window.screenY + (window.outerHeight - alto) / 2));
+
   let ventana: Window | null = null;
   try {
-    ventana = window.open("", "_blank", "width=200,height=200,left=-1000,top=-1000");
+    ventana = window.open(
+      "",
+      "ucemap-prueba-popup",
+      `width=${ancho},height=${alto},left=${left},top=${top}`
+    );
   } catch {
     ventana = null;
   }
@@ -242,9 +258,26 @@ function popupChequeo(): Chequeo {
       ? "El navegador bloqueó la ventana de prueba."
       : "El navegador permite abrir ventanas.",
     arreglo: bloqueada
-      ? "Google pide la cuenta en una ventana emergente. Permitilas para este sitio: en Chrome, el ícono a la derecha de la barra de direcciones, o Configuración → Privacidad y seguridad → Configuración de sitios → Ventanas emergentes."
+      ? "Google pide la cuenta en una ventana emergente. Si ya las habilitaste en la configuración del navegador y sigue en rojo, lo está bloqueando una extensión (uBlock, AdBlock, AdGuard, Ghostery, Poper Blocker) o el antivirus. Probá en una ventana de incógnito: ahí las extensiones están apagadas."
       : undefined,
   };
+}
+
+/**
+ * El nombre del navegador se saca aparte porque el user agent miente: Brave,
+ * Edge y Opera se presentan todos como Chrome, y son justo los que traen
+ * bloqueadores propios que explican la mitad de estos casos.
+ */
+function nombreDelNavegador(): string {
+  const ua = navigator.userAgent;
+  const marcas = (navigator as { brave?: { isBrave?: unknown } }).brave;
+  if (marcas) return "Brave (trae bloqueador propio: Shields)";
+  if (/OPR\//.test(ua)) return "Opera (trae bloqueador propio)";
+  if (/Edg\//.test(ua)) return "Edge";
+  if (/Firefox\//.test(ua)) return "Firefox";
+  if (/Chrome\//.test(ua)) return "Chrome";
+  if (/Safari\//.test(ua)) return "Safari";
+  return "Desconocido";
 }
 
 function almacenamientoChequeo(): Chequeo {
@@ -289,7 +322,8 @@ function textoParaCopiar(chequeos: Chequeo[]): string {
     "UCEMA Map - diagnóstico de login",
     ...lineas,
     "",
-    `Navegador: ${navigator.userAgent}`,
+    `Navegador: ${nombreDelNavegador()}`,
+    `User agent: ${navigator.userAgent}`,
     `Pantalla: ${window.innerWidth}x${window.innerHeight}`,
     `Idioma: ${navigator.language}`,
   ].join("\n");
