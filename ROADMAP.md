@@ -1,6 +1,7 @@
-# Ideas de mejoras - UCEMA Map
+# Roadmap
 
-Actualizado despues de portar mejoras desde [FADUMap](https://fadumap.vercel.app).
+Lo que falta y lo que ya esta hecho. Las ideas estan ordenadas por lo que mas
+sumaria a quien usa la app, no por dificultad.
 
 ## UX / Funcionalidad
 
@@ -11,17 +12,17 @@ Actualizado despues de portar mejoras desde [FADUMap](https://fadumap.vercel.app
    futuros, tipo planificador. `getAncestors`/`getDescendants` ya estan y se usan para el toggle de
    cadena completa.
 3. **Progreso por creditos** — la barra cuenta materias, pero `Materia` tiene `creditos` y UCEMA
-   cuenta oficialmente por creditos. FADUMap ya lo tiene resuelto (cuenta por horas cuando el dato
-   esta, cae a materias si no, y pinta el tramo "cursando"): portar esa `ProgressBar`.
+   cuenta oficialmente por creditos. Conviene contar por creditos cuando el dato esta y caer a
+   materias si no, y pintar aparte el tramo de lo que estas cursando.
 4. **Keyboard navigation en el grafo** — Escape ya cierra, y la search palette navega con flechas.
    Falta moverse entre materias y marcar con el teclado.
 5. **Animacion al aprobar/cursar** — hoy hay transiciones de color; falta un micro-feedback (pulse)
    al marcar.
 6. **Cursada vs final** — hoy "cursar con correlativa en curso" se resuelve con un confirm de
-   "tenes permiso?". FADUMap modela dos baldes (`para_cursar.finales` / `para_cursar.cursadas`).
-   Si el reglamento de UCEMA distingue cursada de final, ese modelo seria mas fiel.
-7. **Chips de nivel en mobile** — FADUMap tiene chips (1 · 2 · 3 …) que centran el mapa en cada
-   anio; en un plan de 5 columnas ayuda bastante en pantalla chica.
+   "tenes permiso?". Si el reglamento de UCEMA distingue cursada aprobada de final aprobado,
+   convendria modelar las correlativas en dos grupos separados.
+7. **Chips de nivel en mobile** — botones (1 · 2 · 3 …) que centren el mapa en cada anio: en un
+   plan de 5 columnas ayuda bastante en pantalla chica.
 
 ## Visual / UI
 
@@ -62,7 +63,7 @@ Actualizado despues de portar mejoras desde [FADUMap](https://fadumap.vercel.app
 - `doHighlight` ahora usa `highlightNodes` / `highlightEdges` en vez de llamar dos veces a la misma
   funcion descartando la mitad del resultado.
 - Validacion de datos en build time (`npm run validate`), enganchada a `npm run build`.
-- Portado desde FADUMap: modo "que puedo cursar" (halo celeste en las disponibles), fix de gestos
+- Modo "que puedo cursar" (halo celeste en las disponibles), fix de gestos
   mobile (pinch de 2 dedos y drag solo de la seleccionada), contador de electivas en el boton,
   meta tags + og-image, PWA instalable con iconos propios, mini-tour "Como usar el mapa" y home
   de bienvenida con las 12 carreras.

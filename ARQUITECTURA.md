@@ -1,6 +1,7 @@
-# UCEMA Map
+# Arquitectura
 
-Mapa interactivo de correlatividades para las carreras de la Universidad del CEMA.
+Notas tecnicas de UCEMA Map: como esta armado, que decisiones se tomaron y por que.
+Para instalar y correr el proyecto, ver el [README](README.md).
 
 ## Comandos
 
