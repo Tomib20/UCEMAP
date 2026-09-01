@@ -2,6 +2,7 @@ import { useState } from "react";
 import { GRUPO_COLORS, CHAIN_COLORS, STATUS_STYLES, SURFACE } from "@/config/theme";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { SocialLinks } from "@/components/ui/SocialLinks";
 
 export function Legend() {
   const mode = useThemeStore((s) => s.mode);
@@ -19,7 +20,7 @@ export function Legend() {
     return (
       <button
         onClick={() => setExpanded(true)}
-        className={`fixed ${isMobile ? "top-14 right-2" : "bottom-2 left-2"} backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md z-10 text-[11px] font-semibold`}
+        className={`fixed ${isMobile ? "top-24 right-2" : "bottom-4 left-4"} backdrop-blur-sm rounded-lg px-3 py-1.5 shadow-md z-10 text-[11px] font-semibold`}
         style={{
           backgroundColor: panelBg,
           border: `1px solid ${surface.panelBorder}`,
@@ -33,7 +34,7 @@ export function Legend() {
 
   return (
     <div
-      className={`fixed ${isMobile ? "top-14 right-2" : "bottom-4 left-4"} backdrop-blur-sm rounded-lg p-3 shadow-md z-10`}
+      className={`fixed ${isMobile ? "top-24 right-2" : "bottom-4 left-4"} backdrop-blur-sm rounded-lg p-3 shadow-md z-10`}
       style={{
         backgroundColor: panelBg,
         border: `1px solid ${surface.panelBorder}`,
@@ -103,6 +104,10 @@ export function Legend() {
           <span className="text-[11px]" style={{ color: surface.textSecondary }}>Habilita (directa)</span>
         </div>
       </div>
+
+      {/* Redes del autor: van dentro del panel para no dejar dos bloques de
+          distinto ancho apilados. En mobile viven en la barra de chips. */}
+      {!isMobile && <SocialLinks variant="map" />}
     </div>
   );
 }

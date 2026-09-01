@@ -16,8 +16,10 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "public");
 
-/* ── Paleta (la misma del mapa, config/theme.ts) ── */
-const NAVY = [26, 39, 68];
+/* ── Paleta ── */
+// Bordo institucional de UCEMA (#940028): es el fondo de la marca.
+const BORDO = [148, 0, 40];
+// Colores de estado del mapa (config/theme.ts), para el mini mapa del og-image.
 const APROBADA = [134, 239, 172];
 const OBLIGATORIA = [191, 219, 254];
 const CURSANDO = [254, 240, 138];
@@ -228,31 +230,26 @@ function encodePng(c) {
  * de la zona segura del 80%).
  */
 function drawIcon(size, { bleed = false } = {}) {
-  const c = createCanvas(size, size, bleed ? NAVY : [0, 0, 0, 0]);
+  const c = createCanvas(size, size, bleed ? BORDO : [0, 0, 0, 0]);
   const u = size / 100; // unidad relativa
-  if (!bleed) roundRect(c, 0, 0, size, size, size * 0.22, NAVY);
+  if (!bleed) roundRect(c, 0, 0, size, size, size * 0.22, BORDO);
 
   const scale = bleed ? 0.78 : 1; // zona segura del maskable
   const cx = size / 2, cy = size / 2;
   const at = (x, y) => [cx + (x - 50) * u * scale, cy + (y - 50) * u * scale];
 
-  const nodes = [
-    { pos: [26, 24], color: APROBADA },
-    { pos: [50, 50], color: OBLIGATORIA },
-    { pos: [74, 76], color: CURSANDO },
-  ];
-  const nw = 34 * u * scale, nh = 15 * u * scale, nr = 5 * u * scale;
+  // Tres materias encadenadas que suben: correlatividad + avance.
+  const nodos = [[28, 72], [50, 50], [72, 28]];
+  const radio = 11 * u * scale;
 
-  // Aristas entre nodo y nodo
-  for (let i = 0; i < nodes.length - 1; i++) {
-    const [x1, y1] = at(...nodes[i].pos);
-    const [x2, y2] = at(...nodes[i + 1].pos);
-    line(c, x1, y1 + nh / 2, x2, y2 - nh / 2, 2.4 * u * scale, EDGE, 0.85);
-    arrowHead(c, x1, y1 + nh / 2, x2, y2 - nh / 2, 5 * u * scale, EDGE);
+  for (let i = 0; i < nodos.length - 1; i++) {
+    const [x1, y1] = at(...nodos[i]);
+    const [x2, y2] = at(...nodos[i + 1]);
+    line(c, x1, y1, x2, y2, 8 * u * scale, WHITE, 0.55);
   }
-  for (const n of nodes) {
-    const [x, y] = at(...n.pos);
-    roundRect(c, x - nw / 2, y - nh / 2, nw, nh, nr, n.color);
+  for (const n of nodos) {
+    const [x, y] = at(...n);
+    circle(c, x, y, radio, WHITE);
   }
   return c;
 }
@@ -260,7 +257,7 @@ function drawIcon(size, { bleed = false } = {}) {
 /** Imagen de preview 1200x630: titulo + mini mapa. */
 function drawOgImage() {
   const W = 1200, H = 630;
-  const c = createCanvas(W, H, NAVY);
+  const c = createCanvas(W, H, BORDO);
 
   // Trama de puntos como el fondo del grafo
   for (let y = 40; y < H; y += 40) {
@@ -272,8 +269,8 @@ function drawOgImage() {
   const tw = textWidth(title, s);
   drawText(c, title, (W - tw) / 2, 120, s, 14, WHITE);
 
-  // Subrayado dorado
-  roundRect(c, (W - tw) / 2 + 6, 262, tw - 12, 8, 4, [253, 224, 71]);
+  // Subrayado
+  roundRect(c, (W - tw) / 2 + 6, 262, tw - 12, 8, 4, WHITE, 0.55);
 
   // Mini mapa: 4 columnas de materias, con aristas encadenadas
   const cols = 4, rows = 3;
@@ -281,7 +278,7 @@ function drawOgImage() {
   const totalW = cols * nw + (cols - 1) * (gapX - nw + nw) - (gapX - 0);
   const startX = (W - (cols * nw + (cols - 1) * gapX)) / 2;
   const startY = 340;
-  const BLOQUEADA = [100, 116, 139];
+  const BLOQUEADA = [255, 255, 255];
   const colors = [APROBADA, APROBADA, OBLIGATORIA, OBLIGATORIA, CURSANDO, OBLIGATORIA];
   const pos = [];
   for (let col = 0; col < cols; col++) {
@@ -301,8 +298,9 @@ function drawOgImage() {
   }
   pos.forEach((p, i) => {
     // La ultima columna representa lo que todavia esta bloqueado.
-    const color = p.col === cols - 1 ? BLOQUEADA : colors[i % colors.length];
-    roundRect(c, p.x, p.y, nw, nh, 12, color);
+    // La ultima columna queda "bloqueada": blanco translucido sobre el bordo.
+    const bloqueada = p.col === cols - 1;
+    roundRect(c, p.x, p.y, nw, nh, 12, bloqueada ? BLOQUEADA : colors[i % colors.length], bloqueada ? 0.28 : 1);
   });
 
   void totalW;
@@ -312,16 +310,11 @@ function drawOgImage() {
 /* ── Favicon SVG (vectorial, mismo dibujo que el icono) ── */
 
 const FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" rx="22" fill="#1a2744"/>
-  <g stroke="#94a3b8" stroke-width="2.4" stroke-linecap="round">
-    <line x1="26" y1="31" x2="50" y2="43"/>
-    <line x1="50" y1="57" x2="74" y2="69"/>
-  </g>
-  <g>
-    <rect x="9" y="17" width="34" height="15" rx="5" fill="#86efac"/>
-    <rect x="33" y="43" width="34" height="15" rx="5" fill="#bfdbfe"/>
-    <rect x="57" y="69" width="34" height="15" rx="5" fill="#fef08a"/>
-  </g>
+  <rect width="100" height="100" rx="22" fill="#940028"/>
+  <path d="M28 72L50 50l22-22" fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" opacity=".55"/>
+  <circle cx="28" cy="72" r="11" fill="#ffffff"/>
+  <circle cx="50" cy="50" r="11" fill="#ffffff"/>
+  <circle cx="72" cy="28" r="11" fill="#ffffff"/>
 </svg>
 `;
 

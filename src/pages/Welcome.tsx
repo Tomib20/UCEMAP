@@ -5,6 +5,8 @@ import { useUserStore } from "@/store/useUserStore";
 import { useProgressStore } from "@/store/useProgressStore";
 import { isSyncConfigured } from "@/lib/googleDrive";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
+import { Logo, GoogleG } from "@/components/ui/Logo";
+import { SocialLinks } from "@/components/ui/SocialLinks";
 import carrerasIndex from "../../data/carreras/index.json";
 
 /** Color de acento por carrera, para que cada tarjeta tenga identidad propia. */
@@ -24,22 +26,6 @@ const ACCENTS: Record<string, string> = {
 };
 
 const ACCENT_FALLBACK = "#64748b";
-
-/** Logo: las tres materias encadenadas del favicon. */
-function Mark({ size = 40 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden className="shrink-0">
-      <rect width="100" height="100" rx="22" fill="#1a2744" />
-      <g stroke="#94a3b8" strokeWidth="2.4" strokeLinecap="round">
-        <line x1="26" y1="31" x2="50" y2="43" />
-        <line x1="50" y1="57" x2="74" y2="69" />
-      </g>
-      <rect x="9" y="17" width="34" height="15" rx="5" fill="#86efac" />
-      <rect x="33" y="43" width="34" height="15" rx="5" fill="#bfdbfe" />
-      <rect x="57" y="69" width="34" height="15" rx="5" fill="#fef08a" />
-    </svg>
-  );
-}
 
 /**
  * Pantalla de bienvenida (ruta `/`). Con 12 carreras, entrar directo a una sola
@@ -62,8 +48,11 @@ export function Welcome() {
   const handleLogin = async () => {
     const ok = await login();
     if (ok) {
-      // El login ya trajo de Drive la ultima carrera del usuario.
-      navigate(`/carrera/${useProgressStore.getState().carreraId}`);
+      // Entramos a la ultima carrera que el usuario tenia abierta en otro
+      // dispositivo; si nunca guardo ninguna, a la que ya estaba en el store.
+      const destino =
+        useUserStore.getState().carreraEnDrive ?? useProgressStore.getState().carreraId;
+      navigate(`/carrera/${destino}`);
     }
   };
 
@@ -74,7 +63,7 @@ export function Welcome() {
       {/* Barra superior */}
       <header className="flex items-center justify-between px-5 sm:px-8 py-4">
         <div className="flex items-center gap-3">
-          <Mark size={38} />
+          <Logo size={38} />
           <div>
             <div className="text-lg font-bold leading-tight" style={{ color: surface.textPrimary }}>
               {BRANDING.name}
@@ -121,17 +110,19 @@ export function Welcome() {
           <button
             onClick={handleLogin}
             disabled={status === "loading"}
-            className="mt-5 text-sm font-semibold hover:underline disabled:opacity-50 inline-flex items-center gap-2"
-            style={{ color: "#0d9488" }}
+            className="mt-5 text-sm font-semibold rounded-lg px-4 py-2.5 inline-flex items-center gap-2.5 border transition-colors disabled:opacity-50 hover:bg-slate-100"
+            style={{ backgroundColor: "#ffffff", color: "#1f1f1f", borderColor: "#dadce0" }}
           >
-            {remembered?.picture && (
+            {remembered?.picture ? (
               <img src={remembered.picture} alt="" className="w-5 h-5 rounded-full" referrerPolicy="no-referrer" />
+            ) : (
+              <GoogleG size={17} />
             )}
             {status === "loading"
               ? "Conectando con Google..."
               : remembered
-                ? `Continuar como ${remembered.name.split(" ")[0]} →`
-                : "¿Ya tenés tu mapa guardado? Iniciá sesión con Google →"}
+                ? `Continuar como ${remembered.name.split(" ")[0]}`
+                : "Iniciar sesión con Google"}
           </button>
         )}
         {errorMsg && status === "error" && (
@@ -184,6 +175,7 @@ export function Welcome() {
               Condiciones
             </Link>
           </p>
+          <SocialLinks />
         </div>
       </section>
     </div>

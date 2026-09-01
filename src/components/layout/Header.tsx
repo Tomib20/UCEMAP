@@ -7,6 +7,7 @@ import { useUserStore } from "@/store/useUserStore";
 import { isSyncConfigured } from "@/lib/googleDrive";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
+import { Logo, GoogleG } from "@/components/ui/Logo";
 
 interface CarreraEntry {
   id: string;
@@ -152,10 +153,12 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
         <button
           onClick={() => { void login(); setMenuOpen(false); }}
           disabled={status === "loading"}
-          className="text-xs font-semibold text-white px-3 py-1.5 rounded-lg bg-white/20 border border-white/30 hover:bg-white/30 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+          className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          style={{ color: "#1f1f1f" }}
           title="Guarda tu progreso en tu Google Drive y usalo en cualquier dispositivo"
         >
-          {status === "loading" ? "Conectando..." : "Iniciar sesion con Google"}
+          <GoogleG size={15} />
+          {status === "loading" ? "Conectando..." : "Iniciar sesión con Google"}
         </button>
       )}
       {errorMsg && status === "error" && !user && (
@@ -175,10 +178,11 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <button
               onClick={() => navigate("/")}
-              className="text-sm font-bold tracking-tight shrink-0 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-1.5 shrink-0 hover:opacity-80 transition-opacity"
               title="Volver a elegir carrera"
             >
-              {BRANDING.name}
+              <Logo size={22} />
+              <span className="text-sm font-bold tracking-tight">{BRANDING.name}</span>
             </button>
             <div className="h-5 w-px bg-white/20 shrink-0" />
             {carreras.length > 1 ? (
@@ -247,13 +251,16 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
       <div className="flex items-center gap-4">
         <button
           onClick={() => navigate("/")}
-          className="text-left hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2.5 text-left hover:opacity-80 transition-opacity"
           title="Volver a elegir carrera"
         >
-          <span className="block text-lg font-bold tracking-tight leading-tight">
-            {BRANDING.name}
+          <Logo size={34} />
+          <span>
+            <span className="block text-lg font-bold tracking-tight leading-tight">
+              {BRANDING.name}
+            </span>
+            <span className="block text-[11px] text-slate-300">{BRANDING.university}</span>
           </span>
-          <span className="block text-[11px] text-slate-300">{BRANDING.university}</span>
         </button>
         <div className="h-8 w-px bg-white/20" />
         <div>

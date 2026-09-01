@@ -45,6 +45,15 @@ export function AppLayout() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
+  // Titulo por carrera: cada URL indexada aparece con su nombre en Google.
+  useEffect(() => {
+    if (!carrera) return;
+    document.title = `${carrera.nombre} - Correlatividades UCEMA | UCEMA Map`;
+    return () => {
+      document.title = "UCEMA Map - Mapa de Correlatividades";
+    };
+  }, [carrera]);
+
   // Beforeunload warning
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {

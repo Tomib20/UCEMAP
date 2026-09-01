@@ -51,7 +51,7 @@ const FEATURES: Feature[] = [
   {
     icon: "☁️",
     title: "Guardar tu progreso",
-    desc: "Iniciá sesión con tu usuario de UCEMA y apretá Guardar para tener tu mapa en cualquier dispositivo.",
+    desc: "Iniciá sesión con Google y tu mapa se guarda solo en tu propio Drive, privado, para abrirlo desde cualquier dispositivo.",
   },
 ];
 

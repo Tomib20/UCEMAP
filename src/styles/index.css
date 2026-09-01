@@ -57,3 +57,15 @@ html, body {
 .react-flow__attribution {
   display: none;
 }
+
+/* Tailwind v4 resetea los botones a `cursor: default`; los volvemos a marcar
+   como clickeables (menos los deshabilitados, que muestran el cursor bloqueado). */
+button:not(:disabled),
+select,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}

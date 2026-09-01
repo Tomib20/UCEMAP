@@ -28,6 +28,7 @@ import { ContextMenu, type ContextMenuState } from "./ContextMenu";
 import { toPng } from "html-to-image";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { Tour } from "@/components/ui/Tour";
+import { SocialLinks } from "@/components/ui/SocialLinks";
 
 /* ── Decorative node types ── */
 
@@ -876,6 +877,7 @@ export function GraphView({ carrera }: GraphViewProps) {
             {exporting ? "Exportando..." : "Exportar PNG"}
           </button>
         )}
+        {isMobile && <SocialLinks variant="chips" />}
         <button
           onClick={() => setTourOpen(true)}
           className="shrink-0 w-8 h-8 rounded-full text-sm font-bold border backdrop-blur-sm flex items-center justify-center"

@@ -1,0 +1,5 @@
+# UCEMA Map
+User-agent: *
+Allow: /
+
+Sitemap: https://ucemap.vercel.app/sitemap.xml

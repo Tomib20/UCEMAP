@@ -81,6 +81,8 @@ interface UserState {
   lastSyncedAt: number | null;
   /** Hay cambios que todavia no llegaron a Drive (guardado en vuelo o esperando el debounce). */
   pendingSave: boolean;
+  /** Ultima carrera que el usuario tenia abierta segun Drive: a donde entrar desde la home. */
+  carreraEnDrive: string | null;
 
   login: () => Promise<boolean>;
   /** Reconecta sin molestar al usuario si Google todavia lo reconoce. */
@@ -109,11 +111,14 @@ function snapshot(): CloudProgreso {
  */
 function mergeCloudIntoLocal(remoto: CloudProgreso) {
   const local = useProgressStore.getState();
+  // OJO: no se toca `carreraId`. La carrera que se ve la manda la URL; si la
+  // pisaramos con la ultima guardada en Drive, el mapa mostraria las materias
+  // de una carrera con el progreso de otra (y el auto-guardado lo replicaria).
+  // La carrera de Drive se usa solo para saber a donde entrar desde la home.
   useProgressStore.setState({
     aprobadas: { ...local.aprobadas, ...remoto.aprobadas },
     cursando: { ...local.cursando, ...remoto.cursando },
     notas: { ...local.notas, ...remoto.notas },
-    carreraId: remoto.carreraId ?? local.carreraId,
     selectedMateria: null,
   });
 }
@@ -129,6 +134,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   error: null,
   lastSyncedAt: null,
   pendingSave: false,
+  carreraEnDrive: null,
 
   /**
    * Retoma la sesion con el token guardado, sin abrir ninguna ventana de Google.
@@ -147,7 +153,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     try {
       const remoto = await driveLoad(guardado.token);
       if (remoto) mergeCloudIntoLocal(remoto);
-      set({ lastSyncedAt: Date.now(), error: null });
+      set({ lastSyncedAt: Date.now(), error: null, carreraEnDrive: remoto?.carreraId ?? null });
     } catch {
       // El token no sirvio (revocado, permisos cambiados): volvemos a pedir login.
       writeToken(null);
@@ -165,7 +171,15 @@ export const useUserStore = create<UserState>((set, get) => ({
 
       writeRemembered(user);
       writeToken({ token, expiraEn });
-      set({ user, token, remembered: user, status: "ready", error: null, lastSyncedAt: Date.now() });
+      set({
+        user,
+        token,
+        remembered: user,
+        status: "ready",
+        error: null,
+        lastSyncedAt: Date.now(),
+        carreraEnDrive: remoto?.carreraId ?? null,
+      });
 
       // Primer login del usuario (todavia no hay archivo): subimos lo que tenga
       // local para que el archivo exista desde el arranque.

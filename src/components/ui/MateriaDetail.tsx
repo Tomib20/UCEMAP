@@ -8,6 +8,26 @@ import { useIsMobile } from "@/hooks/useIsMobile";
 
 const NOTA_OPTIONS: Nota[] = ["AP", 4, 5, 6, 7, 8, 9, 10];
 
+const MAIL_REPORTES = "tomasbruner20@gmail.com";
+
+/**
+ * Arma el mail de reporte con el contexto ya escrito: sin esto la mayoria de los
+ * errores de datos no vuelven nunca, o llegan como "hay algo mal en el mapa".
+ */
+function mailtoReporte(carrera: Carrera, materia: Materia, correlativas: Materia[]): string {
+  const asunto = `Error en ${materia.nombre} (${carrera.nombre})`;
+  const cuerpo = [
+    `Carrera: ${carrera.nombre} (${carrera.id})`,
+    `Materia: ${materia.nombre} - nro ${materia.nro}`,
+    `Anio ${materia.anio}, cuatrimestre ${materia.cuatrimestre}, ${materia.creditos} credito(s)`,
+    `Correlativas que muestra el mapa: ${correlativas.length > 0 ? correlativas.map((m) => m.nombre).join(", ") : "ninguna"}`,
+    "",
+    "Que esta mal / que dice el plan oficial:",
+    "",
+  ].join("\n");
+  return `mailto:${MAIL_REPORTES}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+}
+
 interface MateriaDetailProps {
   carrera: Carrera;
 }
@@ -296,6 +316,18 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
           </ul>
         </div>
       )}
+
+      {/* Los datos salen de los PDFs oficiales, pero el parseo puede fallar:
+          este link arma el mail con la materia y sus correlativas ya cargadas. */}
+      <div className="mt-5 pt-3" style={{ borderTop: `1px solid ${surface.panelBorder}` }}>
+        <a
+          href={mailtoReporte(carrera, materia, correlativasNombres)}
+          className="text-[11px] hover:underline"
+          style={{ color: surface.textSecondary }}
+        >
+          ¿Hay un error en esta materia? Avisame →
+        </a>
+      </div>
     </div>
   );
 

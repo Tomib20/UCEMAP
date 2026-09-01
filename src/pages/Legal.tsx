@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { BRANDING, SURFACE } from "@/config/theme";
 import { useThemeStore } from "@/store/useThemeStore";
+import { Logo } from "@/components/ui/Logo";
 
 const CONTACTO = "tomasbruner20@gmail.com";
 const ACTUALIZADO = "29 de agosto de 2026";
@@ -15,10 +16,11 @@ function PaginaLegal({ titulo, children }: { titulo: string; children: React.Rea
       <header className="px-5 sm:px-8 py-4">
         <Link
           to="/"
-          className="text-sm font-bold hover:opacity-80 transition-opacity"
+          className="inline-flex items-center gap-2 text-sm font-bold hover:opacity-80 transition-opacity"
           style={{ color: surface.textPrimary }}
         >
-          ← {BRANDING.name}
+          <Logo size={26} />
+          {BRANDING.name}
         </Link>
       </header>
 

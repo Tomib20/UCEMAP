@@ -19,8 +19,8 @@ export default defineConfig({
         description:
           "Mapa interactivo de correlatividades de las 12 carreras de la Universidad del CEMA. Segui tu avance materia por materia.",
         lang: "es",
-        theme_color: "#1a2744",
-        background_color: "#1a2744",
+        theme_color: "#940028",
+        background_color: "#940028",
         display: "standalone",
         orientation: "any",
         start_url: "/",
