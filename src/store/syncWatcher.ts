@@ -6,12 +6,13 @@
 
 import { useProgressStore } from "./useProgressStore";
 import { useUserStore } from "./useUserStore";
-import type { Nota } from "./useProgressStore";
+import type { Nota, NotaAplazo } from "./useProgressStore";
 
 interface CarreraSnapshot {
   aprobadas: number[];
   cursando: number[];
   notas: Record<string, Nota>;
+  aplazos: Record<string, NotaAplazo>;
 }
 
 function arraysEqual(a: number[], b: number[]): boolean {
@@ -20,7 +21,10 @@ function arraysEqual(a: number[], b: number[]): boolean {
   return true;
 }
 
-function notasEqual(a: Record<string, Nota>, b: Record<string, Nota>): boolean {
+function notasEqual(
+  a: Record<string, Nota | NotaAplazo>,
+  b: Record<string, Nota | NotaAplazo>
+): boolean {
   const ka = Object.keys(a);
   if (ka.length !== Object.keys(b).length) return false;
   for (const k of ka) if (a[k] !== b[k]) return false;
@@ -31,6 +35,7 @@ function snapshotEquals(a: CarreraSnapshot, b: CarreraSnapshot): boolean {
   if (a.aprobadas !== b.aprobadas && !arraysEqual(a.aprobadas, b.aprobadas)) return false;
   if (a.cursando !== b.cursando && !arraysEqual(a.cursando, b.cursando)) return false;
   if (a.notas !== b.notas && !notasEqual(a.notas, b.notas)) return false;
+  if (a.aplazos !== b.aplazos && !notasEqual(a.aplazos, b.aplazos)) return false;
   return true;
 }
 
@@ -54,20 +59,24 @@ export function initSyncWatcher() {
       ...Object.keys(state.aprobadas),
       ...Object.keys(state.cursando),
       ...Object.keys(state.notas),
+      ...Object.keys(state.aplazos),
       ...Object.keys(prev.aprobadas),
       ...Object.keys(prev.cursando),
       ...Object.keys(prev.notas),
+      ...Object.keys(prev.aplazos),
     ]);
     for (const cid of carreraIds) {
       const cur: CarreraSnapshot = {
         aprobadas: state.aprobadas[cid] ?? [],
         cursando: state.cursando[cid] ?? [],
         notas: state.notas[cid] ?? {},
+        aplazos: state.aplazos[cid] ?? {},
       };
       const old: CarreraSnapshot = {
         aprobadas: prev.aprobadas[cid] ?? [],
         cursando: prev.cursando[cid] ?? [],
         notas: prev.notas[cid] ?? {},
+        aplazos: prev.aplazos[cid] ?? {},
       };
       if (!snapshotEquals(cur, old)) {
         useUserStore.getState().scheduleSave();

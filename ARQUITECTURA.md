@@ -149,11 +149,44 @@ scripts/
 - **No hover highlight**: el highlight solo se activa al hacer click (seleccion), no al pasar el mouse
 - **Flechas directas**: al seleccionar una materia solo se iluminan las correlativas inmediatas (no toda la cadena recursiva)
 
+## Aplazos
+
+- Un aplazo es una nota de 0 a 3 y vive en `aplazos` (nro de materia -> nota),
+  aparte de `notas`: en la historia academica pueden figurar el aplazo y, mas
+  tarde, la nota con la que se aprobo.
+- Precedencia de estados: aprobada > cursando > aplazada > disponible > bloqueada.
+  Si la materia se esta recursando se muestra "cursando" y el nodo conserva el
+  badge rojo del aplazo.
+- Un aplazo **no habilita correlativas**: solo lo aprobado abre lo que sigue.
+  Una materia aplazada se puede volver a cursar, asi que los botones miran si las
+  correlativas estan cumplidas y no el status.
+- Los aplazos cuentan en el promedio (decision del usuario, coincide con como lo
+  informa la universidad). "AP" no cuenta.
+- Una materia aprobada no admite aplazo: la UI queda deshabilitada.
+
+## Importar notas del sistema de alumnos
+
+- `utils/importarNotas.ts` parsea el listado de "Notas oficiales" que el alumno
+  copia con Ctrl+A / Ctrl+C. Cada fila es `codigo materia nota fecha`, separada
+  por tabulaciones o espacios; el resto de la pagina se ignora porque no matchea.
+- El codigo del sistema es el mismo `nro` del plan, asi que el cruce es directo;
+  si no aparece, se prueba por nombre normalizado.
+- Nota >= 4 o "AP" -> aprobada con esa nota. Nota < 4 -> aplazo.
+- Importar reemplaza el progreso de esa carrera (es la fuente oficial) y conserva
+  lo marcado como "cursando", que no figura en el listado.
+- Verificado contra un listado real: 23/23 materias reconocidas y el promedio
+  calculado por la app coincide con el que informa la universidad.
+
 ## Donde vive el progreso
 
-- **`sessionStorage`**: aguanta recargas mientras la pestania siga abierta, pero
-  al cerrarla no queda nada en el dispositivo. Lo unico que persiste de verdad es
-  lo que se sincroniza al Drive del usuario.
+- **Solo se guarda si hay sesion de Google**, y en `sessionStorage`, como cache
+  de la pestania. Sin sesion no se escribe nada: al recargar el mapa arranca
+  vacio. Es a proposito — si no hay donde guardarlo, mostrar materias marcadas de
+  una visita anterior confunde, y en una compu compartida deja el progreso de
+  otro a la vista. Para recuperarlo estan el login y el importador.
+- El header muestra "No se guarda" cuando hay materias marcadas sin sesion, y el
+  modal de importar tiene "Vaciar mi mapa": antes no habia forma de borrar el
+  progreso desde la interfaz.
 - **Mapas de versiones viejas**: las versiones anteriores guardaban en
   `localStorage`. Ese progreso NO se adopta solo — `RecuperarProgreso` pregunta
   si conservarlo o empezar de cero. La copia vieja se borra cuando el usuario la
@@ -175,6 +208,10 @@ leer el progreso de nadie.
   Google no exige verificar la app para usarlos.
 - **El script de Google se carga bajo demanda** (`loadGis()`), no en el
   index.html: quien nunca se loguea no le pide nada a Google.
+- **Segundo login sin friccion**: si ya hay un perfil recordado se pide el token
+  con `hint` (la cuenta anterior) y `prompt: ""` (reutiliza el consentimiento).
+  Sin eso Google pide elegir cuenta y aceptar permisos cada vez, que es su
+  comportamiento por defecto. Si lo rechaza, se reintenta el flujo completo.
 - **El login sale siempre de un click**: el flujo de token de Google abre una
   ventana emergente incluso con `prompt: ""`, asi que no hay forma de renovar de
   fondo. Nunca se dispara al cargar la pagina.
@@ -192,8 +229,8 @@ leer el progreso de nadie.
 - **Guardado automatico con debounce de 1,5s** (`scheduleSave`): cada cambio
   reinicia la cuenta regresiva. `pendingSave` es true mientras hay algo por
   guardar, y `App.tsx` usa ese flag para el warning de `beforeunload`.
-- **Logout**: revoca el token y corta la sincronizacion, pero **no borra el
-  progreso local** (es de este dispositivo y el usuario lo sigue viendo).
+- **Logout**: revoca el token, olvida el perfil y **borra el progreso** de la
+  sesion. Nada se pierde: quedo en el Drive del usuario y vuelve al reingresar.
 - Si el token expira con la pestania abierta, el guardado falla: se suelta la
   sesion y el header muestra "Continuar como ...". El progreso de la sesion no se
   pierde (vive en `sessionStorage`), solo deja de sincronizarse hasta reconectar.

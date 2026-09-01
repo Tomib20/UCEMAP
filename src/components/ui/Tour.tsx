@@ -17,6 +17,11 @@ interface Feature {
 
 const FEATURES: Feature[] = [
   {
+    icon: "⚡",
+    title: "Cargá todo de una",
+    desc: "Copiá la página de Notas oficiales del sistema de UCEMA y pegala en \"Importar mis notas\": se marcan solas tus materias con su nota.",
+  },
+  {
     icon: "👆",
     title: "Tocá una materia",
     desc: "Ves de qué depende y qué habilita. Tocá de nuevo para marcarla como cursando o aprobada, y ponerle nota.",

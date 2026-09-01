@@ -11,6 +11,10 @@ interface GoogleTokenResponse {
 interface GoogleTokenClientConfig {
   client_id: string;
   scope: string;
+  /** Mail de la cuenta a preseleccionar (login_hint). */
+  hint?: string;
+  /** "" reutiliza el consentimiento ya dado en vez de volver a pedirlo. */
+  prompt?: string;
   callback: (response: GoogleTokenResponse) => void;
   error_callback?: (error: { type?: string; message?: string }) => void;
 }

@@ -99,6 +99,7 @@ function snapshot(): CloudProgreso {
     aprobadas: p.aprobadas,
     cursando: p.cursando,
     notas: p.notas,
+    aplazos: p.aplazos,
     carreraId: p.carreraId,
   };
 }
@@ -119,6 +120,7 @@ function mergeCloudIntoLocal(remoto: CloudProgreso) {
     aprobadas: { ...local.aprobadas, ...remoto.aprobadas },
     cursando: { ...local.cursando, ...remoto.cursando },
     notas: { ...local.notas, ...remoto.notas },
+    aplazos: { ...local.aplazos, ...(remoto.aplazos ?? {}) },
     selectedMateria: null,
   });
 }
@@ -164,7 +166,14 @@ export const useUserStore = create<UserState>((set, get) => ({
   login: async () => {
     set({ status: "loading", error: null });
     try {
-      const { token, expiraEn } = await requestToken();
+      // Si ya se logueo antes en este dispositivo, se le sugiere esa cuenta y se
+      // reutiliza el consentimiento: el popup pasa casi de largo. Si Google lo
+      // rechaza (cambio de permisos, cuenta desconectada), se reintenta el flujo
+      // completo, con selector de cuenta y pantalla de permisos.
+      const recordado = get().remembered?.email;
+      const { token, expiraEn } = recordado
+        ? await requestToken(recordado).catch(() => requestToken())
+        : await requestToken();
       const [user, remoto] = await Promise.all([fetchUserInfo(token), driveLoad(token)]);
 
       if (remoto) mergeCloudIntoLocal(remoto);
@@ -199,11 +208,32 @@ export const useUserStore = create<UserState>((set, get) => ({
     }
     const token = get().token;
     if (token) revokeToken(token);
-    // Salir es explicito: tambien olvidamos el perfil, asi no queda el nombre de
-    // otra persona ofrecido en un dispositivo compartido.
+    // Salir es explicito y tiene que dejar el equipo limpio: se olvida el perfil,
+    // el token y tambien el progreso de la sesion. Nada de esto se pierde: quedo
+    // guardado en el Drive del usuario y vuelve al iniciar sesion de nuevo.
     writeRemembered(null);
     writeToken(null);
-    set({ user: null, token: null, remembered: null, status: "idle", error: null, pendingSave: false });
+    useProgressStore.setState({
+      aprobadas: {},
+      cursando: {},
+      notas: {},
+      aplazos: {},
+      selectedMateria: null,
+    });
+    try {
+      window.sessionStorage.removeItem("ucema-map-progress");
+    } catch {
+      /* ignore */
+    }
+    set({
+      user: null,
+      token: null,
+      remembered: null,
+      status: "idle",
+      error: null,
+      pendingSave: false,
+      carreraEnDrive: null,
+    });
   },
 
   saveNow: async () => {

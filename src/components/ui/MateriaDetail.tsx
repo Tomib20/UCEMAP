@@ -2,11 +2,20 @@ import { useMemo, useState, useRef, useCallback } from "react";
 import type { Carrera, Materia } from "@/types/carrera";
 import { GRUPO_COLORS, SURFACE } from "@/config/theme";
 import { getMateriaStatus } from "@/utils/materiaStatus";
-import { useProgressStore, selectAprobadasArray, selectCursandoArray, selectNotasRecord, type Nota } from "@/store/useProgressStore";
+import {
+  useProgressStore,
+  selectAprobadasArray,
+  selectCursandoArray,
+  selectNotasRecord,
+  selectAplazosRecord,
+  type Nota,
+  type NotaAplazo,
+} from "@/store/useProgressStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 const NOTA_OPTIONS: Nota[] = ["AP", 4, 5, 6, 7, 8, 9, 10];
+const NOTA_APLAZO_OPTIONS: NotaAplazo[] = [0, 1, 2, 3];
 
 const MAIL_REPORTES = "tomasbruner20@gmail.com";
 
@@ -37,11 +46,18 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
   const aprobadasArr = useProgressStore(selectAprobadasArray);
   const cursandoArr = useProgressStore(selectCursandoArray);
   const notasRecord = useProgressStore(selectNotasRecord);
+  const aplazosRecord = useProgressStore(selectAplazosRecord);
   const aprobadas = useMemo(() => new Set(aprobadasArr), [aprobadasArr]);
   const cursando = useMemo(() => new Set(cursandoArr), [cursandoArr]);
+  const aplazadas = useMemo(
+    () => new Set(Object.keys(aplazosRecord).map(Number)),
+    [aplazosRecord]
+  );
   const toggleAprobada = useProgressStore((s) => s.toggleAprobada);
   const toggleCursando = useProgressStore((s) => s.toggleCursando);
   const setNota = useProgressStore((s) => s.setNota);
+  const setAplazo = useProgressStore((s) => s.setAplazo);
+  const quitarAplazo = useProgressStore((s) => s.quitarAplazo);
   const selectMateria = useProgressStore((s) => s.selectMateria);
   const fullChain = useProgressStore((s) => s.fullChain);
   const toggleFullChain = useProgressStore((s) => s.toggleFullChain);
@@ -60,7 +76,10 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
     return null;
   }
 
-  const status = getMateriaStatus(materia, aprobadas, cursando);
+  const status = getMateriaStatus(materia, aprobadas, cursando, aplazadas);
+  const notaAplazo = aplazosRecord[String(materia.nro)];
+  // Una materia aprobada (con nota o con "AP") no puede llevar aplazo.
+  const estaAprobada = status === "aprobada";
   const grupo = GRUPO_COLORS[mode][materia.grupo];
   const surface = SURFACE[mode];
   const currentNota = notasRecord[String(materia.nro)];
@@ -73,8 +92,11 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
     m.correlativas.includes(materia.nro)
   );
 
-  const canCursar = status === "disponible" || status === "cursando";
-  const canAprobar = status === "disponible" || status === "cursando" || status === "aprobada";
+  // Se mira la disponibilidad real y no el status: una materia aplazada tiene el
+  // status "aplazada" pero se puede volver a cursar y aprobar.
+  const correlativasCumplidas = materia.correlativas.every((nro) => aprobadas.has(nro));
+  const canCursar = correlativasCumplidas || status === "cursando";
+  const canAprobar = correlativasCumplidas || status === "cursando" || status === "aprobada";
 
   // Check if blocked only because correlativas are cursando (not missing entirely)
   const missingCorrelativas = materia.correlativas.filter((nro) => !aprobadas.has(nro));
@@ -262,6 +284,61 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
           </p>
         </div>
       )}
+
+      {/* Aplazo: queda registrado hasta aprobar la materia, y convive con
+          "cursando" cuando la estas recursando. */}
+      <div className="mb-4">
+        <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: surface.textSecondary }}>
+          Aplazo
+        </h4>
+        <div className="flex flex-wrap gap-1.5 items-center">
+          {NOTA_APLAZO_OPTIONS.map((n) => {
+            const isActive = notaAplazo === n;
+            return (
+              <button
+                key={n}
+                onClick={() => (isActive ? quitarAplazo(materia.nro) : setAplazo(materia.nro, n))}
+                disabled={estaAprobada}
+                className="px-2.5 py-1 rounded text-xs font-semibold border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: isActive
+                    ? "#dc2626"
+                    : mode === "dark" ? "#1e293b" : "#f1f5f9",
+                  color: isActive ? "#fff" : mode === "dark" ? "#94a3b8" : "#64748b",
+                  borderColor: isActive
+                    ? "transparent"
+                    : mode === "dark" ? "#334155" : "#e2e8f0",
+                }}
+                title={
+                  estaAprobada
+                    ? "La materia ya esta aprobada"
+                    : isActive
+                      ? "Quitar el aplazo"
+                      : `Marcar aplazo con ${n}`
+                }
+              >
+                {n}
+              </button>
+            );
+          })}
+          {notaAplazo !== undefined && (
+            <button
+              onClick={() => quitarAplazo(materia.nro)}
+              className="text-[11px] underline ml-1"
+              style={{ color: surface.textSecondary }}
+            >
+              quitar
+            </button>
+          )}
+        </div>
+        <p className="text-[10px] mt-1.5" style={{ color: surface.textSecondary }}>
+          {estaAprobada
+            ? "La materia ya está aprobada: no se le puede cargar un aplazo."
+            : notaAplazo !== undefined
+              ? "Queda registrado aunque la vuelvas a cursar, y cuenta en el promedio."
+              : "Si te aplazaron, marcá la nota. Podés seguir cursándola igual."}
+        </p>
+      </div>
 
       {correlativasNombres.length > 0 && (
         <div className="mb-4">

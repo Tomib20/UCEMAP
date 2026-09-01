@@ -4,6 +4,12 @@ import { BRANDING } from "@/config/theme";
 import type { Carrera } from "@/types/carrera";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useUserStore } from "@/store/useUserStore";
+import {
+  useProgressStore,
+  selectAprobadasArray,
+  selectCursandoArray,
+  selectAplazosRecord,
+} from "@/store/useProgressStore";
 import { isSyncConfigured } from "@/lib/googleDrive";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
@@ -38,6 +44,14 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
   const logout = useUserStore((s) => s.logout);
 
   const { canInstall, promptInstall } = useInstallPrompt();
+
+  // Sin sesion el progreso vive solo en esta pestania: conviene decirlo, porque
+  // si no, uno ve materias marcadas y no sabe si estan guardadas ni de donde salieron.
+  const aprobadasArr = useProgressStore(selectAprobadasArray);
+  const cursandoArr = useProgressStore(selectCursandoArray);
+  const aplazosRecord = useProgressStore(selectAplazosRecord);
+  const hayProgreso =
+    aprobadasArr.length > 0 || cursandoArr.length > 0 || Object.keys(aplazosRecord).length > 0;
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -160,6 +174,14 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
           <GoogleG size={15} />
           {status === "loading" ? "Conectando..." : "Iniciar sesión con Google"}
         </button>
+      )}
+      {!user && hayProgreso && (
+        <span
+          className="text-[11px] px-2 py-1 rounded-lg bg-amber-400/20 text-amber-200"
+          title="Sin sesión, lo que marques se pierde al recargar la página. Iniciá sesión para guardarlo en tu Google Drive."
+        >
+          No se guarda
+        </span>
       )}
       {errorMsg && status === "error" && !user && (
         <span className="text-xs text-red-300" title={errorMsg}>

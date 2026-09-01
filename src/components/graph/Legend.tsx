@@ -11,6 +11,7 @@ export function Legend() {
   const grupos = GRUPO_COLORS[mode];
   const aprobadaStyle = STATUS_STYLES[mode].aprobada;
   const cursandoStyle = STATUS_STYLES[mode].cursando;
+  const aplazadaStyle = STATUS_STYLES[mode].aplazada;
   const [expanded, setExpanded] = useState(!isMobile);
 
   const panelBg = mode === "dark" ? "rgba(30,41,59,0.92)" : "rgba(255,255,255,0.95)";
@@ -79,6 +80,13 @@ export function Legend() {
             style={{ backgroundColor: aprobadaStyle.bg, border: `1.5px solid ${aprobadaStyle.border}` }}
           />
           <span className="text-[11px]" style={{ color: surface.textSecondary }}>Aprobada</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div
+            className="w-5 h-3.5 rounded"
+            style={{ backgroundColor: aplazadaStyle.bg, border: `1.5px solid ${aplazadaStyle.border}` }}
+          />
+          <span className="text-[11px]" style={{ color: surface.textSecondary }}>Aplazada</span>
         </div>
       </div>
 

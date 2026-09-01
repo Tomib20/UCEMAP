@@ -3,7 +3,13 @@ import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
 import type { MateriaNodeData } from "@/utils/layoutGraph";
 import { GRUPO_COLORS, STATUS_STYLES, CHAIN_COLORS, AVAILABLE_GLOW, NODE_WIDTH_MOBILE } from "@/config/theme";
 import { getMateriaStatus } from "@/utils/materiaStatus";
-import { useProgressStore, selectAprobadasArray, selectCursandoArray, selectNotasRecord } from "@/store/useProgressStore";
+import {
+  useProgressStore,
+  selectAprobadasArray,
+  selectCursandoArray,
+  selectNotasRecord,
+  selectAplazosRecord,
+} from "@/store/useProgressStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
@@ -19,10 +25,16 @@ function MateriaNodeComponent({ data }: NodeProps<MateriaNode>) {
   const aprobadasArr = useProgressStore(selectAprobadasArray);
   const cursandoArr = useProgressStore(selectCursandoArray);
   const notasRecord = useProgressStore(selectNotasRecord);
+  const aplazosRecord = useProgressStore(selectAplazosRecord);
   const aprobadas = useMemo(() => new Set(aprobadasArr), [aprobadasArr]);
   const cursando = useMemo(() => new Set(cursandoArr), [cursandoArr]);
+  const aplazadas = useMemo(
+    () => new Set(Object.keys(aplazosRecord).map(Number)),
+    [aplazosRecord]
+  );
 
-  const status = getMateriaStatus(materia, aprobadas, cursando);
+  const status = getMateriaStatus(materia, aprobadas, cursando, aplazadas);
+  const notaAplazo = aplazosRecord[String(materia.nro)];
   const grupo = GRUPO_COLORS[mode][materia.grupo];
   const statusStyle = STATUS_STYLES[mode][status];
   const nota = notasRecord[String(materia.nro)];
@@ -95,6 +107,22 @@ function MateriaNodeComponent({ data }: NodeProps<MateriaNode>) {
             }}
           >
             {nota === "AP" ? "AP" : nota}
+          </div>
+        )}
+        {/* Aplazo: queda marcado aunque la materia se este recursando */}
+        {notaAplazo !== undefined && status !== "aprobada" && (
+          <div
+            className="absolute -top-2 -left-2 rounded-full font-bold flex items-center justify-center"
+            style={{
+              fontSize: badgeFontSize,
+              width: badgeSize,
+              height: badgeSize,
+              backgroundColor: mode === "dark" ? "#b91c1c" : "#dc2626",
+              color: "#fff",
+            }}
+            title={`Aplazada con ${notaAplazo}`}
+          >
+            {notaAplazo}
           </div>
         )}
         {/* Cursando badge */}

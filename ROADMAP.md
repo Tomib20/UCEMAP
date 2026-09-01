@@ -66,6 +66,9 @@ sumaria a quien usa la app, no por dificultad.
 - `doHighlight` ahora usa `highlightNodes` / `highlightEdges` en vez de llamar dos veces a la misma
   funcion descartando la mitad del resultado.
 - Validacion de datos en build time (`npm run validate`), enganchada a `npm run build`.
+- Aplazos (nota 0 a 3), que cuentan en el promedio y no habilitan correlativas.
+- Importar el listado de "Notas oficiales" del sistema de alumnos con copiar y pegar.
+- El progreso se guarda solo con sesion iniciada; "Vaciar mi mapa" y aviso de "No se guarda".
 - Modo "que puedo cursar" (halo celeste en las disponibles), fix de gestos
   mobile (pinch de 2 dedos y drag solo de la seleccionada), contador de electivas en el boton,
   meta tags + og-image, PWA instalable con iconos propios, mini-tour "Como usar el mapa" y home

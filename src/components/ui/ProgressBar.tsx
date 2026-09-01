@@ -1,6 +1,13 @@
 import { useMemo } from "react";
 import type { Carrera } from "@/types/carrera";
-import { useProgressStore, selectAprobadasArray, selectNotasRecord, type Nota } from "@/store/useProgressStore";
+import {
+  useProgressStore,
+  selectAprobadasArray,
+  selectNotasRecord,
+  selectAplazosRecord,
+  type Nota,
+  type NotaAplazo,
+} from "@/store/useProgressStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { SURFACE } from "@/config/theme";
 import { useIsMobile } from "@/hooks/useIsMobile";
@@ -9,13 +16,25 @@ interface ProgressBarProps {
   carrera: Carrera;
 }
 
-function computePromedio(notasRecord: Record<string, Nota>, aprobadasArr: number[]): number | null {
+/**
+ * Promedio con aplazos: entran las notas numericas de las materias aprobadas y
+ * tambien los aplazos, que en la historia academica siguen figurando. "AP"
+ * (aprobada sin nota) no cuenta.
+ */
+function computePromedio(
+  notasRecord: Record<string, Nota>,
+  aprobadasArr: number[],
+  aplazosRecord: Record<string, NotaAplazo>
+): number | null {
   const numericNotas: number[] = [];
   for (const nro of aprobadasArr) {
     const nota = notasRecord[String(nro)];
     if (typeof nota === "number") {
       numericNotas.push(nota);
     }
+  }
+  for (const nota of Object.values(aplazosRecord)) {
+    numericNotas.push(nota);
   }
   if (numericNotas.length === 0) return null;
   return numericNotas.reduce((a, b) => a + b, 0) / numericNotas.length;
@@ -43,6 +62,7 @@ function computeWidths(sections: Section[]): number[] {
 export function ProgressBar({ carrera }: ProgressBarProps) {
   const aprobadasArr = useProgressStore(selectAprobadasArray);
   const notasRecord = useProgressStore(selectNotasRecord);
+  const aplazosRecord = useProgressStore(selectAplazosRecord);
   const mode = useThemeStore((s) => s.mode);
   const isMobile = useIsMobile();
   const aprobadas = useMemo(() => new Set(aprobadasArr), [aprobadasArr]);
@@ -72,7 +92,7 @@ export function ProgressBar({ carrera }: ProgressBarProps) {
   const grandTotal = sections.reduce((s, sec) => s + sec.total, 0);
   const grandDone = sections.reduce((s, sec) => s + sec.done, 0);
   const grandPct = grandTotal > 0 ? Math.round((grandDone / grandTotal) * 100) : 0;
-  const promedio = computePromedio(notasRecord, aprobadasArr);
+  const promedio = computePromedio(notasRecord, aprobadasArr, aplazosRecord);
 
   const trackBg = mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
   const barSep = mode === "dark" ? "#0f172a" : "#fff";

@@ -26,6 +26,7 @@ function normalize(s: string): string {
 const STATUS_LABEL: Record<MateriaStatus, string> = {
   aprobada: "Aprobada",
   cursando: "Cursando",
+  aplazada: "Aplazada",
   disponible: "Disponible",
   bloqueada: "Bloqueada",
 };
@@ -33,6 +34,7 @@ const STATUS_LABEL: Record<MateriaStatus, string> = {
 const STATUS_COLORS: Record<MateriaStatus, string> = {
   aprobada: "#16a34a",
   cursando: "#ca8a04",
+  aplazada: "#dc2626",
   disponible: "#3b82f6",
   bloqueada: "#94a3b8",
 };

@@ -40,12 +40,14 @@ export const STATUS_STYLES: Record<"light" | "dark", Record<MateriaStatus, Statu
   light: {
     aprobada: { bg: "#86efac", border: "#16a34a", textOverride: "#14532d" },
     cursando: { bg: "#fef08a", border: "#ca8a04", textOverride: "#713f12" },
+    aplazada: { bg: "#fecaca", border: "#dc2626", textOverride: "#7f1d1d" },
     disponible: { bg: "", border: "", textOverride: "" },
     bloqueada: { bg: "", border: "", textOverride: "" },
   },
   dark: {
     aprobada: { bg: "#14532d", border: "#4ade80", textOverride: "#bbf7d0" },
     cursando: { bg: "#713f12", border: "#facc15", textOverride: "#fef9c3" },
+    aplazada: { bg: "#7f1d1d", border: "#f87171", textOverride: "#fecaca" },
     disponible: { bg: "", border: "", textOverride: "" },
     bloqueada: { bg: "", border: "", textOverride: "" },
   },

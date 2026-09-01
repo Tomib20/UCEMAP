@@ -1,6 +1,6 @@
 export type MateriaGrupo = "obligatoria" | "topico" | "tesis" | "requisito" | "taller";
 
-export type MateriaStatus = "aprobada" | "cursando" | "disponible" | "bloqueada";
+export type MateriaStatus = "aprobada" | "cursando" | "aplazada" | "disponible" | "bloqueada";
 
 export interface Materia {
   nro: number;

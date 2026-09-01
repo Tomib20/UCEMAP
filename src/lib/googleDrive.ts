@@ -9,7 +9,7 @@
  * revisar la app para usarlos.
  */
 
-import type { Nota } from "@/store/useProgressStore";
+import type { Nota, NotaAplazo } from "@/store/useProgressStore";
 
 const SCOPES = [
   "https://www.googleapis.com/auth/drive.appdata",
@@ -31,6 +31,8 @@ export interface CloudProgreso {
   aprobadas: Record<string, number[]>;
   cursando: Record<string, number[]>;
   notas: Record<string, Record<string, Nota>>;
+  /** Opcional: los archivos guardados antes de esta version no lo traen. */
+  aplazos?: Record<string, Record<string, NotaAplazo>>;
   carreraId?: string;
 }
 
@@ -92,10 +94,14 @@ export interface TokenEmitido {
  * Los tokens duran ~1 hora y Google no entrega refresh tokens a las apps que
  * corren solo en el navegador: para una sesion permanente haria falta un backend.
  *
+ * `email` preselecciona la cuenta usada la vez anterior y `prompt: ""` reutiliza
+ * el consentimiento ya dado. Sin eso, Google pide elegir cuenta y aceptar los
+ * permisos en cada login, que es su comportamiento por defecto.
+ *
  * El callback se fija al crear el token client (no en cada pedido), asi que
  * creamos un client nuevo por llamada para resolver la promesa correcta.
  */
-export async function requestToken(): Promise<TokenEmitido> {
+export async function requestToken(email?: string): Promise<TokenEmitido> {
   const clientId = getClientId();
   if (!clientId) throw new Error("Falta configurar VITE_GOOGLE_CLIENT_ID.");
   await loadGis();
@@ -104,6 +110,7 @@ export async function requestToken(): Promise<TokenEmitido> {
     const client = window.google!.accounts.oauth2.initTokenClient({
       client_id: clientId,
       scope: SCOPES,
+      ...(email ? { hint: email, prompt: "" } : {}),
       callback: (response) => {
         if (response.error) {
           reject(new Error(response.error_description ?? response.error));

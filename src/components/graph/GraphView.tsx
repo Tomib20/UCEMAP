@@ -19,7 +19,12 @@ import { buildGraphLayout, type ElectivasMode, type MateriaNodeData, type Materi
 import { CHAIN_COLORS, AVAILABLE_GLOW, EDGE_COLORS, SURFACE, NODE_WIDTH, NODE_HEIGHT, NODE_WIDTH_MOBILE } from "@/config/theme";
 import { buildAdjacencyMaps, getAncestors, getDescendants } from "@/utils/prerequisiteChain";
 import { getMateriaStatus } from "@/utils/materiaStatus";
-import { useProgressStore, selectAprobadasArray, selectCursandoArray } from "@/store/useProgressStore";
+import {
+  useProgressStore,
+  selectAprobadasArray,
+  selectCursandoArray,
+  selectAplazosRecord,
+} from "@/store/useProgressStore";
 import { useUserStore } from "@/store/useUserStore";
 import { useThemeStore } from "@/store/useThemeStore";
 import { MateriaNode } from "./MateriaNode";
@@ -29,6 +34,7 @@ import { toPng } from "html-to-image";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { Tour } from "@/components/ui/Tour";
 import { SocialLinks } from "@/components/ui/SocialLinks";
+import { ImportarNotas } from "@/components/ui/ImportarNotas";
 
 /* ── Decorative node types ── */
 
@@ -194,16 +200,24 @@ function MateriaHoverInfo({ materia, carrera, top, left }: { materia: Materia; c
   const aprobadas = useMemo(() => new Set(aprobadasArr), [aprobadasArr]);
   const cursando = useMemo(() => new Set(cursandoArr), [cursandoArr]);
 
-  const status = getMateriaStatus(materia, aprobadas, cursando);
+  const aplazosRecord = useProgressStore(selectAplazosRecord);
+  const aplazadas = useMemo(
+    () => new Set(Object.keys(aplazosRecord).map(Number)),
+    [aplazosRecord]
+  );
+
+  const status = getMateriaStatus(materia, aprobadas, cursando, aplazadas);
   const statusLabel: Record<string, string> = {
     aprobada: "Aprobada",
     cursando: "Cursando",
+    aplazada: "Aplazada",
     disponible: "Disponible",
     bloqueada: "Bloqueada",
   };
   const statusColor: Record<string, string> = {
     aprobada: "#16a34a",
     cursando: "#ca8a04",
+    aplazada: "#dc2626",
     disponible: mode === "dark" ? "#60a5fa" : "#3b82f6",
     bloqueada: mode === "dark" ? "#94a3b8" : "#64748b",
   };
@@ -476,7 +490,10 @@ function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDi
     const cursando = new Set(cursandoArr);
     const disponibles = new Set<number>();
     for (const m of carrera.materias) {
-      if (getMateriaStatus(m, aprobadas, cursando) === "disponible") disponibles.add(m.nro);
+      // Las aplazadas tambien se pueden cursar: lo que habilita es tener las
+      // correlativas aprobadas, no el estado en que quedo la materia.
+      const libre = m.correlativas.every((nro) => aprobadas.has(nro));
+      if (libre && !aprobadas.has(m.nro) && !cursando.has(m.nro)) disponibles.add(m.nro);
     }
     setNodes((cur) =>
       cur.map((n) => {
@@ -737,6 +754,7 @@ export function GraphView({ carrera }: GraphViewProps) {
   const [electivasMode, setElectivasMode] = useState<ElectivasMode>("hidden");
   const [disponiblesMode, setDisponiblesMode] = useState(false);
   const [tourOpen, setTourOpen] = useState(false);
+  const [importarOpen, setImportarOpen] = useState(false);
   const surface = SURFACE[mode];
 
   // Mini-tour: se abre solo la primera visita; despues, con el boton "?".
@@ -877,6 +895,18 @@ export function GraphView({ carrera }: GraphViewProps) {
             {exporting ? "Exportando..." : "Exportar PNG"}
           </button>
         )}
+        <button
+          onClick={() => setImportarOpen(true)}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors border backdrop-blur-sm shrink-0"
+          style={{
+            backgroundColor: mode === "dark" ? "rgba(13,148,136,0.25)" : "rgba(13,148,136,0.12)",
+            borderColor: "#0d9488",
+            color: mode === "dark" ? "#5eead4" : "#0f766e",
+          }}
+          title="Cargar tu mapa pegando el listado de Notas oficiales de UCEMA"
+        >
+          {isMobile ? "Importar" : "Importar mis notas"}
+        </button>
         {isMobile && <SocialLinks variant="chips" />}
         <button
           onClick={() => setTourOpen(true)}
@@ -892,6 +922,12 @@ export function GraphView({ carrera }: GraphViewProps) {
           ?
         </button>
       </div>
+
+      <ImportarNotas
+        carrera={carrera}
+        open={importarOpen}
+        onClose={() => setImportarOpen(false)}
+      />
 
       <Tour open={tourOpen} onClose={() => setTourOpen(false)} isMobile={isMobile} />
     </div>
