@@ -57,27 +57,88 @@ function loadGis(): Promise<void> {
   if (gisPromise) return gisPromise;
 
   gisPromise = new Promise<void>((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(`script[src="${GIS_SRC}"]`);
-    const script = existing ?? document.createElement("script");
-    const onLoad = () => {
+    // Un <script> que ya fallo no vuelve a emitir load ni error nunca mas: si lo
+    // reusaramos, el reintento se quedaria esperando hasta el timeout y diria
+    // "Google tardo demasiado" cuando en realidad esta bloqueado. Se descarta y
+    // se pide de cero.
+    document.querySelectorAll(`script[src="${GIS_SRC}"]`).forEach((s) => s.remove());
+
+    const script = document.createElement("script");
+    const timeout = setTimeout(
+      () => reject(new Error("Google tardo demasiado en responder.")),
+      10000
+    );
+    script.addEventListener("load", () => {
+      clearTimeout(timeout);
       if (window.google?.accounts?.oauth2) resolve();
       else reject(new Error("El script de Google cargo pero no expuso la API."));
-    };
-    script.addEventListener("load", onLoad);
-    script.addEventListener("error", () => reject(new Error("No se pudo cargar el script de Google.")));
-    if (!existing) {
-      script.src = GIS_SRC;
-      script.async = true;
-      script.defer = true;
-      document.head.appendChild(script);
-    }
-    setTimeout(() => reject(new Error("Google tardo demasiado en responder.")), 10000);
+    });
+    script.addEventListener("error", () => {
+      clearTimeout(timeout);
+      reject(new Error("No se pudo cargar el script de Google."));
+    });
+    script.src = GIS_SRC;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
   }).catch((e) => {
     gisPromise = null; // permitir reintentar
     throw e;
   });
 
   return gisPromise;
+}
+
+/**
+ * Deja el script de Google listo antes de que el usuario toque nada.
+ *
+ * `requestAccessToken()` abre una ventana emergente, y los navegadores solo la
+ * dejan abrir si sale del click del usuario. Si al hacer click todavia hay que
+ * bajar el script de Google, el `await` corta esa cadena y el popup queda
+ * bloqueado: el login falla al instante sin que se vea ninguna ventana.
+ */
+export function precargarGoogle(): void {
+  void loadGis().catch(() => {
+    /* Si falla, el error real se muestra recien cuando el usuario hace click. */
+  });
+}
+
+/**
+ * Traduce los codigos de Google a algo que se entienda, y deja el codigo crudo a
+ * la vista.
+ *
+ * Las dos mitades hacen falta: sin la traduccion el usuario lee
+ * "popup_failed_to_open" y no sabe que hacer; sin el codigo crudo, cuando alguien
+ * reporta que "le da error" no hay con que distinguir un bloqueador de anuncios
+ * de una cuenta que el administrador de su organizacion tiene restringida.
+ */
+export function explicarErrorDeLogin(e: unknown): string {
+  const crudo = (e instanceof Error ? e.message : String(e ?? "")).trim();
+  const t = crudo.toLowerCase();
+
+  let explicacion: string;
+  if (t.includes("popup_failed_to_open") || t.includes("failed to open")) {
+    explicacion =
+      "El navegador bloqueó la ventana de Google. Permití las ventanas emergentes para este sitio y probá de nuevo.";
+  } else if (t.includes("popup_closed") || t.includes("closed")) {
+    explicacion = "Se cerró la ventana de Google antes de terminar.";
+  } else if (t.includes("no se pudo cargar el script")) {
+    explicacion =
+      "No se pudo cargar Google. Suele ser un bloqueador de anuncios o una extensión de privacidad: desactivala para este sitio.";
+  } else if (t.includes("tardo demasiado")) {
+    explicacion = "Google tardó demasiado en responder. Revisá tu conexión y probá de nuevo.";
+  } else if (t.includes("admin_policy") || t.includes("policy_enforced")) {
+    explicacion =
+      "El administrador de tu cuenta bloquea las apps externas. Probá con una cuenta de Gmail personal.";
+  } else if (t.includes("access_denied")) {
+    explicacion = "Google no autorizó el acceso a esta cuenta. Probá con una cuenta de Gmail personal.";
+  } else if (t.includes("origin") || t.includes("redirect_uri")) {
+    explicacion = `Este dominio (${window.location.origin}) no está autorizado. Entrá desde https://ucemap.vercel.app`;
+  } else {
+    return crudo || "No se pudo iniciar sesión.";
+  }
+
+  return `${explicacion} (${crudo})`;
 }
 
 export interface TokenEmitido {

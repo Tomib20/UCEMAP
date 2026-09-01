@@ -184,8 +184,14 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
         </span>
       )}
       {errorMsg && status === "error" && !user && (
-        <span className="text-xs text-red-300" title={errorMsg}>
-          Error
+        // El mensaje va entero: un "Error" a secas no le sirve a nadie, y el
+        // detalle escondido en un tooltip no existe en mobile.
+        <span
+          className={`text-[11px] text-red-200 bg-red-500/15 rounded-lg px-2 py-1 leading-snug ${
+            isMobile ? "" : "max-w-[280px]"
+          }`}
+        >
+          {errorMsg}
         </span>
       )}
     </>

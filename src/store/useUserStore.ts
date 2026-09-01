@@ -2,6 +2,7 @@ import { create } from "zustand";
 import {
   driveLoad,
   driveSave,
+  explicarErrorDeLogin,
   fetchUserInfo,
   isSyncConfigured,
   requestToken,
@@ -195,8 +196,7 @@ export const useUserStore = create<UserState>((set, get) => ({
       if (!remoto) await get().saveNow();
       return true;
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Error desconocido";
-      set({ status: "error", error: msg, user: null, token: null });
+      set({ status: "error", error: explicarErrorDeLogin(e), user: null, token: null });
       return false;
     }
   },

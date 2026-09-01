@@ -4,6 +4,7 @@ import { Welcome } from "@/pages/Welcome";
 import { Privacidad, Terminos } from "@/pages/Legal";
 import { initSyncWatcher } from "@/store/syncWatcher";
 import { useUserStore } from "@/store/useUserStore";
+import { isSyncConfigured, precargarGoogle } from "@/lib/googleDrive";
 
 // Inicia el watcher de sincronización una sola vez (a nivel de módulo).
 initSyncWatcher();
@@ -12,6 +13,11 @@ initSyncWatcher();
 // silencio para que no tenga que apretar nada. Si Google no lo reconoce, no pasa
 // nada: queda el botón "Continuar como ...".
 void useUserStore.getState().restoreSession();
+
+// El script de Google se baja apenas arranca la app, no al hacer click: si el
+// click tiene que esperarlo, el navegador bloquea la ventana emergente y el
+// login falla al instante.
+if (isSyncConfigured()) precargarGoogle();
 
 // Basura del sistema de cuentas anterior (usuario UCEMA + Google Sheets).
 // Se limpia una sola vez para que no quede nada de aquel login dando vueltas.
