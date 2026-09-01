@@ -1,11 +1,14 @@
 import { useState } from "react";
+import type { Carrera } from "@/types/carrera";
 import { GRUPO_COLORS, CHAIN_COLORS, STATUS_STYLES, SURFACE } from "@/config/theme";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { SocialLinks } from "@/components/ui/SocialLinks";
+import { useProgresoEfectivo } from "@/hooks/useProgresoEfectivo";
 
-export function Legend() {
+export function Legend({ carrera }: { carrera: Carrera }) {
   const mode = useThemeStore((s) => s.mode);
+  const { origenDeOtraCarrera } = useProgresoEfectivo();
   const isMobile = useIsMobile();
   const surface = SURFACE[mode];
   const grupos = GRUPO_COLORS[mode];
@@ -13,6 +16,10 @@ export function Legend() {
   const cursandoStyle = STATUS_STYLES[mode].cursando;
   const aplazadaStyle = STATUS_STYLES[mode].aplazada;
   const [expanded, setExpanded] = useState(!isMobile);
+
+  // La referencia al borde punteado solo tiene sentido si hay alguna materia de
+  // este plan que en realidad se curso en otra carrera.
+  const hayDeOtraCarrera = carrera.materias.some((m) => origenDeOtraCarrera.has(m.nro));
 
   const panelBg = mode === "dark" ? "rgba(30,41,59,0.92)" : "rgba(255,255,255,0.95)";
 
@@ -88,6 +95,17 @@ export function Legend() {
           />
           <span className="text-[11px]" style={{ color: surface.textSecondary }}>Aplazada</span>
         </div>
+        {hayDeOtraCarrera && (
+          <div className="flex items-center gap-2">
+            <div
+              className="w-5 h-3.5 rounded"
+              style={{ backgroundColor: aprobadaStyle.bg, border: `1.5px dashed ${aprobadaStyle.border}` }}
+            />
+            <span className="text-[11px]" style={{ color: surface.textSecondary }}>
+              Cursada en otra carrera
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="my-2" style={{ borderTop: `1px solid ${surface.panelBorder}` }} />

@@ -1,15 +1,9 @@
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { Handle, Position, type NodeProps, type Node } from "@xyflow/react";
 import type { MateriaNodeData } from "@/utils/layoutGraph";
 import { GRUPO_COLORS, STATUS_STYLES, CHAIN_COLORS, AVAILABLE_GLOW, NODE_WIDTH_MOBILE } from "@/config/theme";
 import { getMateriaStatus } from "@/utils/materiaStatus";
-import {
-  useProgressStore,
-  selectAprobadasArray,
-  selectCursandoArray,
-  selectNotasRecord,
-  selectAplazosRecord,
-} from "@/store/useProgressStore";
+import { useProgresoEfectivo } from "@/hooks/useProgresoEfectivo";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
@@ -22,22 +16,16 @@ function MateriaNodeComponent({ data }: NodeProps<MateriaNode>) {
 
   const mode = useThemeStore((s) => s.mode);
   const isMobile = useIsMobile();
-  const aprobadasArr = useProgressStore(selectAprobadasArray);
-  const cursandoArr = useProgressStore(selectCursandoArray);
-  const notasRecord = useProgressStore(selectNotasRecord);
-  const aplazosRecord = useProgressStore(selectAplazosRecord);
-  const aprobadas = useMemo(() => new Set(aprobadasArr), [aprobadasArr]);
-  const cursando = useMemo(() => new Set(cursandoArr), [cursandoArr]);
-  const aplazadas = useMemo(
-    () => new Set(Object.keys(aplazosRecord).map(Number)),
-    [aplazosRecord]
-  );
+  const progreso = useProgresoEfectivo();
 
-  const status = getMateriaStatus(materia, aprobadas, cursando, aplazadas);
-  const notaAplazo = aplazosRecord[String(materia.nro)];
+  const status = getMateriaStatus(materia, progreso.aprobadas, progreso.cursando, progreso.aplazadas);
+  const notaAplazo = progreso.aplazoDe(materia.nro);
+  // La misma materia puede estar cursada en otra carrera: se marca distinto para
+  // que se entienda de donde salio.
+  const otraCarrera = progreso.origenDeOtraCarrera.get(materia.nro);
   const grupo = GRUPO_COLORS[mode][materia.grupo];
   const statusStyle = STATUS_STYLES[mode][status];
-  const nota = notasRecord[String(materia.nro)];
+  const nota = progreso.notaDe(materia.nro);
 
   const bg = statusStyle.bg || grupo.bg;
   const textColor = statusStyle.textOverride || (mode === "dark" ? "#ffffff" : "#1a1a1a");
@@ -45,6 +33,7 @@ function MateriaNodeComponent({ data }: NodeProps<MateriaNode>) {
   let borderColor = statusStyle.border || grupo.border;
   let boxShadow: string | undefined;
   let borderWidth = 2;
+  const borderStyle = otraCarrera ? "dashed" : "solid";
 
   if (role === "selected") {
     borderColor = CHAIN_COLORS.selected.border;
@@ -79,7 +68,7 @@ function MateriaNodeComponent({ data }: NodeProps<MateriaNode>) {
         className="rounded-lg cursor-pointer relative flex flex-col items-center justify-center active:scale-[0.97]"
         style={{
           backgroundColor: bg,
-          border: `${borderWidth}px solid ${borderColor}`,
+          border: `${borderWidth}px ${borderStyle} ${borderColor}`,
           opacity,
           width: nodeWidth,
           minHeight: isMobile ? 34 : 48,
@@ -92,7 +81,7 @@ function MateriaNodeComponent({ data }: NodeProps<MateriaNode>) {
           transform: role === "selected" ? "scale(1.04)" : undefined,
           WebkitTapHighlightColor: "transparent",
         }}
-        title={materia.nombre}
+        title={otraCarrera ? `${materia.nombre} — cursada en ${otraCarrera}` : materia.nombre}
       >
         {/* Nota badge */}
         {status === "aprobada" && nota !== undefined && (

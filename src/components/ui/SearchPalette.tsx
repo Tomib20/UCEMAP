@@ -3,9 +3,8 @@ import type { Carrera, Materia, MateriaStatus } from "@/types/carrera";
 import { getMateriaStatus } from "@/utils/materiaStatus";
 import {
   useProgressStore,
-  selectAprobadasArray,
-  selectCursandoArray,
 } from "@/store/useProgressStore";
+import { useProgresoEfectivo } from "@/hooks/useProgresoEfectivo";
 import { useThemeStore } from "@/store/useThemeStore";
 import { SURFACE } from "@/config/theme";
 
@@ -42,13 +41,9 @@ const STATUS_COLORS: Record<MateriaStatus, string> = {
 export function SearchPalette({ carrera, isOpen, onClose }: SearchPaletteProps) {
   const mode = useThemeStore((s) => s.mode);
   const surface = SURFACE[mode];
-  const aprobadasArr = useProgressStore(selectAprobadasArray);
-  const cursandoArr = useProgressStore(selectCursandoArray);
+  const { aprobadas, cursando } = useProgresoEfectivo();
   const selectMateria = useProgressStore((s) => s.selectMateria);
   const requestCenterOn = useProgressStore((s) => s.requestCenterOn);
-
-  const aprobadas = useMemo(() => new Set(aprobadasArr), [aprobadasArr]);
-  const cursando = useMemo(() => new Set(cursandoArr), [cursandoArr]);
 
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);

@@ -1,7 +1,7 @@
-import { useMemo } from "react";
 import type { Materia } from "@/types/carrera";
 import { getMateriaStatus } from "@/utils/materiaStatus";
-import { useProgressStore, selectAprobadasArray, selectCursandoArray } from "@/store/useProgressStore";
+import { useProgressStore } from "@/store/useProgressStore";
+import { useProgresoEfectivo } from "@/hooks/useProgresoEfectivo";
 import { useThemeStore } from "@/store/useThemeStore";
 import { SURFACE } from "@/config/theme";
 
@@ -19,20 +19,25 @@ interface ContextMenuProps {
 export function ContextMenu({ menu, onClose }: ContextMenuProps) {
   const mode = useThemeStore((s) => s.mode);
   const surface = SURFACE[mode];
-  const aprobadasArr = useProgressStore(selectAprobadasArray);
-  const cursandoArr = useProgressStore(selectCursandoArray);
+  const progreso = useProgresoEfectivo();
+  const { aprobadas, cursando } = progreso;
   const toggleAprobada = useProgressStore((s) => s.toggleAprobada);
   const toggleCursando = useProgressStore((s) => s.toggleCursando);
   const setNota = useProgressStore((s) => s.setNota);
-  const aprobadas = useMemo(() => new Set(aprobadasArr), [aprobadasArr]);
-  const cursando = useMemo(() => new Set(cursandoArr), [cursandoArr]);
-
   const { materia, x, y } = menu;
   const status = getMateriaStatus(materia, aprobadas, cursando);
+  // Lo que viene de otra carrera se edita alla: aca no hay nada que tocar.
+  const otraCarrera = progreso.origenDeOtraCarrera.get(materia.nro);
 
   const items: { label: string; action: () => void; disabled?: boolean; color?: string }[] = [];
 
-  if (status === "aprobada") {
+  if (otraCarrera) {
+    items.push({
+      label: `Cursada en ${otraCarrera}`,
+      action: () => {},
+      disabled: true,
+    });
+  } else if (status === "aprobada") {
     items.push({
       label: "Desmarcar aprobada",
       action: () => { toggleAprobada(materia.nro); onClose(); },

@@ -1,16 +1,13 @@
-import { useMemo, useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import type { Carrera, Materia } from "@/types/carrera";
 import { GRUPO_COLORS, SURFACE } from "@/config/theme";
 import { getMateriaStatus } from "@/utils/materiaStatus";
 import {
   useProgressStore,
-  selectAprobadasArray,
-  selectCursandoArray,
-  selectNotasRecord,
-  selectAplazosRecord,
   type Nota,
   type NotaAplazo,
 } from "@/store/useProgressStore";
+import { useProgresoEfectivo } from "@/hooks/useProgresoEfectivo";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
@@ -43,16 +40,8 @@ interface MateriaDetailProps {
 
 export function MateriaDetail({ carrera }: MateriaDetailProps) {
   const selectedNro = useProgressStore((s) => s.selectedMateria);
-  const aprobadasArr = useProgressStore(selectAprobadasArray);
-  const cursandoArr = useProgressStore(selectCursandoArray);
-  const notasRecord = useProgressStore(selectNotasRecord);
-  const aplazosRecord = useProgressStore(selectAplazosRecord);
-  const aprobadas = useMemo(() => new Set(aprobadasArr), [aprobadasArr]);
-  const cursando = useMemo(() => new Set(cursandoArr), [cursandoArr]);
-  const aplazadas = useMemo(
-    () => new Set(Object.keys(aplazosRecord).map(Number)),
-    [aplazosRecord]
-  );
+  const progreso = useProgresoEfectivo();
+  const { aprobadas, cursando, aplazadas } = progreso;
   const toggleAprobada = useProgressStore((s) => s.toggleAprobada);
   const toggleCursando = useProgressStore((s) => s.toggleCursando);
   const setNota = useProgressStore((s) => s.setNota);
@@ -77,12 +66,16 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
   }
 
   const status = getMateriaStatus(materia, aprobadas, cursando, aplazadas);
-  const notaAplazo = aplazosRecord[String(materia.nro)];
+  const notaAplazo = progreso.aplazoDe(materia.nro);
+  const otraCarrera = progreso.origenDeOtraCarrera.get(materia.nro);
+  // El progreso de otra carrera se edita alla: aca los controles quedan a la
+  // vista, pero apagados, para que se entienda que el dato existe y no se toca.
+  const estiloAjeno = otraCarrera ? { opacity: 0.5 } : undefined;
   // Una materia aprobada (con nota o con "AP") no puede llevar aplazo.
   const estaAprobada = status === "aprobada";
   const grupo = GRUPO_COLORS[mode][materia.grupo];
   const surface = SURFACE[mode];
-  const currentNota = notasRecord[String(materia.nro)];
+  const currentNota = progreso.notaDe(materia.nro);
 
   const correlativasNombres = materia.correlativas
     .map((nro) => carrera.materias.find((m) => m.nro === nro))
@@ -164,8 +157,21 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
         &middot; {materia.creditos} credito(s)
       </p>
 
+      {otraCarrera && (
+        <div
+          className="text-[11px] rounded-lg px-2.5 py-2 mb-3"
+          style={{
+            backgroundColor: mode === "dark" ? "rgba(59,130,246,0.14)" : "rgba(59,130,246,0.09)",
+            color: mode === "dark" ? "#93c5fd" : "#1d4ed8",
+          }}
+        >
+          Esta materia la tenés cursada en <strong>{otraCarrera}</strong>: es la misma materia, con
+          el mismo código. Para cambiarla, entrá a esa carrera.
+        </div>
+      )}
+
       {/* Action buttons */}
-      <div className="flex flex-col gap-2 mb-4">
+      <div className="flex flex-col gap-2 mb-4" style={estiloAjeno}>
         <button
           onClick={allMissingAreCursando ? handleCursandoConPermiso : handleCursando}
           className={`w-full py-2 px-3 rounded-lg text-sm font-semibold transition-colors border ${
@@ -181,7 +187,7 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
                   ? "bg-slate-800 text-slate-500 border-slate-600 cursor-not-allowed"
                   : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
           }`}
-          disabled={!canCursar && !allMissingAreCursando}
+          disabled={(!canCursar && !allMissingAreCursando) || !!otraCarrera}
         >
           {status === "cursando"
             ? "\u25CF Cursando \u2014 click para desmarcar"
@@ -211,7 +217,7 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
                     ? "bg-slate-800 text-slate-500 border-slate-600 cursor-not-allowed"
                     : "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
           }`}
-          disabled={hasAprobadaDependent || !canAprobar}
+          disabled={hasAprobadaDependent || !canAprobar || !!otraCarrera}
         >
           {status === "aprobada" && hasAprobadaDependent
             ? "\u2713 Aprobada \u2014 no se puede desmarcar"
@@ -250,7 +256,7 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
 
       {/* Nota selector */}
       {status === "aprobada" && (
-        <div className="mb-4">
+        <div className="mb-4" style={estiloAjeno}>
           <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: surface.textSecondary }}>
             Nota
           </h4>
@@ -261,6 +267,7 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
                 <button
                   key={String(n)}
                   onClick={() => setNota(materia.nro, n)}
+                  disabled={!!otraCarrera}
                   className="px-2.5 py-1 rounded text-xs font-semibold border transition-colors"
                   style={{
                     backgroundColor: isActive
@@ -287,7 +294,7 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
 
       {/* Aplazo: queda registrado hasta aprobar la materia, y convive con
           "cursando" cuando la estas recursando. */}
-      <div className="mb-4">
+      <div className="mb-4" style={estiloAjeno}>
         <h4 className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: surface.textSecondary }}>
           Aplazo
         </h4>
@@ -298,7 +305,7 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
               <button
                 key={n}
                 onClick={() => (isActive ? quitarAplazo(materia.nro) : setAplazo(materia.nro, n))}
-                disabled={estaAprobada}
+                disabled={estaAprobada || !!otraCarrera}
                 className="px-2.5 py-1 rounded text-xs font-semibold border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: isActive
@@ -324,6 +331,7 @@ export function MateriaDetail({ carrera }: MateriaDetailProps) {
           {notaAplazo !== undefined && (
             <button
               onClick={() => quitarAplazo(materia.nro)}
+              disabled={!!otraCarrera}
               className="text-[11px] underline ml-1"
               style={{ color: surface.textSecondary }}
             >

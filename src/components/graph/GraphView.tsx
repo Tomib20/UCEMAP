@@ -21,11 +21,9 @@ import { buildAdjacencyMaps, getAncestors, getDescendants } from "@/utils/prereq
 import { getMateriaStatus } from "@/utils/materiaStatus";
 import {
   useProgressStore,
-  selectAprobadasArray,
-  selectCursandoArray,
-  selectAplazosRecord,
 } from "@/store/useProgressStore";
 import { useUserStore } from "@/store/useUserStore";
+import { useProgresoEfectivo } from "@/hooks/useProgresoEfectivo";
 import { useThemeStore } from "@/store/useThemeStore";
 import { MateriaNode } from "./MateriaNode";
 import { Legend } from "./Legend";
@@ -195,16 +193,7 @@ function highlightEdges(
 function MateriaHoverInfo({ materia, carrera, top, left }: { materia: Materia; carrera: Carrera; top: number; left: number }) {
   const mode = useThemeStore((s) => s.mode);
   const surface = SURFACE[mode];
-  const aprobadasArr = useProgressStore(selectAprobadasArray);
-  const cursandoArr = useProgressStore(selectCursandoArray);
-  const aprobadas = useMemo(() => new Set(aprobadasArr), [aprobadasArr]);
-  const cursando = useMemo(() => new Set(cursandoArr), [cursandoArr]);
-
-  const aplazosRecord = useProgressStore(selectAplazosRecord);
-  const aplazadas = useMemo(
-    () => new Set(Object.keys(aplazosRecord).map(Number)),
-    [aplazosRecord]
-  );
+  const { aprobadas, cursando, aplazadas } = useProgresoEfectivo();
 
   const status = getMateriaStatus(materia, aprobadas, cursando, aplazadas);
   const statusLabel: Record<string, string> = {
@@ -293,8 +282,7 @@ interface FlowInnerProps {
 function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDisponibles }: FlowInnerProps) {
   const selectMateria = useProgressStore((s) => s.selectMateria);
   const fullChain = useProgressStore((s) => s.fullChain);
-  const aprobadasArr = useProgressStore(selectAprobadasArray);
-  const cursandoArr = useProgressStore(selectCursandoArray);
+  const { aprobadas, cursando } = useProgresoEfectivo();
   const mode = useThemeStore((s) => s.mode);
   const selectedRef = useRef<number | null>(null);
   const fullChainRef = useRef(fullChain);
@@ -306,8 +294,6 @@ function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDi
 
   // Compute year stats
   const yearStats = useMemo(() => {
-    const aprobadas = new Set(aprobadasArr);
-    const cursando = new Set(cursandoArr);
     const stats = new Map<number, { total: number; aprobadas: number; cursando: number }>();
     for (const m of carrera.materias) {
       if (m.grupo !== "obligatoria") continue;
@@ -318,7 +304,7 @@ function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDi
       else if (cursando.has(m.nro)) s.cursando++;
     }
     return stats;
-  }, [carrera.materias, aprobadasArr, cursandoArr]);
+  }, [carrera.materias, aprobadas, cursando]);
 
   // Compute a good viewport: fit all visible materia nodes (excluding spacer/labels/separators)
   // into the available area, leaving room for the sidebar (right ~320px) and progress bar (bottom ~100px).
@@ -370,8 +356,6 @@ function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDi
   );
 
   const { initialNodes, initialEdges } = useMemo(() => {
-    const aprobadas = new Set(aprobadasArr);
-    const cursando = new Set(cursandoArr);
     const { nodes, edges } = buildGraphLayout(carrera.materias, electivasMode, aprobadas, cursando, isMobile);
 
     // Inject year stats directly into year label nodes
@@ -393,7 +377,7 @@ function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDi
       originalPositions.current.set(n.id, { ...n.position });
     }
     return { initialNodes: nodesWithStats, initialEdges: edgesStyled };
-  }, [carrera.materias, mode, electivasMode, aprobadasArr, cursandoArr, yearStats, isMobile]);
+  }, [carrera.materias, mode, electivasMode, aprobadas, cursando, yearStats, isMobile]);
 
   const doFitView = useCallback((duration = 0, nodesToFit?: Node[]) => {
     const target = computeViewport(nodesToFit ?? initialNodes);
@@ -486,8 +470,6 @@ function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDi
    * pueden cursar (correlativas aprobadas), que quedan con halo celeste.
    */
   const doDisponibles = useCallback(() => {
-    const aprobadas = new Set(aprobadasArr);
-    const cursando = new Set(cursandoArr);
     const disponibles = new Set<number>();
     for (const m of carrera.materias) {
       // Las aplazadas tambien se pueden cursar: lo que habilita es tener las
@@ -514,7 +496,7 @@ function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDi
         markerEnd: dimmedMarker(mode),
       })) as typeof cur
     );
-  }, [carrera.materias, aprobadasArr, cursandoArr, setNodes, setEdges, mode]);
+  }, [carrera.materias, aprobadas, cursando, setNodes, setEdges, mode]);
 
   // On mobile: first tap = highlight only, second tap = open detail, third = deselect.
   // On desktop: first click = highlight + open detail, second = deselect.
@@ -722,8 +704,8 @@ function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDi
               if (node.id.startsWith("__")) return "transparent";
               const materia = (node.data as MateriaNodeData).materia;
               if (!materia) return "transparent";
-              if (aprobadasArr.includes(materia.nro)) return mode === "dark" ? "#4ade80" : "#16a34a";
-              if (cursandoArr.includes(materia.nro)) return mode === "dark" ? "#facc15" : "#eab308";
+              if (aprobadas.has(materia.nro)) return mode === "dark" ? "#4ade80" : "#16a34a";
+              if (cursando.has(materia.nro)) return mode === "dark" ? "#facc15" : "#eab308";
               if (materia.grupo === "obligatoria") return "#3b82f6";
               if (materia.grupo === "topico") return "#d97706";
               if (materia.grupo === "tesis") return "#7c3aed";
@@ -748,8 +730,7 @@ interface GraphViewProps {
 export function GraphView({ carrera }: GraphViewProps) {
   const mode = useThemeStore((s) => s.mode);
   const isMobile = useIsMobile();
-  const aprobadasArr = useProgressStore(selectAprobadasArray);
-  const cursandoArr = useProgressStore(selectCursandoArray);
+  const { aprobadas, cursando } = useProgresoEfectivo();
 
   const [electivasMode, setElectivasMode] = useState<ElectivasMode>("hidden");
   const [disponiblesMode, setDisponiblesMode] = useState(false);
@@ -781,12 +762,12 @@ export function GraphView({ carrera }: GraphViewProps) {
 
   // Detect if there are any active (aprobadas/cursando) topicos/talleres
   const hasActiveElectivas = useMemo(() => {
-    const ap = new Set(aprobadasArr);
-    const cu = new Set(cursandoArr);
     return carrera.materias.some(
-      (m) => (m.grupo === "topico" || m.grupo === "taller") && (ap.has(m.nro) || cu.has(m.nro))
+      (m) =>
+        (m.grupo === "topico" || m.grupo === "taller") &&
+        (aprobadas.has(m.nro) || cursando.has(m.nro))
     );
-  }, [carrera.materias, aprobadasArr, cursandoArr]);
+  }, [carrera.materias, aprobadas, cursando]);
 
   // Cycle: hidden -> (active if hasActive) -> all -> hidden
   const cycleElectivas = () => {
@@ -848,7 +829,7 @@ export function GraphView({ carrera }: GraphViewProps) {
           onExitDisponibles={() => setDisponiblesMode(false)}
         />
       </ReactFlowProvider>
-      <Legend />
+      <Legend carrera={carrera} />
 
       <div className={`absolute z-10 flex gap-2 ${isMobile ? "top-2 left-2 right-2 overflow-x-auto" : "top-3 left-3"}`}>
         <button
