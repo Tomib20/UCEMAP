@@ -27,6 +27,18 @@ node scripts/generate-icons.mjs
 
 Los assets estan commiteados: solo hay que correrlo si cambia el branding o el diseno.
 
+## Verificacion contra los planes oficiales (Python)
+
+`verificar_contra_pdfs.py` compara cada JSON contra el PDF del plan: materias que
+falten, correlativas del plan que no se muestren y correlativas que el plan no
+respalde. Es la unica forma de saber si el mapa dice lo mismo que la universidad.
+
+```bash
+python scripts/verificar_contra_pdfs.py
+```
+
+Al 29/08/2026 las 12 carreras coinciden con sus planes.
+
 ## Parseo de PDFs (Python)
 
 Requiere `pymupdf` (`pip install pymupdf`).

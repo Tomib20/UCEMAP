@@ -42,8 +42,11 @@ sumaria a quien usa la app, no por dificultad.
 ## Datos
 
 12. **Mas carreras / planes nuevos** — cuando UCEMA publique planes nuevos, regenerar con
-    `generate_carreras.py` y validar.
-13. **Chequeos extra en el validador** — `scripts/validate-carreras.mjs` ya cubre campos, `nro`
+    `generate_carreras.py`, validar y correr `verificar_contra_pdfs.py`.
+13. **Correlativas no publicadas** — los datos coinciden con lo que publican los PDF oficiales
+    (verificado carrera por carrera). Si la facultad aplica en la practica algun requisito que el
+    plan no publica, solo se puede detectar por los reportes de los usuarios.
+14. **Chequeos extra en el validador** — `scripts/validate-carreras.mjs` ya cubre campos, `nro`
     duplicados, correlativas inexistentes, ciclos y cupos. Se le podria agregar deteccion de
     correlativas "hacia atras" (una materia de 1er anio que dependa de una de 4to) como aviso.
 
