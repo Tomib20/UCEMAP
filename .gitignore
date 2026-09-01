@@ -1,4 +1,7 @@
 node_modules/
+
+# Notas de trabajo propias, no forman parte de la app
+notas/
 dist/
 dev-dist/
 .claude/
