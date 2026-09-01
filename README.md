@@ -27,7 +27,9 @@ Marcá lo que aprobaste y el grafo te muestra qué se te habilita, qué te falta
 | **Progreso por bloque** | Obligatorias, electivas, proyecto final y requisitos, cada uno con su avance. |
 | **Buscador** | `Ctrl` / `⌘` + `K` para encontrar cualquier materia y centrar el mapa en ella. |
 | **Tu progreso en tu Drive** | Sesión con Google opcional: el mapa se guarda en tu propia cuenta y lo abrís desde cualquier dispositivo. |
-| **Instalable y offline** | Es una PWA: se instala como app en el celular y funciona sin conexión. |
+| **Materias compartidas** | Muchas materias tienen el mismo código en varias carreras. Si la aprobaste en una, aparece aprobada en todas, marcada con borde punteado para que sepas de dónde viene. |
+| **En la compu y en el celular** | Funciona en el navegador de escritorio y se instala como app en el teléfono (es una PWA). |
+| **Consultable sin internet** | Una vez abierta, el mapa se puede seguir consultando sin conexión. Iniciar sesión y sincronizar con Drive sí requieren internet. |
 | **Modo oscuro y mobile** | Pensada para usarse en el teléfono, con gestos y layout propios. |
 
 ## Carreras
