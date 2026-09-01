@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { BRANDING } from "@/config/theme";
 import type { Carrera } from "@/types/carrera";
 import { useThemeStore } from "@/store/useThemeStore";
@@ -191,7 +191,10 @@ export function Header({ carrera, carreras, onSearchOpen }: HeaderProps) {
             isMobile ? "" : "max-w-[280px]"
           }`}
         >
-          {errorMsg}
+          {errorMsg}{" "}
+          <Link to="/diagnostico" className="underline font-semibold whitespace-nowrap">
+            Ver por qué
+          </Link>
         </span>
       )}
     </>

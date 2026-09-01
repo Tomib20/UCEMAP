@@ -141,6 +141,20 @@ export function explicarErrorDeLogin(e: unknown): string {
   return `${explicacion} (${crudo})`;
 }
 
+/**
+ * Intenta cargar el script de Google y cuenta como fue. Lo usa la pagina de
+ * diagnostico: es la unica forma de distinguir "Google esta bloqueado" de
+ * "la ventana emergente esta bloqueada" sin pedirle a nadie que abra la consola.
+ */
+export async function probarCargaDeGoogle(): Promise<{ ok: boolean; detalle: string }> {
+  try {
+    await loadGis();
+    return { ok: true, detalle: "El script de Google carga bien." };
+  } catch (e) {
+    return { ok: false, detalle: e instanceof Error ? e.message : String(e) };
+  }
+}
+
 export interface TokenEmitido {
   token: string;
   /** Momento (epoch ms) en el que el token deja de servir. */

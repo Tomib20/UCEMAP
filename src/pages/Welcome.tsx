@@ -130,7 +130,10 @@ export function Welcome() {
         )}
         {errorMsg && status === "error" && (
           <p className="mt-2 text-xs" style={{ color: "#dc2626" }}>
-            No pudimos entrar: {errorMsg}
+            No pudimos entrar: {errorMsg}{" "}
+            <Link to="/diagnostico" className="underline font-semibold">
+              Ver por qué
+            </Link>
           </p>
         )}
       </section>
