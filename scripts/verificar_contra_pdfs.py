@@ -80,7 +80,7 @@ def main():
     if problemas:
         print(f"{problemas} carrera(s) con diferencias contra el plan oficial.")
     else:
-        print("Las 12 carreras coinciden con sus planes oficiales.")
+        print(f"Las {len(index['carreras'])} carreras coinciden con sus planes oficiales.")
     return 1 if problemas else 0
 
 

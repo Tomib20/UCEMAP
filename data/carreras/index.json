@@ -8,6 +8,12 @@
       "planEstudio": "Plan de Estudios - ININFn.pdf"
     },
     {
+      "id": "ingenieria-inteligencia-artificial",
+      "nombre": "Ingenieria en Inteligencia Artificial",
+      "archivo": "ingenieria-inteligencia-artificial.json",
+      "planEstudio": "Plan de Estudios - INIA.pdf"
+    },
+    {
       "id": "abogacia",
       "nombre": "Abogacia",
       "archivo": "abogacia.json",

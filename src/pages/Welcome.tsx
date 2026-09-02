@@ -12,6 +12,7 @@ import carrerasIndex from "../../data/carreras/index.json";
 /** Color de acento por carrera, para que cada tarjeta tenga identidad propia. */
 const ACCENTS: Record<string, string> = {
   "ingenieria-informatica": "#2563eb",
+  "ingenieria-inteligencia-artificial": "#0ea5e9",
   abogacia: "#7c3aed",
   actuario: "#0891b2",
   "business-administration": "#0d9488",

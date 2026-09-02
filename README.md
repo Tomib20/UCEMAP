@@ -34,16 +34,17 @@ Marcá lo que aprobaste y el grafo te muestra qué se te habilita, qué te falta
 
 ## Carreras
 
-Las 12 carreras de grado, con sus planes vigentes:
+Las 13 carreras de grado, con sus planes vigentes:
 
 | | |
 |---|---|
-| Ingeniería en Informática | Licenciatura en Economía |
-| Abogacía | Licenciatura en Finanzas |
-| Actuario | Licenciatura en Marketing |
-| Business Administration | Licenciatura en Negocios Digitales |
-| Contador Público | Licenciatura en Relaciones Internacionales |
-| Licenciatura en Ciencias Políticas | Licenciatura en Dirección de Empresas |
+| Ingeniería en Informática | Licenciatura en Ciencias Políticas |
+| Ingeniería en Inteligencia Artificial | Licenciatura en Dirección de Empresas |
+| Abogacía | Licenciatura en Economía |
+| Actuario | Licenciatura en Finanzas |
+| Business Administration | Licenciatura en Marketing |
+| Contador Público | Licenciatura en Negocios Digitales |
+| | Licenciatura en Relaciones Internacionales |
 
 > **No es un sitio oficial de la Universidad del CEMA.** Los datos se transcriben de los planes de
 > estudio oficiales y están verificados uno por uno contra ellos, pero pueden tener errores o quedar
@@ -150,7 +151,7 @@ npm run validate
 ```
 
 El verificador reporta materias que falten, correlativas del plan que no se estén mostrando y
-correlativas que el plan no respalde. Al día de hoy las 12 carreras coinciden con sus planes.
+correlativas que el plan no respalde. Al día de hoy las 13 carreras coinciden con sus planes.
 
 Ver [scripts/README.md](scripts/README.md) para el detalle de cada herramienta.
 

@@ -30,6 +30,7 @@ OUT_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "carreras")
 FILENAME_INFO = {
     "ININF": ("ingenieria-informatica-old", "Ingenieria en Informatica (Plan viejo)"),
     "ININFn": ("ingenieria-informatica", "Ingenieria en Informatica"),
+    "INIA": ("ingenieria-inteligencia-artificial", "Ingenieria en Inteligencia Artificial"),
     "LIE25": ("licenciatura-economia-2025", "Licenciatura en Economia (Plan 2025)"),
     "LIEM": ("licenciatura-economia-m", "Licenciatura en Economia (Plan M)"),
     "LIEn": ("licenciatura-economia", "Licenciatura en Economia"),

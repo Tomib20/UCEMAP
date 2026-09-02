@@ -1,0 +1,436 @@
+{
+  "id": "ingenieria-inteligencia-artificial",
+  "nombre": "Ingenieria en Inteligencia Artificial",
+  "programa": "INIA",
+  "plan": "2026/00",
+  "resolucion": "48/24",
+  "titulo": "",
+  "anios": 5,
+  "materias": [
+    {
+      "nro": 6513,
+      "nombre": "Análisis Matemático",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14085,
+      "nombre": "Fundamentos de Informática - IA",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14086,
+      "nombre": "Introducción a la Inteligencia Artificial",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1012,
+      "nombre": "Matemática Discreta",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 4,
+      "nombre": "Elementos de Administración",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1013,
+      "nombre": "Física I",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14109,
+      "nombre": "Nivel de Inglés",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14087,
+      "nombre": "Programación I - IA",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6514,
+      "nombre": "Álgebra Lineal",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2652,
+      "nombre": "Base de Datos I",
+      "anio": 2,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1016,
+      "nombre": "Física II",
+      "anio": 2,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6516,
+      "nombre": "Introducción a la Probabilidad y Estadística",
+      "anio": 2,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14088,
+      "nombre": "Programación II - IA",
+      "anio": 2,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 7583,
+      "nombre": "Análisis Matemático Multivariado",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14089,
+      "nombre": "Diseño y Análisis de Algoritmos",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6519,
+      "nombre": "Estadística para la Toma de Decisiones",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14090,
+      "nombre": "Inteligencia Artificial: Principios y Técnicas",
+      "anio": 2,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14094,
+      "nombre": "Aprendizaje Automático",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14091,
+      "nombre": "Matemática para Machine Learning",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14092,
+      "nombre": "Sistemas y Arquitectura de Computadoras",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14093,
+      "nombre": "Teoría de la Computación",
+      "anio": 3,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14097,
+      "nombre": "Algoritmos Modernos",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14098,
+      "nombre": "Big Data & Business Analytics",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14095,
+      "nombre": "Optimización Convexa",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14096,
+      "nombre": "Reinforcement Learning",
+      "anio": 3,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14100,
+      "nombre": "Aprendizaje Profundo",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14101,
+      "nombre": "Criptografía y Seguridad Informática",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14099,
+      "nombre": "Habilidades para el Liderazgo",
+      "anio": 4,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14102,
+      "nombre": "Human-Computer Interaction",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14103,
+      "nombre": "Inteligencia Artificial para el Procesamiento de Lenguaje Natural",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14104,
+      "nombre": "Inteligencia Artificial para la Visión Computacional",
+      "anio": 4,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14105,
+      "nombre": "La Lente Computacional: Ciencias, Filosofía y Ética",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2672,
+      "nombre": "Práctica Profesional Supervisada",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14106,
+      "nombre": "Valuación y Management de Proyectos - IA",
+      "anio": 5,
+      "cuatrimestre": 1,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14107,
+      "nombre": "Entrepreneurship - IA",
+      "anio": 5,
+      "cuatrimestre": 2,
+      "grupo": "obligatoria",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 3131,
+      "nombre": "Administración de Proyectos",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1024,
+      "nombre": "Análisis Numérico",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2871,
+      "nombre": "Gestión Ambiental",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2651,
+      "nombre": "Redes I",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 2653,
+      "nombre": "Redes II",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 1018,
+      "nombre": "Técnicas Digitales",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "topico",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 14108,
+      "nombre": "Proyecto Final Integrador",
+      "anio": 5,
+      "cuatrimestre": 2,
+      "grupo": "tesis",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6555,
+      "nombre": "Taller de Aplicación III",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6756,
+      "nombre": "Taller de Aplicación IV",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 6757,
+      "nombre": "Taller de Aplicación V",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15208,
+      "nombre": "Taller de Herramientas de IA Code para Empresas",
+      "anio": 1,
+      "cuatrimestre": 1,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    },
+    {
+      "nro": 15207,
+      "nombre": "Taller de Herramientas de IA No-Code para Empresas",
+      "anio": 1,
+      "cuatrimestre": 2,
+      "grupo": "taller",
+      "correlativas": [],
+      "creditos": 1.0
+    }
+  ],
+  "topicos_requeridos": 6,
+  "talleres_requeridos": 5
+}
