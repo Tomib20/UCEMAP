@@ -2,7 +2,6 @@ import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom"
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Welcome } from "@/pages/Welcome";
 import { Privacidad, Terminos } from "@/pages/Legal";
-import { Diagnostico } from "@/pages/Diagnostico";
 import { initSyncWatcher } from "@/store/syncWatcher";
 import { useUserStore } from "@/store/useUserStore";
 import { isSyncConfigured, precargarGoogle } from "@/lib/googleDrive";
@@ -48,10 +47,6 @@ const router = createBrowserRouter([
   {
     path: "/terminos",
     element: <Terminos />,
-  },
-  {
-    path: "/diagnostico",
-    element: <Diagnostico />,
   },
   {
     path: "*",
