@@ -6,7 +6,6 @@ import {
   fetchUserInfo,
   isSyncConfigured,
   requestToken,
-  revokeToken,
   type CloudProgreso,
   type GoogleUser,
 } from "@/lib/googleDrive";
@@ -206,11 +205,16 @@ export const useUserStore = create<UserState>((set, get) => ({
       clearTimeout(saveTimer);
       saveTimer = null;
     }
-    const token = get().token;
-    if (token) revokeToken(token);
-    // Salir es explicito y tiene que dejar el equipo limpio: se olvida el perfil,
-    // el token y tambien el progreso de la sesion. Nada de esto se pierde: quedo
-    // guardado en el Drive del usuario y vuelve al iniciar sesion de nuevo.
+    // Ojo: aca NO se revoca el token. Revocar no es cerrar sesion: le saca a la
+    // app el permiso que el usuario ya dio, igual que quitarle el acceso desde
+    // la cuenta de Google. El efecto era que en cada login volvia a aparecer la
+    // pantalla de permisos, para siempre. Salir solo suelta la sesion local; si
+    // alguien quiere cortarle el acceso de verdad, se hace desde Google y esta
+    // explicado en la pagina de privacidad.
+    //
+    // Salir si tiene que dejar el equipo limpio: se olvida el perfil, el token y
+    // el progreso de la sesion. Nada de eso se pierde, quedo guardado en el
+    // Drive del usuario y vuelve al iniciar sesion de nuevo.
     writeRemembered(null);
     writeToken(null);
     useProgressStore.setState({

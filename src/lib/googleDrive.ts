@@ -171,7 +171,17 @@ export async function requestToken(email?: string): Promise<TokenEmitido> {
     const client = window.google!.accounts.oauth2.initTokenClient({
       client_id: clientId,
       scope: SCOPES,
-      ...(email ? { hint: email, prompt: "" } : {}),
+      // `prompt: ""` va SIEMPRE: es "no pidas nada de mas". Sin el, Google
+      // vuelve a mostrar la pantalla de permisos aunque el usuario ya los haya
+      // dado, y tener que aceptarlos en cada login es insoportable. Si de verdad
+      // hace falta consentimiento (permisos nuevos, acceso revocado), Google lo
+      // muestra igual: esto no lo saltea, solo deja de forzarlo.
+      //
+      // `hint` ademas preselecciona la ultima cuenta usada, asi el selector ni
+      // aparece. Cuando no hay cuenta recordada (recien se cerro sesion), el
+      // selector si sale y esta bien: hay que elegir con cual entrar.
+      prompt: "",
+      ...(email ? { hint: email } : {}),
       callback: (response) => {
         if (response.error) {
           reject(new Error(response.error_description ?? response.error));
@@ -184,10 +194,6 @@ export async function requestToken(email?: string): Promise<TokenEmitido> {
     });
     client.requestAccessToken();
   });
-}
-
-export function revokeToken(token: string): void {
-  window.google?.accounts.oauth2.revoke(token);
 }
 
 export async function fetchUserInfo(token: string): Promise<GoogleUser> {
