@@ -64,6 +64,25 @@ html, body {
   display: none;
 }
 
+/* Zoom y encuadre (arriba a la derecha del mapa).
+   El boton de React Flow es blanco en los dos temas, pero en modo oscuro el
+   icono heredaba el color de texto claro: lineas casi blancas sobre fondo
+   blanco, o sea tres cuadrados vacios. Se fija el color a mano para que no
+   dependa del tema. */
+.react-flow__controls-button {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.react-flow__controls-button:hover {
+  background: #f1f5f9;
+}
+
+.react-flow__controls-button svg,
+.react-flow__controls-button svg path {
+  fill: #1a2744;
+}
+
 /* Tailwind v4 resetea los botones a `cursor: default`; los volvemos a marcar
    como clickeables (menos los deshabilitados, que muestran el cursor bloqueado). */
 button:not(:disabled),
