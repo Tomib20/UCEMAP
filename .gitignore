@@ -1,7 +1,11 @@
 node_modules/
 
-# Notas de trabajo propias, no forman parte de la app
+# Notas de trabajo propias, no forman parte de la app. Viven en disco para
+# poder usarlas, pero fuera del repo publico.
 notas/
+CLAUDE.md
+MEJORAS.md
+sample/
 dist/
 dev-dist/
 .claude/
