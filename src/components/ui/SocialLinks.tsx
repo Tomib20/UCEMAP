@@ -4,11 +4,14 @@ import { useThemeStore } from "@/store/useThemeStore";
 /**
  * Redes del autor. Dejar en "" las que no se quieran mostrar: cada icono se
  * renderiza solo si tiene URL, asi nunca queda un link roto publicado.
+ *
+ * GitHub apunta al repo de la app, no al perfil: quien toca ese icono desde el
+ * mapa esta buscando el codigo de esto, no la lista de proyectos del autor.
  */
 const REDES = {
   instagram: "https://www.instagram.com/tomi.bruner/",
   linkedin: "https://www.linkedin.com/in/tomasbruner",
-  github: "https://github.com/Tomib20",
+  github: "https://github.com/Tomib20/UCEMAP",
 };
 
 const AUTOR = "Tomás Bruner";
@@ -45,7 +48,14 @@ function redesActivas() {
   return [
     { url: REDES.instagram, label: "Instagram", Icono: IconInstagram },
     { url: REDES.linkedin, label: "LinkedIn", Icono: IconLinkedIn },
-    { url: REDES.github, label: "GitHub", Icono: IconGitHub },
+    {
+      url: REDES.github,
+      label: "GitHub",
+      Icono: IconGitHub,
+      // Los otros dos son el perfil del autor; este es el repo de la app, asi
+      // que no le sirve el "<autor> en <red>" de los demas.
+      titulo: "Ver el codigo de UCEMA Map en GitHub",
+    },
   ].filter((r) => r.url !== "");
 }
 
@@ -65,14 +75,14 @@ export function SocialLinks({ variant = "footer" }: { variant?: "footer" | "map"
 
   const iconos = (
     <>
-      {redes.map(({ url, label, Icono }) => (
+      {redes.map(({ url, label, Icono, titulo }) => (
         <a
           key={label}
           href={url}
           target="_blank"
           rel="noopener noreferrer"
-          title={`${AUTOR} en ${label}`}
-          aria-label={label}
+          title={titulo ?? `${AUTOR} en ${label}`}
+          aria-label={titulo ?? `${AUTOR} en ${label}`}
           className="w-7 h-7 rounded-lg flex items-center justify-center border transition-opacity hover:opacity-70 shrink-0"
           style={{
             borderColor: surface.panelBorder,
