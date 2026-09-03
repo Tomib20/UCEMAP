@@ -41,7 +41,10 @@ export function Welcome() {
   const carreras = carrerasIndex.carreras;
 
   const login = useUserStore((s) => s.login);
+  const user = useUserStore((s) => s.user);
   const remembered = useUserStore((s) => s.remembered);
+  const carreraEnDrive = useUserStore((s) => s.carreraEnDrive);
+  const carreraActual = useProgressStore((s) => s.carreraId);
   const status = useUserStore((s) => s.status);
   const errorMsg = useUserStore((s) => s.error);
   const { canInstall, promptInstall } = useInstallPrompt();
@@ -58,6 +61,12 @@ export function Welcome() {
   };
 
   const accent = (id: string) => ACCENTS[id] ?? ACCENT_FALLBACK;
+
+  // Con la sesion abierta no hay nada que iniciar: lo util es volver al mapa que
+  // venia usando. Sale de Drive si guardo desde otro dispositivo, y si no, de la
+  // carrera que tiene abierta aca.
+  const destino = carreraEnDrive ?? carreraActual;
+  const nombreDestino = carreras.find((c) => c.id === destino)?.nombre;
 
   return (
     <div
@@ -110,25 +119,46 @@ export function Welcome() {
           venís con el promedio. Elegí tu carrera para empezar.
         </p>
 
-        {isSyncConfigured() && (
-          <button
-            onClick={handleLogin}
-            disabled={status === "loading"}
-            className="mt-5 text-sm font-semibold rounded-lg px-4 py-2.5 inline-flex items-center gap-2.5 border transition-colors disabled:opacity-50 hover:bg-slate-100"
-            style={{ backgroundColor: "#ffffff", color: "#1f1f1f", borderColor: "#dadce0" }}
-          >
-            {remembered?.picture ? (
-              <img src={remembered.picture} alt="" className="w-5 h-5 rounded-full" referrerPolicy="no-referrer" />
-            ) : (
-              <GoogleG size={17} />
-            )}
-            {status === "loading"
-              ? "Conectando con Google..."
-              : remembered
-                ? `Continuar como ${remembered.name.split(" ")[0]}`
-                : "Iniciar sesión con Google"}
-          </button>
-        )}
+        {isSyncConfigured() &&
+          (user ? (
+            <div className="mt-5 flex flex-col items-center gap-2">
+              <Link
+                to={`/carrera/${destino}`}
+                className="text-sm font-semibold rounded-lg px-4 py-2.5 inline-flex items-center gap-2.5 bg-teal hover:bg-teal-light transition-colors text-white"
+              >
+                {user.picture && (
+                  <img
+                    src={user.picture}
+                    alt=""
+                    className="w-5 h-5 rounded-full"
+                    referrerPolicy="no-referrer"
+                  />
+                )}
+                {nombreDestino ? `Volver a ${nombreDestino}` : "Volver a mi mapa"}
+              </Link>
+              <span className="text-xs" style={{ color: surface.textSecondary }}>
+                Sesión iniciada como {user.name}. Tu progreso se guarda en tu Drive.
+              </span>
+            </div>
+          ) : (
+            <button
+              onClick={handleLogin}
+              disabled={status === "loading"}
+              className="mt-5 text-sm font-semibold rounded-lg px-4 py-2.5 inline-flex items-center gap-2.5 border transition-colors disabled:opacity-50 hover:bg-slate-100"
+              style={{ backgroundColor: "#ffffff", color: "#1f1f1f", borderColor: "#dadce0" }}
+            >
+              {remembered?.picture ? (
+                <img src={remembered.picture} alt="" className="w-5 h-5 rounded-full" referrerPolicy="no-referrer" />
+              ) : (
+                <GoogleG size={17} />
+              )}
+              {status === "loading"
+                ? "Conectando con Google..."
+                : remembered
+                  ? `Continuar como ${remembered.name.split(" ")[0]}`
+                  : "Iniciar sesión con Google"}
+            </button>
+          ))}
         {errorMsg && status === "error" && (
           <p className="mt-2 text-xs" style={{ color: "#dc2626" }}>
             No pudimos entrar: {errorMsg}
