@@ -379,6 +379,23 @@ function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDi
     return { initialNodes: nodesWithStats, initialEdges: edgesStyled };
   }, [carrera.materias, mode, electivasMode, aprobadas, cursando, yearStats, isMobile]);
 
+  /**
+   * El encuadre inicial, calculado antes de pintar.
+   *
+   * Antes esto se hacia en `onInit`, que corre DESPUES del primer render: React
+   * Flow alcanzaba a pintar un cuadro con su viewport por defecto (zoom 1,
+   * esquina superior izquierda) y recien ahi saltaba al encuadre bueno. Se veia
+   * como un golpe de zoom enorme seguido de un alejamiento, en cada carrera que
+   * abrias.
+   *
+   * `computeViewport` solo mira las posiciones del layout y el tamaño de la
+   * ventana, nada medido del DOM, asi que se puede resolver de entrada.
+   */
+  const viewportInicial = useMemo(
+    () => computeViewport(initialNodes) ?? { x: 0, y: 0, zoom: 1 },
+    [computeViewport, initialNodes]
+  );
+
   const doFitView = useCallback((duration = 0, nodesToFit?: Node[]) => {
     const target = computeViewport(nodesToFit ?? initialNodes);
     if (target) {
@@ -654,10 +671,6 @@ function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDi
     setHoverInfo(null);
   }, []);
 
-  const onInit = useCallback(() => {
-    doFitView(0);
-  }, [doFitView]);
-
   const onPaneClick = useCallback(() => {
     selectedRef.current = null;
     highlightedRef.current = null;
@@ -682,7 +695,7 @@ function FlowInner({ carrera, electivasMode, isMobile, disponiblesMode, onExitDi
         onNodeMouseEnter={onNodeMouseEnter}
         onNodeMouseLeave={onNodeMouseLeave}
         onPaneClick={onPaneClick}
-        onInit={onInit}
+        defaultViewport={viewportInicial}
         minZoom={0.15}
         maxZoom={2}
         nodesDraggable
