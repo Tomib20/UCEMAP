@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "validate": "node scripts/validate-carreras.mjs",
-    "build": "npm run validate && node scripts/generate-seo.mjs && tsc -b && vite build",
+    "build": "npm run validate && node scripts/generate-seo.mjs && tsc -b && vite build && node scripts/prerender.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

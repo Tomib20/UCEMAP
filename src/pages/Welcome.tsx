@@ -139,10 +139,14 @@ export function Welcome() {
       {/* Grilla de carreras */}
       <section className="px-5 sm:px-8 pb-12 max-w-5xl mx-auto">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Son <Link>, no botones con navigate(): un boton no es un enlace.
+              Sin un <a href> de verdad no se puede abrir la carrera en una
+              pestania nueva ni copiar su direccion, y para Google las 14
+              carreras quedan huerfanas: no hay nada que las enlace. */}
           {carreras.map((c) => (
-            <button
+            <Link
               key={c.id}
-              onClick={() => navigate(`/carrera/${c.id}`)}
+              to={`/carrera/${c.id}`}
               className="text-left rounded-xl border p-4 transition-transform hover:-translate-y-0.5 hover:shadow-md flex items-center gap-3"
               style={{ backgroundColor: surface.panel, borderColor: surface.panelBorder }}
             >
@@ -161,7 +165,7 @@ export function Welcome() {
                   Ver mapa →
                 </span>
               </span>
-            </button>
+            </Link>
           ))}
         </div>
 
